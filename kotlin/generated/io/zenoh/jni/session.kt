@@ -33,6 +33,7 @@ import io.zenoh.jni.query.QueryTarget
 import io.zenoh.jni.query.Queryable
 import io.zenoh.jni.query.ReplyCallback
 import io.zenoh.jni.query.ReplyKeyExpr
+import io.zenoh.jni.query.Selector
 import io.zenoh.jni.query.asRaw
 import io.zenoh.jni.registerGcHandle
 import io.zenoh.jni.releaseCell
@@ -74,7 +75,7 @@ public class Session(initialPtr: Long) : GcNativeHandle(initialPtr) {
         s: String,
         encodingSel: Int,
         encoding00: Int?,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Encoding?,
         congestionControl: CongestionControl?,
         priority: Priority?,
@@ -88,7 +89,7 @@ public class Session(initialPtr: Long) : GcNativeHandle(initialPtr) {
         keyExpr: KeyExpr,
         encodingSel: Int,
         encoding00: Int?,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Encoding?,
         congestionControl: CongestionControl?,
         priority: Priority?,
@@ -117,7 +118,7 @@ public class Session(initialPtr: Long) : GcNativeHandle(initialPtr) {
         keyExpr1: KeyExpr?,
         encodingSel: Int,
         encoding00: Int?,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Encoding?,
         congestionControl: CongestionControl?,
         priority: Priority?,
@@ -180,7 +181,7 @@ public class Session(initialPtr: Long) : GcNativeHandle(initialPtr) {
         s: String,
         encodingSel: Int,
         encoding00: Int?,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Encoding?,
         congestionControl: CongestionControl?,
         priority: Priority?,
@@ -197,7 +198,7 @@ public class Session(initialPtr: Long) : GcNativeHandle(initialPtr) {
         keyExpr: KeyExpr,
         encodingSel: Int,
         encoding00: Int?,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Encoding?,
         congestionControl: CongestionControl?,
         priority: Priority?,
@@ -234,7 +235,7 @@ public class Session(initialPtr: Long) : GcNativeHandle(initialPtr) {
         keyExpr1: KeyExpr?,
         encodingSel: Int,
         encoding00: Int?,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Encoding?,
         congestionControl: CongestionControl?,
         priority: Priority?,
@@ -290,9 +291,9 @@ public class Session(initialPtr: Long) : GcNativeHandle(initialPtr) {
                         publisherDetection ?: false,
                         cache != null,
                         cache?.maxSamples?.toLong() ?: 0L,
-                        cache?.replies?.priority?.value ?: 0,
-                        cache?.replies?.congestionControl?.value ?: 0,
-                        cache?.replies?.isExpress ?: false,
+                        cache?.repliesConfig?.priority?.value ?: 0,
+                        cache?.repliesConfig?.congestionControl?.value ?: 0,
+                        cache?.repliesConfig?.isExpress ?: false,
                         __bcap,
                         __dcap,
                     )
@@ -311,7 +312,7 @@ public class Session(initialPtr: Long) : GcNativeHandle(initialPtr) {
         payload: ByteArray,
         encodingSel: Int,
         encoding00: Int?,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Encoding?,
         congestionControl: CongestionControl?,
         priority: Priority?,
@@ -327,7 +328,7 @@ public class Session(initialPtr: Long) : GcNativeHandle(initialPtr) {
         payload: ByteArray,
         encodingSel: Int,
         encoding00: Int?,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Encoding?,
         congestionControl: CongestionControl?,
         priority: Priority?,
@@ -358,7 +359,7 @@ public class Session(initialPtr: Long) : GcNativeHandle(initialPtr) {
         payload: ByteArray,
         encodingSel: Int,
         encoding00: Int?,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Encoding?,
         congestionControl: CongestionControl?,
         priority: Priority?,
@@ -642,8 +643,8 @@ public class Session(initialPtr: Long) : GcNativeHandle(initialPtr) {
                         history?.maxAge != null,
                         history?.maxAge ?: 0.0,
                         recovery != null,
-                        recovery?.periodicQueries?.toLong() ?: -1L,
-                        recovery?.heartbeat ?: false,
+                        recovery?.mode,
+                        recovery?.retentionPeriod?.toLong() ?: -1L,
                         queryTimeout?.toLong() ?: -1L,
                         subscriberDetection != null,
                         subscriberDetection ?: false,
@@ -883,69 +884,21 @@ public class Session(initialPtr: Long) : GcNativeHandle(initialPtr) {
         if (__dcap.failed) return onError.run(__dcap.ze0!!)
     }
 
-    public fun get(
-        s: String,
-        parameters: String?,
-        timeoutMs: Long?,
-        target: QueryTarget?,
-        consolidation: ConsolidationMode?,
-        acceptReplies: ReplyKeyExpr?,
-        congestionControl: CongestionControl?,
-        priority: Priority?,
-        express: Boolean?,
-        payload: ByteArray?,
-        encodingSel: Int,
-        encoding00: Int?,
-        encoding01: String?,
-        encoding1: Encoding?,
-        attachment: ByteArray?,
-        callback: ReplyCallback,
-        onClose: VoidCallback,
-        onBindingError: JniErrorHandler<Unit>,
-        onError: ErrorHandler<Unit>,
-    ) = get(0, s, null, parameters, timeoutMs, target, consolidation, acceptReplies, congestionControl, priority, express, payload, encodingSel, encoding00, encoding01, encoding1, attachment, callback, onClose, onBindingError, onError)
-
-    public fun get(
-        keyExpr: KeyExpr,
-        parameters: String?,
-        timeoutMs: Long?,
-        target: QueryTarget?,
-        consolidation: ConsolidationMode?,
-        acceptReplies: ReplyKeyExpr?,
-        congestionControl: CongestionControl?,
-        priority: Priority?,
-        express: Boolean?,
-        payload: ByteArray?,
-        encodingSel: Int,
-        encoding00: Int?,
-        encoding01: String?,
-        encoding1: Encoding?,
-        attachment: ByteArray?,
-        callback: ReplyCallback,
-        onClose: VoidCallback,
-        onBindingError: JniErrorHandler<Unit>,
-        onError: ErrorHandler<Unit>,
-    ) = get(1, null, keyExpr, parameters, timeoutMs, target, consolidation, acceptReplies, congestionControl, priority, express, payload, encodingSel, encoding00, encoding01, encoding1, attachment, callback, onClose, onBindingError, onError)
-
     /**
      * Send a query to matching queryables.
      *
-     * The callback is called for each reply. Optional arguments control selector
-     * parameters, timeout, targets, reply consolidation, accepted reply keys,
-     * delivery quality, payload metadata, and attachment. The close callback is
-     * called after the reply stream ends.
+     * The callback is called for each reply. Optional arguments control timeout,
+     * targets, reply consolidation, accepted reply keys, delivery quality, payload
+     * metadata, and attachment. The close callback is called after the reply
+     * stream ends.
      *
      * Parameter `attachment` is the Rust `ZBytes` argument, expanded: its `zbytes_new_from_vec` inputs (crosses as `attachment`).
      * Parameter `encoding` is the Rust `Encoding` argument, expanded: pass EITHER its `encoding_new_from_id` inputs OR an existing `Encoding` — the selector chooses the arm, `-1` = absent (crosses as `encodingSel`, `encoding00`, `encoding01`, `encoding1`).
-     * Parameter `key_expr` is the Rust `KeyExpr` argument, expanded: pass EITHER its `keyexpr_new_try_from` inputs OR an existing `KeyExpr` — the selector chooses the arm (crosses as `keyExprSel`, `keyExpr0`, `keyExpr1`).
      * Parameter `payload` is the Rust `ZBytes` argument, expanded: its `zbytes_new_from_vec` inputs (crosses as `payload`).
      * On a domain error `onError` receives the decomposed Rust `Error` error (`message`); a binding/system failure goes to `onBindingError` instead.
      */
     public fun get(
-        keyExprSel: Int,
-        keyExpr0: String?,
-        keyExpr1: KeyExpr?,
-        parameters: String?,
+        selector: Selector,
         timeoutMs: Long?,
         target: QueryTarget?,
         consolidation: ConsolidationMode?,
@@ -956,7 +909,7 @@ public class Session(initialPtr: Long) : GcNativeHandle(initialPtr) {
         payload: ByteArray?,
         encodingSel: Int,
         encoding00: Int?,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Encoding?,
         attachment: ByteArray?,
         callback: ReplyCallback,
@@ -965,7 +918,7 @@ public class Session(initialPtr: Long) : GcNativeHandle(initialPtr) {
         onError: ErrorHandler<Unit>,
     ) {
         if (this.isClosed()) { onBindingError.run("Operation on a closed native handle."); return }
-        if (keyExpr1?.isClosed() == true) {
+        if (selector.keyExpr.isClosed()) {
             onBindingError.run("Operation on a closed native handle."); return
         }
         if (encoding1?.isClosed() == true) {
@@ -976,44 +929,46 @@ public class Session(initialPtr: Long) : GcNativeHandle(initialPtr) {
         run {
             val __locks = ArrayList<NativeHandle>()
             __locks.add(this)
-            keyExpr1?.let { __locks.add(it) }
+            __locks.add(selector.keyExpr)
             encoding1?.let { __locks.add(it) }
             withSortedHandleLocks(__locks) {
                 val this_ptr = this.ptr
-                val keyExpr1_ptr = keyExpr1?.ptr ?: 0L
+                val selectorKeyExpr_ptr = selector.keyExpr.ptr
                 val encoding1_ptr = encoding1?.ptr ?: 0L
-                JNINative.sessionGet(
-                    this_ptr,
-                    keyExprSel,
-                    keyExpr0,
-                    keyExpr1_ptr,
-                    parameters,
-                    timeoutMs != null,
-                    timeoutMs ?: 0L,
-                    target != null,
-                    target?.value ?: 0,
-                    consolidation != null,
-                    consolidation?.value ?: 0,
-                    acceptReplies != null,
-                    acceptReplies?.value ?: 0,
-                    congestionControl != null,
-                    congestionControl?.value ?: 0,
-                    priority != null,
-                    priority?.value ?: 0,
-                    express != null,
-                    express ?: false,
-                    payload,
-                    encodingSel,
-                    encoding00 != null,
-                    encoding00 ?: 0,
-                    encoding01,
-                    encoding1_ptr,
-                    attachment,
-                    callback.asRaw(),
-                    onClose,
-                    __bcap,
-                    __dcap,
-                )
+                try {
+                    JNINative.sessionGet(
+                        this_ptr,
+                        selectorKeyExpr_ptr,
+                        selector.parameters,
+                        timeoutMs != null,
+                        timeoutMs ?: 0L,
+                        target != null,
+                        target?.value ?: 0,
+                        consolidation != null,
+                        consolidation?.value ?: 0,
+                        acceptReplies != null,
+                        acceptReplies?.value ?: 0,
+                        congestionControl != null,
+                        congestionControl?.value ?: 0,
+                        priority != null,
+                        priority?.value ?: 0,
+                        express != null,
+                        express ?: false,
+                        payload,
+                        encodingSel,
+                        encoding00 != null,
+                        encoding00 ?: 0,
+                        encoding01,
+                        encoding1_ptr,
+                        attachment,
+                        callback.asRaw(),
+                        onClose,
+                        __bcap,
+                        __dcap,
+                    )
+                } finally {
+                    selector.keyExpr.markConsumed()
+                }
             }
         }
         if (__bcap.failed) return onBindingError.run(__bcap.ze0)

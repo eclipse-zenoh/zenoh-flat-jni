@@ -49,13 +49,18 @@ public class KeyExpr(initialPtr: Long) : GcNativeHandle(initialPtr) {
         return KeyExpr(if (p != 0L) p else cell.get())
     }
 
-    /** Return the canonical text of a key expression. */
-    public fun getStr(onError: JniErrorHandler<String>): String {
+    /**
+     * Borrow the canonical text of a key expression.
+     *
+     * The text is valid for as long as the key expression is. Use
+     * [`keyexpr_to_string`] when an owned copy is needed.
+     */
+    public fun asStr(onError: JniErrorHandler<String>): String {
         if (this.isClosed()) return onError.run("Operation on a closed native handle.")
         val __bcap = JniErrorHandlerCapture.acquire()
         val __ret = withSortedHandleLocks(this) {
             val this_ptr = this.ptr
-            JNINative.keyexprGetStr(this_ptr, __bcap)
+            JNINative.keyexprAsStr(this_ptr, __bcap)
         }
         if (__bcap.failed) return onError.run(__bcap.ze0)
         return __ret
@@ -73,7 +78,11 @@ public class KeyExpr(initialPtr: Long) : GcNativeHandle(initialPtr) {
         return KeyExpr(__ret)
     }
 
-    /** Return the canonical text of a key expression. */
+    /**
+     * Return the canonical text of a key expression as an owned copy.
+     *
+     * Use [`keyexpr_as_str`] to read the text without copying it.
+     */
     public fun toStr(onError: JniErrorHandler<String>): String {
         if (this.isClosed()) return onError.run("Operation on a closed native handle.")
         val __bcap = JniErrorHandlerCapture.acquire()

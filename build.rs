@@ -29,8 +29,8 @@
 //!
 //! Kotlin **method names are derived automatically** by the
 //! `set_method_name_mangle` hook ([`strip_flat_class_prefix`], which strips the
-//! class-name prefix): `sample_get_payload` → `getPayload`, `keyexpr_get_str`
-//! → `getStr`, `keyexpr_new_join` → `newJoin`. An explicit `.name(...)` is
+//! class-name prefix): `sample_get_payload` → `getPayload`, `keyexpr_as_str`
+//! → `asStr`, `keyexpr_new_join` → `newJoin`. An explicit `.name(...)` is
 //! used only where absolutely necessary: `toStr` (a derived `toString` would
 //! clash with Kotlin's `Any.toString()`) and the `message` field label of the
 //! class-less rust-side-only `Error` decomposition.
@@ -54,7 +54,7 @@ use prebindgen::{
     core::Registry,
     data_class, enum_class, expand_param, expand_return, fun,
     lang::{ConstDecl, FunctionDecl, JniGen},
-    package, ptr_class, sig, value_class,
+    package, ptr_class, sealed_class, sig, value_class,
 };
 use syn::parse_quote as pq;
 
@@ -65,8 +65,8 @@ fn fail(context: &str, err: impl std::fmt::Display) -> ! {
 
 /// Namespace-relative member naming: strip the (case-insensitive) class-name
 /// prefix from a class method's derived name so the flat crate's
-/// `keyexpr_get_str` surfaces as `getStr` on `KeyExpr`, `zbytes_as_bytes` as
-/// `asBytes` on `ZBytes`, etc. Registered via
+/// `keyexpr_as_str` surfaces as `asStr` on `KeyExpr`, `zbytes_to_bytes` as
+/// `toBytes` on `ZBytes`, etc. Registered via
 /// [`JniGen::set_method_name_mangle`] — the generator's default method mangle
 /// is identity (full camelCase), so this hook restores the de-prefixed API.
 /// Members with an explicit `.name(...)` bypass the hook.
@@ -96,7 +96,7 @@ fn encoding_consts(lower: &str) -> [ConstDecl; 2] {
         ConstDecl::named(format!("ENCODING_{upper}"))
             .expr(pq!(String), pq!(encoding_to_string(#factory()))),
         ConstDecl::named(format!("ENCODING_{upper}_ID"))
-            .expr(pq!(i32), pq!(encoding_get_id(#factory()))),
+            .expr(pq!(u16), pq!(encoding_get_id(#factory()))),
     ]
 }
 
@@ -152,7 +152,7 @@ fn main() {
     let mut bytes = package!("bytes")
         .class(
             ptr_class!(ZBytes)
-                .method(fun!(zbytes_as_bytes))
+                .method(fun!(zbytes_to_bytes))
                 // Whole-handle clone return — see KeyExpr's `newClone`.
                 .method(fun!(zbytes_new_clone).expand_return(expand_return!(ZBytes).field_self()))
                 // `fromVec` builds a ZBytes from a `ByteArray` — both the
@@ -229,7 +229,7 @@ fn main() {
         // loader from its static initializer so the native library is loaded
         // transparently before any extern resolves (consumers never load it).
         .set_jni_native_init("io.zenoh.jni.NativeLibrary.ensureLoaded()")
-        // De-prefix class-method names (`keyexpr_get_str` -> `getStr`): the
+        // De-prefix class-method names (`keyexpr_as_str` -> `asStr`): the
         // generator's default method mangle is identity, so restore the
         // namespace-relative naming this binding's Kotlin API expects.
         .set_method_name_mangle(|_, class, n| strip_flat_class_prefix(class, n))
@@ -277,7 +277,7 @@ fn main() {
                         // override the class's default return fields (identity via
                         // the owned converter) so the borrowed-opaque clone path
                         // applies instead.
-                        .method(fun!(keyexpr_get_str))
+                        .method(fun!(keyexpr_as_str))
                         .method(
                             fun!(keyexpr_new_clone)
                                 .expand_return(expand_return!(KeyExpr).field_self()),
@@ -316,7 +316,7 @@ fn main() {
                 .variant(fun!(keyexpr_new_try_from))
                 .variant_self(),
         )
-        .expand(expand_return!(KeyExpr).field(fun!(keyexpr_get_str)))
+        .expand(expand_return!(KeyExpr).field(fun!(keyexpr_as_str)))
         // ── Config + ZenohId ──────────────────────────────────────────────
         .package(
             package!("config")
@@ -336,21 +336,18 @@ fn main() {
                         // Factories → Config companion-object members.
                         .constructor(fun!(config_new_default))
                         .constructor(fun!(config_new_from_file))
-                        .constructor(fun!(config_new_from_json))
                         .constructor(fun!(config_new_from_json5))
                         .constructor(fun!(config_new_from_yaml)),
                 )
                 .class(enum_class!(WhatAmI))
-                // `ZenohId` is a `Copy` value (zenoh's `ZenohId`, repr(transparent)), so
-                // it crosses as a raw byte-blob `ByteArray` rather than a closeable jlong
-                // handle. `Vec<ZenohId>` (session peers/routers) folds each element WHOLE
-                // as the typed `ZenohId` value class. Its read accessors become methods
-                // on the value class (receiver = `this.bytes`).
-                .class(
-                    value_class!(ZenohId)
-                        .method(fun!(zenoh_id_to_bytes))
-                        .method(fun!(zenoh_id_to_string).name("toStr")),
-                ),
+                // `ZenohId` is a `Copy` value — a fixed-width (`ZENOH_ID_MAX_SIZE`)
+                // byte blob — so it crosses as a raw `ByteArray` rather than a
+                // closeable jlong handle; the blob IS the value class's `bytes`
+                // property, so no separate accessor is needed. `Vec<ZenohId>`
+                // (session peers/routers) folds each element WHOLE as the typed
+                // `ZenohId` value class. Its read accessors become methods on the
+                // value class (receiver = `this.bytes`).
+                .class(value_class!(ZenohId).method(fun!(zenoh_id_to_string).name("toStr"))),
         )
         // ── Scouting ──────────────────────────────────────────────────────
         // Canonical output: the scout callback decomposes a `Hello` into its
@@ -431,16 +428,11 @@ fn main() {
                 .field(fun!(encoding_get_schema)),
         )
         // ── Time ──────────────────────────────────────────────────────────
-        // Canonical output: a timestamp is its NTP64 value (`timestamp_get_ntp64`
-        // -> i64 -> Long, 1 leaf); nested in a `Sample` it contributes that Long.
-        .package(
-            package!("time").class(
-                ptr_class!(Timestamp)
-                    .method(fun!(timestamp_get_ntp64))
-                    .method(fun!(timestamp_get_id)),
-            ),
-        )
-        .expand(expand_return!(Timestamp).field(fun!(timestamp_get_ntp64)))
+        // A timestamp is a plain VALUE in zenoh-flat (NTP64 component + the
+        // originating node id), so it crosses as a flat data class — its fields
+        // become decoupled leaves, and nested in a `Sample` it contributes those
+        // leaves directly (no handle, no accessor crossing).
+        .package(package!("time").class(data_class!(Timestamp)))
         // ── Sample ────────────────────────────────────────────────────────
         // Canonical INPUT: identity only — a `Sample` param takes the owned
         // handle directly. (The full-options constructors carry `Option<ptr_class>`
@@ -449,12 +441,16 @@ fn main() {
         // Canonical OUTPUT: the full sample decomposed in ONE crossing. Each record
         // is unwrapped per its return type's own canonical output (key_expr ->
         // handle+String, payload/attachment -> ByteArray, encoding -> String,
-        // timestamp -> Long?, kind/priority/congestion/reliability -> Int, express
-        // -> Boolean, source_zid -> ByteArray?, source_eid -> Int, source_sn ->
-        // Long). Auto-applies to every (non-Result) `Sample` return.
+        // timestamp -> the `Timestamp` value's leaves, kind/priority/congestion/
+        // reliability -> Int, express -> Boolean, source_info -> the `SourceInfo`
+        // value's leaves). Auto-applies to every (non-Result) `Sample` return.
         .package(
             package!("sample")
                 .class(enum_class!(SampleKind))
+                // Source information is a plain VALUE (`SourceInfo`, nesting
+                // `EntityGlobalId` / `ZenohId`), optional as a whole: a sample
+                // either carries all of it or none of it.
+                .class(data_class!(SourceInfo))
                 .class(
                     ptr_class!(Sample)
                         // All sample getters are record sources AND instance methods on
@@ -470,9 +466,7 @@ fn main() {
                         .method(fun!(sample_get_congestion_control))
                         .method(fun!(sample_get_attachment))
                         .method(fun!(sample_get_reliability))
-                        .method(fun!(sample_get_source_zid))
-                        .method(fun!(sample_get_source_eid))
-                        .method(fun!(sample_get_source_sn)),
+                        .method(fun!(sample_get_source_info)),
                 )
                 // Standalone sample constructors (callable from Kotlin); consumed by handle.
                 .fun(fun!(sample_new_put))
@@ -493,9 +487,7 @@ fn main() {
                 .field(fun!(sample_get_congestion_control))
                 .field(fun!(sample_get_attachment))
                 .field(fun!(sample_get_reliability))
-                .field(fun!(sample_get_source_zid))
-                .field(fun!(sample_get_source_eid))
-                .field(fun!(sample_get_source_sn)),
+                .field(fun!(sample_get_source_info)),
         )
         // ── Pub/Sub ───────────────────────────────────────────────────────
         // key_expr / payload / attachment / encoding params are auto-constructed
@@ -519,6 +511,11 @@ fn main() {
                 .class(data_class!(RepliesConfig))
                 .class(data_class!(CacheConfig))
                 .class(data_class!(HistoryConfig))
+                // `RecoveryMode` is a data-carrying enum (the modes are mutually
+                // exclusive by construction upstream), so it mirrors as a Kotlin
+                // sealed interface; it is declared before `RecoveryConfig`, whose
+                // `mode` field nests it.
+                .class(sealed_class!(RecoveryMode))
                 .class(data_class!(RecoveryConfig))
                 // `EntityGlobalId` is declared before `Miss`, which nests it as a
                 // field; its `zid` is the `ZenohId` value class declared above.
@@ -584,13 +581,19 @@ fn main() {
                 .class(enum_class!(ReplyKeyExpr))
                 .class(enum_class!(QueryTarget))
                 .class(enum_class!(ConsolidationMode))
+                // A selector is a plain VALUE — the key expression selecting the
+                // keys plus the parameters refining the selection — so it crosses
+                // as a flat data class. Its `key_expr` is a nested handle-backed
+                // type, so it is carried as a `KeyExpr` handle (a value form
+                // decomposes exactly one level).
+                .class(data_class!(Selector))
                 .class(
                     ptr_class!(Query)
                         // gc_managed: an abandoned Query's backstop close also
                         // finalizes the reply stream (same as the SDKs' former
                         // finalize()), so the querier's get completes.
                         .gc_managed()
-                        .method(fun!(query_get_keyexpr))
+                        .method(fun!(query_get_key_expr))
                         .method(fun!(query_get_parameters))
                         .method(fun!(query_get_payload))
                         .method(fun!(query_get_encoding))
@@ -615,8 +618,7 @@ fn main() {
                     ptr_class!(Reply)
                         // Record sources are class methods — `reply.sample()`'s
                         // standalone export is therefore the cloned-handle form.
-                        .method(fun!(reply_get_replier_zid))
-                        .method(fun!(reply_get_replier_eid))
+                        .method(fun!(reply_get_replier_id))
                         .method(fun!(reply_is_ok))
                         .method(fun!(reply_get_sample))
                         .method(fun!(reply_get_err)),
@@ -628,11 +630,11 @@ fn main() {
         // the callback returns; a query must outlive its callback to be
         // answered. `.field_self()` is declared LAST: the root identity moves
         // the owned query while the nested KeyExpr identity (from
-        // `query_get_keyexpr`) clones from a borrow of it — the generator
+        // `query_get_key_expr`) clones from a borrow of it — the generator
         // hard-errors on the reverse order.
         .expand(
             expand_return!(Query)
-                .field(fun!(query_get_keyexpr))
+                .field(fun!(query_get_key_expr))
                 .field(fun!(query_get_parameters))
                 .field(fun!(query_get_payload))
                 .field(fun!(query_get_encoding))
@@ -649,15 +651,15 @@ fn main() {
         )
         // Reply canonical output: the whole reply decomposed in ONE crossing
         // (PRODUCT model — both arms' leaves always present, the not-taken
-        // arm's are null). replier zid/eid + the is_ok discriminator, then the
+        // arm's are null). The replier's `EntityGlobalId` (a value: zid + eid)
+        // + the is_ok discriminator, then the
         // ok arm splices the full sample and the err arm splices
         // payload/encoding. Auto-applies to the `Fn(Reply)` callbacks of
         // `session_get` / `querier_get` / liveliness get; no identity record,
         // so no `Reply` handle crosses.
         .expand(
             expand_return!(Reply)
-                .field(fun!(reply_get_replier_zid))
-                .field(fun!(reply_get_replier_eid))
+                .field(fun!(reply_get_replier_id))
                 .field(fun!(reply_is_ok))
                 .field(fun!(reply_get_sample))
                 .field(fun!(reply_get_err)),
@@ -692,7 +694,9 @@ fn main() {
                         fun!(session_undeclare_keyexpr)
                             .expand_param("key_expr", expand_param!(KeyExpr).variant_self()),
                     )
-                    .method(fun!(session_get).split_on_param("key_expr"))
+                    // `session.get(...)` takes a whole `Selector` value (key expr
+                    // + parameters), so there is no key-expr param to split on.
+                    .method(fun!(session_get))
                     // `Vec<ZenohId>`: ZenohId is a value class, so these return
                     // `List<ZenohId>` via the normal Vec converter. Named to drop
                     // the `get` prefix (`peersZid` / `routersZid`).
@@ -722,31 +726,29 @@ fn main() {
     for name in [
         // Advanced pub/sub lifecycle/metadata: the gc_managed handle's close
         // (drop = undeclare) covers these, as for the regular pub/sub fns.
-        "advanced_publisher_get_keyexpr",
+        "advanced_publisher_get_id",
+        "advanced_publisher_get_key_expr",
         "advanced_publisher_undeclare",
-        "advanced_subscriber_get_keyexpr",
+        "advanced_subscriber_get_id",
+        "advanced_subscriber_get_key_expr",
         "advanced_subscriber_undeclare",
         "matching_listener_undeclare",
         "sample_miss_listener_undeclare",
         "liveliness_undeclare_token",
-        "publisher_get_eid",
-        "publisher_get_keyexpr",
-        "publisher_get_zid",
+        "publisher_get_id",
+        "publisher_get_key_expr",
         "publisher_undeclare",
-        "querier_get_eid",
-        "querier_get_keyexpr",
-        "querier_get_zid",
+        "querier_get_id",
+        "querier_get_key_expr",
         "querier_undeclare",
-        "queryable_get_eid",
-        "queryable_get_keyexpr",
-        "queryable_get_zid",
+        "queryable_get_id",
+        "queryable_get_key_expr",
         "queryable_undeclare",
         "session_close",
         "session_is_closed",
         "session_new_timestamp",
-        "subscriber_get_eid",
-        "subscriber_get_keyexpr",
-        "subscriber_get_zid",
+        "subscriber_get_id",
+        "subscriber_get_key_expr",
         "subscriber_undeclare",
         "zbytes_new_from_slice",
     ] {
