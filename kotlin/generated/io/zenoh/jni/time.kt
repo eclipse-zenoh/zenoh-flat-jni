@@ -9,6 +9,20 @@ package io.zenoh.jni.time
  * crosses whole, by value.
  */
 public data class Timestamp(val ntp64: ULong, val id: ByteArray) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Timestamp) return false
+        return ntp64 == other.ntp64 && id.contentEquals(other.id)
+    }
+
+    override fun hashCode(): Int {
+        var result = ntp64.hashCode()
+        result = 31 * result + id.contentHashCode()
+        return result
+    }
+
+    override fun toString(): String = "Timestamp(ntp64=$ntp64, id=${id.contentToString()})"
+
     public companion object {
         @JvmStatic
         public fun fromParts(ntp64: Long, id: ByteArray): Timestamp = Timestamp(ntp64.toULong(), id)

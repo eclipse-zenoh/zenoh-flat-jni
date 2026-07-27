@@ -44,10 +44,25 @@ public enum class WhatAmI(public val value: Int) {
  * fixed-size array, so no reader has to be told how long an identifier may be.
  *
  * Typed by-value wrapper for the native Rust `ZenohId` (a `Copy` blob carried
- * as its raw bytes; `@JvmInline`-erased to `ByteArray` at the JNI boundary).
+ * as its raw bytes; it crosses the JNI boundary as a bare `ByteArray`).
+ *
+ * Not a `@JvmInline value class`: Kotlin 1.9 reserves `equals`/`hashCode`
+ * members on a value class, so one cannot be given the value equality this
+ * type has in Rust — arrays would compare by identity.
  */
-@JvmInline
-public value class ZenohId(public val bytes: ByteArray) {
+public data class ZenohId(public val bytes: ByteArray) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is ZenohId) return false
+        return bytes.contentEquals(other.bytes)
+    }
+
+    override fun hashCode(): Int {
+        return bytes.contentHashCode()
+    }
+
+    override fun toString(): String = "ZenohId(bytes=${bytes.contentToString()})"
+
     /**
      * Format a Zenoh node identifier as its standard string form.
      *
