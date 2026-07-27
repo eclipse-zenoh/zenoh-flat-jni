@@ -917,6 +917,16 @@ public class Session(initialPtr: Long) : GcNativeHandle(initialPtr) {
         onBindingError: JniErrorHandler<Unit>,
         onError: ErrorHandler<Unit>,
     ) {
+        if (this.ptr != 0L && this.ptr == selector.keyExpr.ptr) {
+            onBindingError.run(
+                "Aliasing arguments: 'this' and 'selectorKeyExpr' are the same native resource; a consumed handle may not be passed twice in one call.",
+            ); return
+        }
+        if (selector.keyExpr.ptr != 0L && selector.keyExpr.ptr == (encoding1?.ptr ?: 0L)) {
+            onBindingError.run(
+                "Aliasing arguments: 'selectorKeyExpr' and 'encoding1' are the same native resource; a consumed handle may not be passed twice in one call.",
+            ); return
+        }
         if (this.isClosed()) { onBindingError.run("Operation on a closed native handle."); return }
         if (selector.keyExpr.isClosed()) {
             onBindingError.run("Operation on a closed native handle."); return

@@ -11795,18 +11795,20 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_helloGetLocators<'a>(
     let __vec = zenoh_flat::hello_get_locators(&h);
     let mut __acc = __acc;
     for __elem in __vec.into_iter() {
-        let __enc = match String_to_JString_c7f3ca43(&mut env, __elem) {
-            ::core::result::Result::Ok(__w) => __w,
-            ::core::result::Result::Err(__e) => {
-                signal_binding_error(
-                    &mut env,
-                    &__error_sink,
-                    &__SINK_MID,
-                    __SINK_FQN,
-                    __SINK_DESCR,
-                    &__e.to_string(),
-                );
-                return jni::objects::JObject::null().into();
+        let __enc = {
+            match String_to_JString_c7f3ca43(&mut env, __elem) {
+                ::core::result::Result::Ok(__w) => __w,
+                ::core::result::Result::Err(__e) => {
+                    signal_binding_error(
+                        &mut env,
+                        &__error_sink,
+                        &__SINK_MID,
+                        __SINK_FQN,
+                        __SINK_DESCR,
+                        &__e.to_string(),
+                    );
+                    return jni::objects::JObject::null().into();
+                }
             }
         };
         let __obj: jni::objects::JObject = __enc.into();
@@ -14235,18 +14237,20 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_parametersValues<'a>(
     let __vec = zenoh_flat::parameters_values(&s, &k);
     let mut __acc = __acc;
     for __elem in __vec.into_iter() {
-        let __enc = match String_to_JString_c7f3ca43(&mut env, __elem) {
-            ::core::result::Result::Ok(__w) => __w,
-            ::core::result::Result::Err(__e) => {
-                signal_binding_error(
-                    &mut env,
-                    &__error_sink,
-                    &__SINK_MID,
-                    __SINK_FQN,
-                    __SINK_DESCR,
-                    &__e.to_string(),
-                );
-                return jni::objects::JObject::null().into();
+        let __enc = {
+            match String_to_JString_c7f3ca43(&mut env, __elem) {
+                ::core::result::Result::Ok(__w) => __w,
+                ::core::result::Result::Err(__e) => {
+                    signal_binding_error(
+                        &mut env,
+                        &__error_sink,
+                        &__SINK_MID,
+                        __SINK_FQN,
+                        __SINK_DESCR,
+                        &__e.to_string(),
+                    );
+                    return jni::objects::JObject::null().into();
+                }
             }
         };
         let __obj: jni::objects::JObject = __enc.into();
@@ -21482,18 +21486,20 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionGetPeersZid<'a>(
     let __vec = zenoh_flat::session_get_peers_zid(&session);
     let mut __acc = __acc;
     for __elem in __vec.into_iter() {
-        let __enc = match ZenohId_to_JByteArray_2caee6f1(&mut env, __elem) {
-            ::core::result::Result::Ok(__w) => __w,
-            ::core::result::Result::Err(__e) => {
-                signal_binding_error(
-                    &mut env,
-                    &__error_sink,
-                    &__SINK_MID,
-                    __SINK_FQN,
-                    __SINK_DESCR,
-                    &__e.to_string(),
-                );
-                return jni::objects::JObject::null().into();
+        let __enc = {
+            match ZenohId_to_JByteArray_2caee6f1(&mut env, __elem) {
+                ::core::result::Result::Ok(__w) => __w,
+                ::core::result::Result::Err(__e) => {
+                    signal_binding_error(
+                        &mut env,
+                        &__error_sink,
+                        &__SINK_MID,
+                        __SINK_FQN,
+                        __SINK_DESCR,
+                        &__e.to_string(),
+                    );
+                    return jni::objects::JObject::null().into();
+                }
             }
         };
         let __obj: jni::objects::JObject = __enc.into();
@@ -21569,18 +21575,20 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionGetRoutersZid<'a>(
     let __vec = zenoh_flat::session_get_routers_zid(&session);
     let mut __acc = __acc;
     for __elem in __vec.into_iter() {
-        let __enc = match ZenohId_to_JByteArray_2caee6f1(&mut env, __elem) {
-            ::core::result::Result::Ok(__w) => __w,
-            ::core::result::Result::Err(__e) => {
-                signal_binding_error(
-                    &mut env,
-                    &__error_sink,
-                    &__SINK_MID,
-                    __SINK_FQN,
-                    __SINK_DESCR,
-                    &__e.to_string(),
-                );
-                return jni::objects::JObject::null().into();
+        let __enc = {
+            match ZenohId_to_JByteArray_2caee6f1(&mut env, __elem) {
+                ::core::result::Result::Ok(__w) => __w,
+                ::core::result::Result::Err(__e) => {
+                    signal_binding_error(
+                        &mut env,
+                        &__error_sink,
+                        &__SINK_MID,
+                        __SINK_FQN,
+                        __SINK_DESCR,
+                        &__e.to_string(),
+                    );
+                    return jni::objects::JObject::null().into();
+                }
             }
         };
         let __obj: jni::objects::JObject = __enc.into();
