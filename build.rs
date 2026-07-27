@@ -54,7 +54,7 @@ use prebindgen::{
     core::Registry,
     data_class, enum_class, expand_param, expand_return, fun,
     lang::{ConstDecl, FunctionDecl, JniGen},
-    package, ptr_class, sealed_class, sig, value_class,
+    package, ptr_class, sealed_class, sig,
 };
 use syn::parse_quote as pq;
 
@@ -340,14 +340,14 @@ fn main() {
                         .constructor(fun!(config_new_from_yaml)),
                 )
                 .class(enum_class!(WhatAmI))
-                // `ZenohId` is a `Copy` value — a fixed-width (`ZENOH_ID_MAX_SIZE`)
-                // byte blob — so it crosses as a raw `ByteArray` rather than a
-                // closeable jlong handle; the blob IS the value class's `bytes`
-                // property, so no separate accessor is needed. `Vec<ZenohId>`
-                // (session peers/routers) folds each element WHOLE as the typed
-                // `ZenohId` value class. Its read accessors become methods on the
-                // value class (receiver = `this.bytes`).
-                .class(value_class!(ZenohId).method(fun!(zenoh_id_to_string).name("toStr"))),
+                // `ZenohId` is a plain value: one fixed-width
+                // (`ZENOH_ID_MAX_SIZE`) byte field, which crosses as a Kotlin
+                // `ByteArray` — no closeable handle, and no raw-memory image of
+                // the Rust struct. The field IS the class's `bytes` property, so
+                // no separate accessor is needed. `Vec<ZenohId>` (session
+                // peers/routers) folds each element WHOLE as the typed class.
+                // Its read accessors become instance methods.
+                .class(data_class!(ZenohId).method(fun!(zenoh_id_to_string).name("toStr"))),
         )
         // ── Scouting ──────────────────────────────────────────────────────
         // Canonical output: the scout callback decomposes a `Hello` into its

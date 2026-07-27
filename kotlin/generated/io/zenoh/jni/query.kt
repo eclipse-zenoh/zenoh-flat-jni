@@ -13,6 +13,7 @@ import io.zenoh.jni.bytes.Encoding
 import io.zenoh.jni.bytes.ZBytes
 import io.zenoh.jni.keyexpr.KeyExpr
 import io.zenoh.jni.pubsub.EntityGlobalId
+import io.zenoh.jni.pubsub.__EntityGlobalIdBuilder
 import io.zenoh.jni.registerGcHandle
 import io.zenoh.jni.releaseCell
 import io.zenoh.jni.sample.Sample
@@ -572,16 +573,19 @@ public class Reply(initialPtr: Long) : NativeHandle(initialPtr) {
      * Return the global identifier of the entity that answered, when known.
      *
      * This information is available only when unstable features are enabled.
+     *
+     * The Rust `EntityGlobalId` result is delivered decomposed: the builder callback receives (`zid__bytes`, `eid`).
      */
+    @Suppress("UNCHECKED_CAST")
     public fun getReplierId(onError: JniErrorHandler<EntityGlobalId?>): EntityGlobalId? {
         if (this.isClosed()) return onError.run("Operation on a closed native handle.")
         val __bcap = JniErrorHandlerCapture.acquire()
         val __ret = withSortedHandleLocks(this) {
             val this_ptr = this.ptr
-            JNINative.replyGetReplierId(this_ptr, __bcap)
+            JNINative.replyGetReplierId(this_ptr, __EntityGlobalIdBuilder, __bcap)
         }
         if (__bcap.failed) return onError.run(__bcap.ze0)
-        return __ret
+        return __ret as EntityGlobalId?
     }
 
     /** Return whether this reply contains a sample rather than an error. */

@@ -21,7 +21,7 @@ public data class Timestamp(val ntp64: ULong, val id: ByteArray) {
         return result
     }
 
-    override fun toString(): String = "Timestamp(ntp64=$ntp64, id=${id.contentToString()})"
+    override fun toString(): String = "Timestamp(ntp64=${ntp64}, id=${id.contentToString()})"
 
     public companion object {
         @JvmStatic

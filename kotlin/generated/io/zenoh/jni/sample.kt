@@ -47,7 +47,7 @@ public enum class SampleKind(public val value: Int) {
 public data class SourceInfo(val source: EntityGlobalId, val sn: Long) {
     public companion object {
         @JvmStatic
-        public fun fromParts(source_zid: ByteArray, source_eid: Long, sn: Long): SourceInfo = SourceInfo(EntityGlobalId.fromParts(source_zid, source_eid), sn)
+        public fun fromParts(source_zid_bytes: ByteArray, source_eid: Long, sn: Long): SourceInfo = SourceInfo(EntityGlobalId.fromParts(source_zid_bytes, source_eid), sn)
     }
 }
 
@@ -202,16 +202,19 @@ public class Sample(initialPtr: Long) : NativeHandle(initialPtr) {
      * Return the source information of the sample, when known.
      *
      * This information is available only when unstable features are enabled.
+     *
+     * The Rust `SourceInfo` result is delivered decomposed: the builder callback receives (`source__zid__bytes`, `source__eid`, `sn`).
      */
+    @Suppress("UNCHECKED_CAST")
     public fun getSourceInfo(onError: JniErrorHandler<SourceInfo?>): SourceInfo? {
         if (this.isClosed()) return onError.run("Operation on a closed native handle.")
         val __bcap = JniErrorHandlerCapture.acquire()
         val __ret = withSortedHandleLocks(this) {
             val this_ptr = this.ptr
-            JNINative.sampleGetSourceInfo(this_ptr, __bcap)
+            JNINative.sampleGetSourceInfo(this_ptr, __SourceInfoBuilder, __bcap)
         }
         if (__bcap.failed) return onError.run(__bcap.ze0)
-        return __ret
+        return __ret as SourceInfo?
     }
 
     public companion object {
@@ -283,6 +286,13 @@ public fun SampleCallback.asRaw(): SampleCallbackRaw =
             getSourceInfo
         )
     }
+
+public fun interface SourceInfoBuilder<out R> {
+    public fun run(source__zid__bytes: ByteArray, source__eid: Long, sn: Long): R
+}
+
+internal val __SourceInfoBuilder: SourceInfoBuilder<SourceInfo> =
+SourceInfoBuilder { source__zid__bytes, source__eid, sn -> SourceInfo.fromParts(source__zid__bytes, source__eid, sn) }
 
 /**
  * Create a sample that publishes a value.

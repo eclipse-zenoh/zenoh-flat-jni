@@ -12,6 +12,7 @@ import io.zenoh.jni.VoidCallback
 import io.zenoh.jni.bytes.Encoding
 import io.zenoh.jni.config.Config
 import io.zenoh.jni.config.ZenohId
+import io.zenoh.jni.config.__ZenohIdBuilder
 import io.zenoh.jni.config.__ZenohIdFolderRawHolder
 import io.zenoh.jni.keyexpr.KeyExpr
 import io.zenoh.jni.liveliness.LivelinessToken
@@ -59,16 +60,21 @@ public class Session(initialPtr: Long) : GcNativeHandle(initialPtr) {
         return Session(if (p != 0L) p else cell.get())
     }
 
-    /** Return the identifier of this session. */
+    /**
+     * Return the identifier of this session.
+     *
+     * The Rust `ZenohId` result is delivered decomposed: the builder callback receives (`bytes`).
+     */
+    @Suppress("UNCHECKED_CAST")
     public fun getZid(onError: JniErrorHandler<ZenohId>): ZenohId {
         if (this.isClosed()) return onError.run("Operation on a closed native handle.")
         val __bcap = JniErrorHandlerCapture.acquire()
         val __ret = withSortedHandleLocks(this) {
             val this_ptr = this.ptr
-            JNINative.sessionGetZid(this_ptr, __bcap)
+            JNINative.sessionGetZid(this_ptr, __ZenohIdBuilder, __bcap)
         }
         if (__bcap.failed) return onError.run(__bcap.ze0)
-        return ZenohId(__ret)
+        return __ret as ZenohId
     }
 
     public fun declarePublisher(
@@ -985,7 +991,11 @@ public class Session(initialPtr: Long) : GcNativeHandle(initialPtr) {
         if (__dcap.failed) return onError.run(__dcap.ze0!!)
     }
 
-    /** Return the identifiers of peers currently connected to this session. */
+    /**
+     * Return the identifiers of peers currently connected to this session.
+     *
+     * The Rust `ZenohId` result is delivered decomposed: the builder callback receives (`bytes`).
+     */
     @Suppress("UNCHECKED_CAST")
     public fun getPeersZid(onError: JniErrorHandler<List<ZenohId>>): List<ZenohId> {
         if (this.isClosed()) return onError.run("Operation on a closed native handle.")
@@ -1003,7 +1013,11 @@ public class Session(initialPtr: Long) : GcNativeHandle(initialPtr) {
         return __ret as List<ZenohId>
     }
 
-    /** Return the identifiers of routers currently connected to this session. */
+    /**
+     * Return the identifiers of routers currently connected to this session.
+     *
+     * The Rust `ZenohId` result is delivered decomposed: the builder callback receives (`bytes`).
+     */
     @Suppress("UNCHECKED_CAST")
     public fun getRoutersZid(onError: JniErrorHandler<List<ZenohId>>): List<ZenohId> {
         if (this.isClosed()) return onError.run("Operation on a closed native handle.")

@@ -401,10 +401,6 @@ const _: () = {
         panic!("opaque handle types must have alignment >= 2 (bit 0 is the closed tag)");
     }
 };
-const _: () = {
-    const fn __assert_copy<T: ::core::marker::Copy>() {}
-    __assert_copy::<zenoh_flat::ZenohId>();
-};
 #[no_mangle]
 #[allow(non_snake_case, unused_mut, unused_variables, dead_code)]
 pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingZenohBytes<'a>(
@@ -3985,9 +3981,10 @@ pub(crate) unsafe fn EntityGlobalId_to_JObject_42df3b10<'a>(
     v: zenoh_flat::EntityGlobalId,
 ) -> ::core::result::Result<jni::objects::JObject<'a>, __JniErr> {
     Ok({
-        let ___zid: jni::objects::JObject = {
-            ZenohId_to_JByteArray_2caee6f1(env, v.zid.clone())?
-        }
+        let ___zid_bytes: jni::objects::JObject = u8_ZENOH_ID_MAX_SIZE_to_JByteArray_836d163f(
+                env,
+                v.zid.bytes.clone(),
+            )?
             .into();
         let ___eid: jni::sys::jlong = u32_to_jlong_9594a230(env, v.eid.clone())?;
         let __obj = env
@@ -3996,7 +3993,7 @@ pub(crate) unsafe fn EntityGlobalId_to_JObject_42df3b10<'a>(
                 "fromParts",
                 "([BJ)Lio/zenoh/jni/pubsub/EntityGlobalId;",
                 &[
-                    jni::objects::JValue::Object(&___zid),
+                    jni::objects::JValue::Object(&___zid_bytes),
                     jni::objects::JValue::from(___eid),
                 ],
             )
@@ -4122,28 +4119,30 @@ pub(crate) unsafe fn JByteArray_to_Vec_u8_7936d5de<'env, 'v>(
     clippy::nonminimal_bool,
     clippy::eq_op
 )]
-pub(crate) unsafe fn JByteArray_to_ZenohId_2caee6f1<'env, 'v>(
+pub(crate) unsafe fn JByteArray_to_u8_ZENOH_ID_MAX_SIZE_836d163f<'env, 'v>(
     env: &mut jni::JNIEnv<'env>,
     v: &jni::objects::JByteArray<'v>,
-) -> ::core::result::Result<zenoh_flat::ZenohId, __JniErr> {
+) -> ::core::result::Result<[u8; zenoh_flat::ZENOH_ID_MAX_SIZE], __JniErr> {
     Ok({
-        let __bytes = env
+        let __buf = env
             .convert_byte_array(v)
             .map_err(|e| {
                 <__JniErr as ::core::convert::From<
                     String,
-                >>::from(format!("value-blob decode: {}", e))
+                >>::from(format!("fixed-size array decode: {}", e))
             })?;
-        if __bytes.len() != ::core::mem::size_of::<zenoh_flat::ZenohId>() {
-            return ::core::result::Result::Err(
+        let __arr: [u8; zenoh_flat::ZENOH_ID_MAX_SIZE] = __buf
+            .as_slice()
+            .try_into()
+            .map_err(|_| {
                 <__JniErr as ::core::convert::From<
                     String,
-                >>::from("value-blob decode: wrong byte length".to_string()),
-            );
-        }
-        unsafe {
-            ::core::ptr::read_unaligned(__bytes.as_ptr() as *const zenoh_flat::ZenohId)
-        }
+                >>::from(
+                    "fixed-size array decode: `[u8 ; ZENOH_ID_MAX_SIZE]` expects a different length"
+                        .to_string(),
+                )
+            })?;
+        __arr
     })
 }
 #[allow(
@@ -4201,14 +4200,13 @@ pub(crate) unsafe fn JObject_to_EntityGlobalId_42df3b10<'env, 'v>(
     v: &jni::objects::JObject<'v>,
 ) -> ::core::result::Result<zenoh_flat::EntityGlobalId, __JniErr> {
     Ok({
-        let __zid_jobj: jni::objects::JObject = env
-            .get_field(v, "zid", "[B")
+        let __zid_raw: jni::objects::JObject = env
+            .get_field(v, "zid", "Lio/zenoh/jni/config/ZenohId;")
             .and_then(|val| val.l())
             .map_err(|e| <__JniErr as ::core::convert::From<
                 String,
             >>::from(format!("EntityGlobalId.zid: {}", e)))?;
-        let __zid_raw: jni::objects::JByteArray = __zid_jobj.into();
-        let zid = JByteArray_to_ZenohId_2caee6f1(env, &__zid_raw)?;
+        let zid = JObject_to_ZenohId_d483690b(env, &__zid_raw)?;
         let __eid_raw: jni::sys::jlong = env
             .get_field(v, "eid", "J")
             .and_then(|val| val.j())
@@ -5132,6 +5130,33 @@ pub(crate) unsafe fn JObject_to_Timestamp_2cba8ec4<'env, 'v>(
     clippy::nonminimal_bool,
     clippy::eq_op
 )]
+pub(crate) unsafe fn JObject_to_ZenohId_d483690b<'env, 'v>(
+    env: &mut jni::JNIEnv<'env>,
+    v: &jni::objects::JObject<'v>,
+) -> ::core::result::Result<zenoh_flat::ZenohId, __JniErr> {
+    Ok({
+        let __bytes_jobj: jni::objects::JObject = env
+            .get_field(v, "bytes", "[B")
+            .and_then(|val| val.l())
+            .map_err(|e| <__JniErr as ::core::convert::From<
+                String,
+            >>::from(format!("ZenohId.bytes: {}", e)))?;
+        let __bytes_raw: jni::objects::JByteArray = __bytes_jobj.into();
+        let bytes = JByteArray_to_u8_ZENOH_ID_MAX_SIZE_836d163f(env, &__bytes_raw)?;
+        zenoh_flat::ZenohId { bytes }
+    })
+}
+#[allow(
+    non_snake_case,
+    unused_mut,
+    unused_variables,
+    unused_braces,
+    dead_code,
+    clippy::needless_question_mark,
+    clippy::let_and_return,
+    clippy::nonminimal_bool,
+    clippy::eq_op
+)]
 pub(crate) unsafe fn JObject_to_impl_Fn_Hello_Send_Sync_static_d937ec1a<'env, 'v>(
     env: &mut jni::JNIEnv<'env>,
     v: &jni::objects::JObject<'v>,
@@ -5161,7 +5186,11 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Hello_Send_Sync_static_d937ec1a<'env, 'v
                 format!("Unable to get callback class for {}: {}", "Fn(Hello)", e),
             ))?;
         let __invoke_id = env
-            .get_method_id(&__invoke_class, "run", "(I[BLjava/util/List;)V")
+            .get_method_id(
+                &__invoke_class,
+                "run",
+                "(ILio/zenoh/jni/config/ZenohId;Ljava/util/List;)V",
+            )
             .map_err(|e| <__JniErr as ::core::convert::From<
                 String,
             >>::from(format!("Unable to resolve run for {}: {}", "Fn(Hello)", e)))?;
@@ -5194,7 +5223,7 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Hello_Send_Sync_static_d937ec1a<'env, 'v
                         jni::sys::jvalue { i: __enc0 }
                     };
                     let __cb0_obj1: jni::objects::JObject = {
-                        let __enc1 = match ZenohId_to_JByteArray_2caee6f1(
+                        let __enc1 = match ZenohId_to_JObject_d483690b(
                             &mut env,
                             zenoh_flat::hello_get_zid(&__cb_arg0),
                         ) {
@@ -5207,7 +5236,7 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Hello_Send_Sync_static_d937ec1a<'env, 'v
                                 );
                             }
                         };
-                        __enc1.into()
+                        __enc1
                     };
                     let __cb0_obj2: jni::objects::JObject = {
                         let __enc2 = match Vec_String_to_JObject_1e282499(
@@ -5301,7 +5330,7 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Miss_Send_Sync_static_192e5ce2<'env, 'v>
                 format!("Unable to get callback class for {}: {}", "Fn(Miss)", e),
             ))?;
         let __invoke_id = env
-            .get_method_id(&__invoke_class, "run", "(Lio/zenoh/jni/pubsub/Miss;)V")
+            .get_method_id(&__invoke_class, "run", "([BJJ)V")
             .map_err(|e| <__JniErr as ::core::convert::From<
                 String,
             >>::from(format!("Unable to resolve run for {}: {}", "Fn(Miss)", e)))?;
@@ -5317,8 +5346,54 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Miss_Send_Sync_static_192e5ce2<'env, 'v>
                         String,
                     >>::from(format!("push local frame for {}: {}", "Fn(Miss)", e)))?;
                 let __frame_res = (|| -> ::core::result::Result<(), __JniErr> {
-                    let __cb0_enc = Miss_to_JObject_e2758329(&mut env, __cb_arg0)?;
-                    let __cb0_obj: jni::objects::JObject = __cb0_enc;
+                    let __cb0_obj0: jni::objects::JObject = {
+                        let __enc0 = match u8_ZENOH_ID_MAX_SIZE_to_JByteArray_836d163f(
+                            &mut env,
+                            __cb_arg0.source.zid.bytes.clone(),
+                        ) {
+                            ::core::result::Result::Ok(__w) => __w,
+                            ::core::result::Result::Err(__e) => {
+                                return ::core::result::Result::Err(
+                                    <__JniErr as ::core::convert::From<
+                                        String,
+                                    >>::from(__e.to_string()),
+                                );
+                            }
+                        };
+                        __enc0.into()
+                    };
+                    let __cb0_obj1: jni::sys::jvalue = {
+                        let __enc1 = match u32_to_jlong_9594a230(
+                            &mut env,
+                            __cb_arg0.source.eid.clone(),
+                        ) {
+                            ::core::result::Result::Ok(__w) => __w,
+                            ::core::result::Result::Err(__e) => {
+                                return ::core::result::Result::Err(
+                                    <__JniErr as ::core::convert::From<
+                                        String,
+                                    >>::from(__e.to_string()),
+                                );
+                            }
+                        };
+                        jni::sys::jvalue { j: __enc1 }
+                    };
+                    let __cb0_obj2: jni::sys::jvalue = {
+                        let __enc2 = match u32_to_jlong_9594a230(
+                            &mut env,
+                            __cb_arg0.nb.clone(),
+                        ) {
+                            ::core::result::Result::Ok(__w) => __w,
+                            ::core::result::Result::Err(__e) => {
+                                return ::core::result::Result::Err(
+                                    <__JniErr as ::core::convert::From<
+                                        String,
+                                    >>::from(__e.to_string()),
+                                );
+                            }
+                        };
+                        jni::sys::jvalue { j: __enc2 }
+                    };
                     let __call_res: ::core::result::Result<(), __JniErr> = unsafe {
                         env.call_method_unchecked(
                             &callback_global_ref,
@@ -5328,8 +5403,10 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Miss_Send_Sync_static_192e5ce2<'env, 'v>
                             ),
                             &[
                                 jni::sys::jvalue {
-                                    l: __cb0_obj.as_raw(),
+                                    l: __cb0_obj0.as_raw(),
                                 },
+                                __cb0_obj1,
+                                __cb0_obj2,
                             ],
                         )
                     }
@@ -6853,9 +6930,10 @@ pub(crate) unsafe fn Miss_to_JObject_e2758329<'a>(
     v: zenoh_flat::Miss,
 ) -> ::core::result::Result<jni::objects::JObject<'a>, __JniErr> {
     Ok({
-        let ___source_zid: jni::objects::JObject = {
-            ZenohId_to_JByteArray_2caee6f1(env, v.source.zid.clone())?
-        }
+        let ___source_zid_bytes: jni::objects::JObject = u8_ZENOH_ID_MAX_SIZE_to_JByteArray_836d163f(
+                env,
+                v.source.zid.bytes.clone(),
+            )?
             .into();
         let ___source_eid: jni::sys::jlong = u32_to_jlong_9594a230(
             env,
@@ -6868,7 +6946,7 @@ pub(crate) unsafe fn Miss_to_JObject_e2758329<'a>(
                 "fromParts",
                 "([BJJ)Lio/zenoh/jni/pubsub/Miss;",
                 &[
-                    jni::objects::JValue::Object(&___source_zid),
+                    jni::objects::JValue::Object(&___source_zid_bytes),
                     jni::objects::JValue::from(___source_eid),
                     jni::objects::JValue::from(___nb),
                 ],
@@ -7933,9 +8011,10 @@ pub(crate) unsafe fn SourceInfo_to_JObject_355bb3a8<'a>(
     v: zenoh_flat::SourceInfo,
 ) -> ::core::result::Result<jni::objects::JObject<'a>, __JniErr> {
     Ok({
-        let ___source_zid: jni::objects::JObject = {
-            ZenohId_to_JByteArray_2caee6f1(env, v.source.zid.clone())?
-        }
+        let ___source_zid_bytes: jni::objects::JObject = u8_ZENOH_ID_MAX_SIZE_to_JByteArray_836d163f(
+                env,
+                v.source.zid.bytes.clone(),
+            )?
             .into();
         let ___source_eid: jni::sys::jlong = u32_to_jlong_9594a230(
             env,
@@ -7948,7 +8027,7 @@ pub(crate) unsafe fn SourceInfo_to_JObject_355bb3a8<'a>(
                 "fromParts",
                 "([BJJ)Lio/zenoh/jni/sample/SourceInfo;",
                 &[
-                    jni::objects::JValue::Object(&___source_zid),
+                    jni::objects::JValue::Object(&___source_zid_bytes),
                     jni::objects::JValue::from(___source_eid),
                     jni::objects::JValue::from(___sn),
                 ],
@@ -8103,7 +8182,7 @@ pub(crate) unsafe fn Vec_ZenohId_to_JObject_cd7f8e6c<'a>(
                 String,
             >>::from(format!("Vec<_>: list-from-env: {}", e)))?;
         for __elem in v.into_iter() {
-            let __elem_wire = ZenohId_to_JByteArray_2caee6f1(env, __elem)?;
+            let __elem_wire = ZenohId_to_JObject_d483690b(env, __elem)?;
             let __elem_obj: jni::objects::JObject = __elem_wire.into();
             __list
                 .add(env, &__elem_obj)
@@ -8200,23 +8279,28 @@ pub(crate) unsafe fn ZBytes_to_jlong_56134c74<'a>(
     clippy::nonminimal_bool,
     clippy::eq_op
 )]
-pub(crate) unsafe fn ZenohId_to_JByteArray_2caee6f1<'a>(
+pub(crate) unsafe fn ZenohId_to_JObject_d483690b<'a>(
     env: &mut jni::JNIEnv<'a>,
     v: zenoh_flat::ZenohId,
-) -> ::core::result::Result<jni::objects::JByteArray<'a>, __JniErr> {
+) -> ::core::result::Result<jni::objects::JObject<'a>, __JniErr> {
     Ok({
-        let __bytes: &[u8] = unsafe {
-            ::core::slice::from_raw_parts(
-                (&v as *const zenoh_flat::ZenohId) as *const u8,
-                ::core::mem::size_of::<zenoh_flat::ZenohId>(),
+        let ___bytes: jni::objects::JObject = u8_ZENOH_ID_MAX_SIZE_to_JByteArray_836d163f(
+                env,
+                v.bytes.clone(),
+            )?
+            .into();
+        let __obj = env
+            .call_static_method(
+                "io/zenoh/jni/config/ZenohId",
+                "fromParts",
+                "([B)Lio/zenoh/jni/config/ZenohId;",
+                &[jni::objects::JValue::Object(&___bytes)],
             )
-        };
-        env.byte_array_from_slice(__bytes)
-            .map_err(|e| {
-                <__JniErr as ::core::convert::From<
-                    String,
-                >>::from(format!("value-blob encode: {}", e))
-            })?
+            .and_then(|__v| __v.l())
+            .map_err(|e| <__JniErr as ::core::convert::From<
+                String,
+            >>::from(format!("encode struct via fromParts: {}", e)))?;
+        __obj
     })
 }
 #[allow(
@@ -9449,6 +9533,30 @@ pub(crate) unsafe fn u64_to_jlong_4384a5d6<'a>(
     v: u64,
 ) -> ::core::result::Result<jni::sys::jlong, __JniErr> {
     Ok(v as jni::sys::jlong)
+}
+#[allow(
+    non_snake_case,
+    unused_mut,
+    unused_variables,
+    unused_braces,
+    dead_code,
+    clippy::needless_question_mark,
+    clippy::let_and_return,
+    clippy::nonminimal_bool,
+    clippy::eq_op
+)]
+pub(crate) unsafe fn u8_ZENOH_ID_MAX_SIZE_to_JByteArray_836d163f<'a>(
+    env: &mut jni::JNIEnv<'a>,
+    v: [u8; zenoh_flat::ZENOH_ID_MAX_SIZE],
+) -> ::core::result::Result<jni::objects::JByteArray<'a>, __JniErr> {
+    Ok({
+        env.byte_array_from_slice(&v)
+            .map_err(|e| {
+                <__JniErr as ::core::convert::From<
+                    String,
+                >>::from(format!("fixed-size array encode: {}", e))
+            })?
+    })
 }
 #[allow(
     non_snake_case,
@@ -11897,8 +12005,9 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_helloGetZid<'a>(
     mut env: jni::JNIEnv<'a>,
     _class: jni::objects::JClass<'a>,
     h: jni::sys::jlong,
+    __builder: jni::objects::JObject<'a>,
     __error_sink: jni::objects::JObject<'a>,
-) -> jni::objects::JByteArray<'a> {
+) -> jni::objects::JObject<'a> {
     #[allow(non_upper_case_globals)]
     static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
@@ -11917,17 +12026,58 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_helloGetZid<'a>(
             return jni::objects::JObject::null().into();
         }
     };
+    #[allow(non_upper_case_globals)]
+    static __CB_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    const __CB_FQN: &str = "io/zenoh/jni/config/ZenohIdBuilder";
+    const __CB_DESCR: &str = "([B)Ljava/lang/Object;";
     let __out = zenoh_flat::hello_get_zid(&h);
-    match ZenohId_to_JByteArray_2caee6f1(&mut env, __out) {
-        ::core::result::Result::Ok(__w) => __w,
+    let __obj0: jni::objects::JObject = {
+        let __enc0 = match u8_ZENOH_ID_MAX_SIZE_to_JByteArray_836d163f(
+            &mut env,
+            __out.bytes.clone(),
+        ) {
+            ::core::result::Result::Ok(__w) => __w,
+            ::core::result::Result::Err(__e) => {
+                signal_binding_error(
+                    &mut env,
+                    &__error_sink,
+                    &__SINK_MID,
+                    __SINK_FQN,
+                    __SINK_DESCR,
+                    &__e.to_string(),
+                );
+                return jni::objects::JObject::null().into();
+            }
+        };
+        __enc0.into()
+    };
+    match __CB_MID
+        .call_object(
+            &mut env,
+            __CB_FQN,
+            "run",
+            __CB_DESCR,
+            &__builder,
+            &[
+                jni::sys::jvalue {
+                    l: __obj0.as_raw(),
+                },
+            ],
+        )
+    {
+        ::core::result::Result::Ok(__o) => __o,
         ::core::result::Result::Err(__e) => {
+            let _ = env.exception_describe();
+            let __e2 = <__JniErr as ::core::convert::From<
+                String,
+            >>::from(__e.to_string());
             signal_binding_error(
                 &mut env,
                 &__error_sink,
                 &__SINK_MID,
                 __SINK_FQN,
                 __SINK_DESCR,
-                &__e.to_string(),
+                &__e2.to_string(),
             );
             jni::objects::JObject::null().into()
         }
@@ -16593,6 +16743,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_replyGetReplierId<'a>(
     mut env: jni::JNIEnv<'a>,
     _class: jni::objects::JClass<'a>,
     r: jni::sys::jlong,
+    __builder: jni::objects::JObject<'a>,
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JObject<'a> {
     #[allow(non_upper_case_globals)]
@@ -16613,20 +16764,84 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_replyGetReplierId<'a>(
             return jni::objects::JObject::null().into();
         }
     };
+    #[allow(non_upper_case_globals)]
+    static __CB_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    const __CB_FQN: &str = "io/zenoh/jni/pubsub/EntityGlobalIdBuilder";
+    const __CB_DESCR: &str = "([BJ)Ljava/lang/Object;";
     let __out = zenoh_flat::reply_get_replier_id(&r);
-    match Option_EntityGlobalId_to_JObject_edfc5f2b(&mut env, __out) {
-        ::core::result::Result::Ok(__w) => __w,
-        ::core::result::Result::Err(__e) => {
-            signal_binding_error(
-                &mut env,
-                &__error_sink,
-                &__SINK_MID,
-                __SINK_FQN,
-                __SINK_DESCR,
-                &__e.to_string(),
-            );
-            jni::objects::JObject::null().into()
+    match __out {
+        ::core::option::Option::Some(__inner) => {
+            let __obj0: jni::objects::JObject = {
+                let __enc0 = match u8_ZENOH_ID_MAX_SIZE_to_JByteArray_836d163f(
+                    &mut env,
+                    __inner.zid.bytes.clone(),
+                ) {
+                    ::core::result::Result::Ok(__w) => __w,
+                    ::core::result::Result::Err(__e) => {
+                        signal_binding_error(
+                            &mut env,
+                            &__error_sink,
+                            &__SINK_MID,
+                            __SINK_FQN,
+                            __SINK_DESCR,
+                            &__e.to_string(),
+                        );
+                        return jni::objects::JObject::null().into();
+                    }
+                };
+                __enc0.into()
+            };
+            let __obj1: jni::sys::jvalue = {
+                let __enc1 = match u32_to_jlong_9594a230(&mut env, __inner.eid.clone()) {
+                    ::core::result::Result::Ok(__w) => __w,
+                    ::core::result::Result::Err(__e) => {
+                        signal_binding_error(
+                            &mut env,
+                            &__error_sink,
+                            &__SINK_MID,
+                            __SINK_FQN,
+                            __SINK_DESCR,
+                            &__e.to_string(),
+                        );
+                        return jni::objects::JObject::null().into();
+                    }
+                };
+                jni::sys::jvalue { j: __enc1 }
+            };
+            match __CB_MID
+                .call_object(
+                    &mut env,
+                    __CB_FQN,
+                    "run",
+                    __CB_DESCR,
+                    &__builder,
+                    &[
+                        jni::sys::jvalue {
+                            l: __obj0.as_raw(),
+                        },
+                        __obj1,
+                    ],
+                )
+            {
+                ::core::result::Result::Ok(__o) => __o,
+                ::core::result::Result::Err(__e) => {
+                    let _ = env.exception_describe();
+                    let __e2 = <__JniErr as ::core::convert::From<
+                        String,
+                    >>::from(__e.to_string());
+                    signal_binding_error(
+                        &mut env,
+                        &__error_sink,
+                        &__SINK_MID,
+                        __SINK_FQN,
+                        __SINK_DESCR,
+                        &__e2.to_string(),
+                    );
+                    jni::objects::JObject::null().into()
+                }
+            }
         }
+        ::core::option::Option::None => jni::objects::JObject::null().into(),
     }
 }
 #[no_mangle]
@@ -17097,6 +17312,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sampleGetSourceInfo<'a>(
     mut env: jni::JNIEnv<'a>,
     _class: jni::objects::JClass<'a>,
     s: jni::sys::jlong,
+    __builder: jni::objects::JObject<'a>,
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JObject<'a> {
     #[allow(non_upper_case_globals)]
@@ -17117,20 +17333,105 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sampleGetSourceInfo<'a>(
             return jni::objects::JObject::null().into();
         }
     };
+    #[allow(non_upper_case_globals)]
+    static __CB_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    const __CB_FQN: &str = "io/zenoh/jni/sample/SourceInfoBuilder";
+    const __CB_DESCR: &str = "([BJJ)Ljava/lang/Object;";
     let __out = zenoh_flat::sample_get_source_info(&s);
-    match Option_SourceInfo_to_JObject_bc7e1137(&mut env, __out) {
-        ::core::result::Result::Ok(__w) => __w,
-        ::core::result::Result::Err(__e) => {
-            signal_binding_error(
-                &mut env,
-                &__error_sink,
-                &__SINK_MID,
-                __SINK_FQN,
-                __SINK_DESCR,
-                &__e.to_string(),
-            );
-            jni::objects::JObject::null().into()
+    match __out {
+        ::core::option::Option::Some(__inner) => {
+            let __obj0: jni::objects::JObject = {
+                let __enc0 = match u8_ZENOH_ID_MAX_SIZE_to_JByteArray_836d163f(
+                    &mut env,
+                    __inner.source.zid.bytes.clone(),
+                ) {
+                    ::core::result::Result::Ok(__w) => __w,
+                    ::core::result::Result::Err(__e) => {
+                        signal_binding_error(
+                            &mut env,
+                            &__error_sink,
+                            &__SINK_MID,
+                            __SINK_FQN,
+                            __SINK_DESCR,
+                            &__e.to_string(),
+                        );
+                        return jni::objects::JObject::null().into();
+                    }
+                };
+                __enc0.into()
+            };
+            let __obj1: jni::sys::jvalue = {
+                let __enc1 = match u32_to_jlong_9594a230(
+                    &mut env,
+                    __inner.source.eid.clone(),
+                ) {
+                    ::core::result::Result::Ok(__w) => __w,
+                    ::core::result::Result::Err(__e) => {
+                        signal_binding_error(
+                            &mut env,
+                            &__error_sink,
+                            &__SINK_MID,
+                            __SINK_FQN,
+                            __SINK_DESCR,
+                            &__e.to_string(),
+                        );
+                        return jni::objects::JObject::null().into();
+                    }
+                };
+                jni::sys::jvalue { j: __enc1 }
+            };
+            let __obj2: jni::sys::jvalue = {
+                let __enc2 = match u32_to_jlong_9594a230(&mut env, __inner.sn.clone()) {
+                    ::core::result::Result::Ok(__w) => __w,
+                    ::core::result::Result::Err(__e) => {
+                        signal_binding_error(
+                            &mut env,
+                            &__error_sink,
+                            &__SINK_MID,
+                            __SINK_FQN,
+                            __SINK_DESCR,
+                            &__e.to_string(),
+                        );
+                        return jni::objects::JObject::null().into();
+                    }
+                };
+                jni::sys::jvalue { j: __enc2 }
+            };
+            match __CB_MID
+                .call_object(
+                    &mut env,
+                    __CB_FQN,
+                    "run",
+                    __CB_DESCR,
+                    &__builder,
+                    &[
+                        jni::sys::jvalue {
+                            l: __obj0.as_raw(),
+                        },
+                        __obj1,
+                        __obj2,
+                    ],
+                )
+            {
+                ::core::result::Result::Ok(__o) => __o,
+                ::core::result::Result::Err(__e) => {
+                    let _ = env.exception_describe();
+                    let __e2 = <__JniErr as ::core::convert::From<
+                        String,
+                    >>::from(__e.to_string());
+                    signal_binding_error(
+                        &mut env,
+                        &__error_sink,
+                        &__SINK_MID,
+                        __SINK_FQN,
+                        __SINK_DESCR,
+                        &__e2.to_string(),
+                    );
+                    jni::objects::JObject::null().into()
+                }
+            }
         }
+        ::core::option::Option::None => jni::objects::JObject::null().into(),
     }
 }
 #[no_mangle]
@@ -21486,8 +21787,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionGetPeersZid<'a>(
     let __vec = zenoh_flat::session_get_peers_zid(&session);
     let mut __acc = __acc;
     for __elem in __vec.into_iter() {
-        let __enc = {
-            match ZenohId_to_JByteArray_2caee6f1(&mut env, __elem) {
+        let __obj0: jni::objects::JObject = {
+            let __enc0 = match u8_ZENOH_ID_MAX_SIZE_to_JByteArray_836d163f(
+                &mut env,
+                __elem.bytes.clone(),
+            ) {
                 ::core::result::Result::Ok(__w) => __w,
                 ::core::result::Result::Err(__e) => {
                     signal_binding_error(
@@ -21500,9 +21804,9 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionGetPeersZid<'a>(
                     );
                     return jni::objects::JObject::null().into();
                 }
-            }
+            };
+            __enc0.into()
         };
-        let __obj: jni::objects::JObject = __enc.into();
         __acc = match __CB_MID
             .call_object(
                 &mut env,
@@ -21515,7 +21819,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionGetPeersZid<'a>(
                         l: __acc.as_raw(),
                     },
                     jni::sys::jvalue {
-                        l: __obj.as_raw(),
+                        l: __obj0.as_raw(),
                     },
                 ],
             )
@@ -21575,8 +21879,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionGetRoutersZid<'a>(
     let __vec = zenoh_flat::session_get_routers_zid(&session);
     let mut __acc = __acc;
     for __elem in __vec.into_iter() {
-        let __enc = {
-            match ZenohId_to_JByteArray_2caee6f1(&mut env, __elem) {
+        let __obj0: jni::objects::JObject = {
+            let __enc0 = match u8_ZENOH_ID_MAX_SIZE_to_JByteArray_836d163f(
+                &mut env,
+                __elem.bytes.clone(),
+            ) {
                 ::core::result::Result::Ok(__w) => __w,
                 ::core::result::Result::Err(__e) => {
                     signal_binding_error(
@@ -21589,9 +21896,9 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionGetRoutersZid<'a>(
                     );
                     return jni::objects::JObject::null().into();
                 }
-            }
+            };
+            __enc0.into()
         };
-        let __obj: jni::objects::JObject = __enc.into();
         __acc = match __CB_MID
             .call_object(
                 &mut env,
@@ -21604,7 +21911,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionGetRoutersZid<'a>(
                         l: __acc.as_raw(),
                     },
                     jni::sys::jvalue {
-                        l: __obj.as_raw(),
+                        l: __obj0.as_raw(),
                     },
                 ],
             )
@@ -21635,8 +21942,9 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionGetZid<'a>(
     mut env: jni::JNIEnv<'a>,
     _class: jni::objects::JClass<'a>,
     session: jni::sys::jlong,
+    __builder: jni::objects::JObject<'a>,
     __error_sink: jni::objects::JObject<'a>,
-) -> jni::objects::JByteArray<'a> {
+) -> jni::objects::JObject<'a> {
     #[allow(non_upper_case_globals)]
     static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
@@ -21655,17 +21963,58 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionGetZid<'a>(
             return jni::objects::JObject::null().into();
         }
     };
+    #[allow(non_upper_case_globals)]
+    static __CB_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    const __CB_FQN: &str = "io/zenoh/jni/config/ZenohIdBuilder";
+    const __CB_DESCR: &str = "([B)Ljava/lang/Object;";
     let __out = zenoh_flat::session_get_zid(&session);
-    match ZenohId_to_JByteArray_2caee6f1(&mut env, __out) {
-        ::core::result::Result::Ok(__w) => __w,
+    let __obj0: jni::objects::JObject = {
+        let __enc0 = match u8_ZENOH_ID_MAX_SIZE_to_JByteArray_836d163f(
+            &mut env,
+            __out.bytes.clone(),
+        ) {
+            ::core::result::Result::Ok(__w) => __w,
+            ::core::result::Result::Err(__e) => {
+                signal_binding_error(
+                    &mut env,
+                    &__error_sink,
+                    &__SINK_MID,
+                    __SINK_FQN,
+                    __SINK_DESCR,
+                    &__e.to_string(),
+                );
+                return jni::objects::JObject::null().into();
+            }
+        };
+        __enc0.into()
+    };
+    match __CB_MID
+        .call_object(
+            &mut env,
+            __CB_FQN,
+            "run",
+            __CB_DESCR,
+            &__builder,
+            &[
+                jni::sys::jvalue {
+                    l: __obj0.as_raw(),
+                },
+            ],
+        )
+    {
+        ::core::result::Result::Ok(__o) => __o,
         ::core::result::Result::Err(__e) => {
+            let _ = env.exception_describe();
+            let __e2 = <__JniErr as ::core::convert::From<
+                String,
+            >>::from(__e.to_string());
             signal_binding_error(
                 &mut env,
                 &__error_sink,
                 &__SINK_MID,
                 __SINK_FQN,
                 __SINK_DESCR,
-                &__e.to_string(),
+                &__e2.to_string(),
             );
             jni::objects::JObject::null().into()
         }
@@ -22426,7 +22775,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_zbytesToBytes<'a>(
 pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_zenohIdToString<'a>(
     mut env: jni::JNIEnv<'a>,
     _class: jni::objects::JClass<'a>,
-    z: jni::objects::JByteArray<'a>,
+    z_bytes: jni::objects::JByteArray<'a>,
     __error_sink: jni::objects::JObject<'a>,
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
@@ -22438,7 +22787,10 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_zenohIdToString<'a>(
     static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
-    let z = match JByteArray_to_ZenohId_2caee6f1(&mut env, &z) {
+    let __flat_z_bytes = match JByteArray_to_u8_ZENOH_ID_MAX_SIZE_836d163f(
+        &mut env,
+        &z_bytes,
+    ) {
         ::core::result::Result::Ok(__v) => __v,
         ::core::result::Result::Err(__e) => {
             signal_binding_error(
@@ -22452,6 +22804,10 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_zenohIdToString<'a>(
             return jni::objects::JObject::null().into();
         }
     };
+    let __flat_z = zenoh_flat::ZenohId {
+        bytes: __flat_z_bytes,
+    };
+    let z = __flat_z;
     let __out = match zenoh_flat::zenoh_id_to_string(&z) {
         ::core::result::Result::Ok(__v) => __v,
         ::core::result::Result::Err(__de) => {

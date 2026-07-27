@@ -206,6 +206,7 @@ Base package: `io.zenoh.jni`
   - shaped by: return `String` decomposed → [] (Callback delivery)
 - `hello_get_whatami` — `fun getWhatami(onError: JniErrorHandler<WhatAmI>): WhatAmI`
 - `hello_get_zid` — `fun getZid(onError: JniErrorHandler<ZenohId>): ZenohId`
+  - shaped by: return `ZenohId` decomposed → [bytes] (Callback delivery)
 
 ## class `io.zenoh.jni.keyexpr.KeyExpr` (ptr_class, Rust `KeyExpr`)
 
@@ -277,6 +278,7 @@ Base package: `io.zenoh.jni`
 
 - `reply_get_err` — `fun getErr(onError: JniErrorHandler<ReplyError?>): ReplyError?`
 - `reply_get_replier_id` — `fun getReplierId(onError: JniErrorHandler<EntityGlobalId?>): EntityGlobalId?`
+  - shaped by: return `EntityGlobalId` decomposed → [zid__bytes, eid] (Callback delivery)
 - `reply_get_sample` — `fun getSample(onError: JniErrorHandler<Sample?>): Sample?`
 - `reply_is_ok` — `fun isOk(onError: JniErrorHandler<Boolean>): Boolean`
 
@@ -297,6 +299,7 @@ Base package: `io.zenoh.jni`
 - `sample_get_priority` — `fun getPriority(onError: JniErrorHandler<Priority>): Priority`
 - `sample_get_reliability` — `fun getReliability(onError: JniErrorHandler<Reliability>): Reliability`
 - `sample_get_source_info` — `fun getSourceInfo(onError: JniErrorHandler<SourceInfo?>): SourceInfo?`
+  - shaped by: return `SourceInfo` decomposed → [source__zid__bytes, source__eid, sn] (Callback delivery)
 - `sample_get_timestamp` — `fun getTimestamp(onError: JniErrorHandler<Timestamp?>): Timestamp?`
   - shaped by: return `Timestamp` decomposed → [ntp64, id] (Callback delivery)
 
@@ -345,10 +348,11 @@ Base package: `io.zenoh.jni`
   - shaped by: param `payload` expanded from `ZBytes` — variants [zbytes_new_from_vec]
   - shaped by: domain error `Error` decomposed → onError [message] (binding failures → onBindingError)
 - `session_get_peers_zid` — `fun getPeersZid(onError: JniErrorHandler<List<ZenohId>>): List<ZenohId>`
-  - shaped by: return `ZenohId` decomposed → [] (Callback delivery)
+  - shaped by: return `ZenohId` decomposed → [bytes] (Callback delivery)
 - `session_get_routers_zid` — `fun getRoutersZid(onError: JniErrorHandler<List<ZenohId>>): List<ZenohId>`
-  - shaped by: return `ZenohId` decomposed → [] (Callback delivery)
+  - shaped by: return `ZenohId` decomposed → [bytes] (Callback delivery)
 - `session_get_zid` — `fun getZid(onError: JniErrorHandler<ZenohId>): ZenohId`
+  - shaped by: return `ZenohId` decomposed → [bytes] (Callback delivery)
 - `session_put` — `fun put(keyExprSel: Int, keyExpr0: String?, keyExpr1: KeyExpr?, payload: ByteArray, encodingSel: Int, encoding00: Int?, encoding01: ByteArray?, encoding1: Encoding?, congestionControl: CongestionControl?, priority: Priority?, express: Boolean?, attachment: ByteArray?, reliability: Reliability?, onBindingError: JniErrorHandler<Unit>, onError: ErrorHandler<Unit>)`
   - shaped by: param `attachment` expanded from `ZBytes` — variants [zbytes_new_from_vec]
   - shaped by: param `encoding` expanded from `Encoding` — variants [encoding_new_from_id, self]
@@ -364,7 +368,7 @@ Base package: `io.zenoh.jni`
 - `zbytes_new_from_vec` — `fun newFromVec(bytes: ByteArray, onError: JniErrorHandler<ZBytes>): ZBytes`
 - `zbytes_to_bytes` — `fun toBytes(onError: JniErrorHandler<ByteArray>): ByteArray`
 
-## class `io.zenoh.jni.config.ZenohId` (value_class, Rust `ZenohId`)
+## class `io.zenoh.jni.config.ZenohId` (data_class, Rust `ZenohId`)
 
 - `zenoh_id_to_string` — `fun toStr(onBindingError: JniErrorHandler<String>, onError: ErrorHandler<String>): String`
   - shaped by: domain error `Error` decomposed → onError [message] (binding failures → onBindingError)
@@ -411,7 +415,7 @@ Base package: `io.zenoh.jni`
 - `Timestamp`: data_class → `io.zenoh.jni.time.Timestamp` (wire `jni :: objects :: JObject`)
 - `WhatAmI`: enum_class → `io.zenoh.jni.config.WhatAmI` (wire `jni :: sys :: jint`)
 - `ZBytes`: ptr_class → `io.zenoh.jni.bytes.ZBytes` (wire `jni :: sys :: jlong`)
-- `ZenohId`: value_class → `io.zenoh.jni.config.ZenohId` (wire `jni :: objects :: JByteArray`)
+- `ZenohId`: data_class → `io.zenoh.jni.config.ZenohId` (wire `jni :: objects :: JObject`)
 
 ## conversions
 

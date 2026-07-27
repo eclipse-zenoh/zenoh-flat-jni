@@ -42,15 +42,8 @@ public enum class WhatAmI(public val value: Int) {
  *
  * The bound is carried by the type rather than by this comment: the field is a
  * fixed-size array, so no reader has to be told how long an identifier may be.
- *
- * Typed by-value wrapper for the native Rust `ZenohId` (a `Copy` blob carried
- * as its raw bytes; it crosses the JNI boundary as a bare `ByteArray`).
- *
- * Not a `@JvmInline value class`: Kotlin 1.9 reserves `equals`/`hashCode`
- * members on a value class, so one cannot be given the value equality this
- * type has in Rust — arrays would compare by identity.
  */
-public data class ZenohId(public val bytes: ByteArray) {
+public data class ZenohId(val bytes: ByteArray) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is ZenohId) return false
@@ -80,6 +73,11 @@ public data class ZenohId(public val bytes: ByteArray) {
         if (__bcap.failed) return onBindingError.run(__bcap.ze0)
         if (__dcap.failed) return onError.run(__dcap.ze0!!)
         return __ret
+    }
+
+    public companion object {
+        @JvmStatic
+        public fun fromParts(bytes: ByteArray): ZenohId = ZenohId(bytes)
     }
 }
 
@@ -234,12 +232,19 @@ public class Config(initialPtr: Long) : GcNativeHandle(initialPtr) {
     }
 }
 
+public fun interface ZenohIdBuilder<out R> {
+    public fun run(bytes: ByteArray): R
+}
+
+internal val __ZenohIdBuilder: ZenohIdBuilder<ZenohId> =
+ZenohIdBuilder { bytes -> ZenohId.fromParts(bytes) }
+
 public fun interface ZenohIdFolderRaw<A> {
-    public fun run(acc: A, element: ByteArray): A
+    public fun run(acc: A, bytes: ByteArray): A
 }
 
 internal object __ZenohIdFolderRawHolder {
     @JvmField
     val instance: ZenohIdFolderRaw<ArrayList<ZenohId>> =
-    ZenohIdFolderRaw { acc, element -> acc.add(ZenohId(element)); acc }
+    ZenohIdFolderRaw { acc, bytes -> acc.add(ZenohId.fromParts(bytes)); acc }
 }

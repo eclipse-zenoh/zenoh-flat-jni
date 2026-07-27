@@ -70,7 +70,7 @@ public data class CacheConfig(val maxSamples: ULong, val repliesConfig: RepliesC
 public data class EntityGlobalId(val zid: ZenohId, val eid: Long) {
     public companion object {
         @JvmStatic
-        public fun fromParts(zid: ByteArray, eid: Long): EntityGlobalId = EntityGlobalId(ZenohId(zid), eid)
+        public fun fromParts(zid_bytes: ByteArray, eid: Long): EntityGlobalId = EntityGlobalId(ZenohId.fromParts(zid_bytes), eid)
     }
 }
 
@@ -99,7 +99,7 @@ public data class HistoryConfig(val detectLatePublishers: Boolean, val maxSample
 public data class Miss(val source: EntityGlobalId, val nb: Long) {
     public companion object {
         @JvmStatic
-        public fun fromParts(source_zid: ByteArray, source_eid: Long, nb: Long): Miss = Miss(EntityGlobalId.fromParts(source_zid, source_eid), nb)
+        public fun fromParts(source_zid_bytes: ByteArray, source_eid: Long, nb: Long): Miss = Miss(EntityGlobalId.fromParts(source_zid_bytes, source_eid), nb)
     }
 }
 
@@ -375,7 +375,7 @@ public class AdvancedSubscriber(initialPtr: Long) : GcNativeHandle(initialPtr) {
             val this_ptr = this.ptr
             JNINative.advancedSubscriberDeclareSampleMissListener(
                 this_ptr,
-                callback,
+                callback.asRaw(),
                 onClose,
                 __bcap,
                 __dcap,
@@ -407,7 +407,7 @@ public class AdvancedSubscriber(initialPtr: Long) : GcNativeHandle(initialPtr) {
             val this_ptr = this.ptr
             JNINative.advancedSubscriberDeclareBackgroundSampleMissListener(
                 this_ptr,
-                callback,
+                callback.asRaw(),
                 onClose,
                 __bcap,
                 __dcap,
@@ -672,3 +672,24 @@ public class Subscriber(initialPtr: Long) : GcNativeHandle(initialPtr) {
 public fun interface MissCallback {
     public fun run(miss: Miss)
 }
+
+public fun interface MissCallbackRaw {
+    public fun run(source__zid__bytes: ByteArray, source__eid: Long, nb: Long)
+}
+
+public fun MissCallback.asRaw(): MissCallbackRaw =
+    MissCallbackRaw {
+        source__zid__bytes,
+        source__eid,
+        nb ->
+        run(
+            Miss.fromParts(source__zid__bytes, source__eid, nb)
+        )
+    }
+
+public fun interface EntityGlobalIdBuilder<out R> {
+    public fun run(zid__bytes: ByteArray, eid: Long): R
+}
+
+internal val __EntityGlobalIdBuilder: EntityGlobalIdBuilder<EntityGlobalId> =
+EntityGlobalIdBuilder { zid__bytes, eid -> EntityGlobalId.fromParts(zid__bytes, eid) }
