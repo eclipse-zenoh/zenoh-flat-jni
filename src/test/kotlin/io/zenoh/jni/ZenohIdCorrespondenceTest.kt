@@ -29,13 +29,17 @@ import kotlin.test.assertEquals
 class ZenohIdCorrespondenceTest {
 
     private val boom = JniErrorHandler<Nothing> { je ->
-        throw AssertionError("unexpected native zid error: $je")
+        throw AssertionError("unexpected native zid binding error: $je")
+    }
+
+    private val domainBoom = ErrorHandler<Nothing> { ze ->
+        throw AssertionError("unexpected native zid error: $ze")
     }
 
     private fun assertCorresponds(bytes: ByteArray) {
         val zid = ZenohId(bytes)
         assertEquals(
-            zid.toStr(boom),
+            zid.toStr(boom, domainBoom),
             zid.zidString(),
             "zid render mismatch for ${bytes.joinToString(",")}",
         )
@@ -43,8 +47,9 @@ class ZenohIdCorrespondenceTest {
 
     @Test
     fun rendersLikeNative() {
+        // No all-zero id: those bytes are not an identifier, so the native
+        // renderer rejects them rather than producing a string to compare.
         val edges = listOf(
-            ByteArray(16), // zero id
             ByteArray(16).also { it[0] = 1 }, // smallest nonzero (LE low byte)
             ByteArray(16).also { it[15] = 1 }, // highest byte only
             ByteArray(16).also { it[0] = 0x0F }, // sub-0x10 low byte

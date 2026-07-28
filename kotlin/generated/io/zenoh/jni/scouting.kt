@@ -13,6 +13,7 @@ import io.zenoh.jni.__StringFolderHolder
 import io.zenoh.jni.config.Config
 import io.zenoh.jni.config.WhatAmI
 import io.zenoh.jni.config.ZenohId
+import io.zenoh.jni.config.__ZenohIdBuilder
 import io.zenoh.jni.registerGcHandle
 import io.zenoh.jni.releaseCell
 import io.zenoh.jni.withSortedHandleLocks
@@ -47,16 +48,21 @@ public class Hello(initialPtr: Long) : NativeHandle(initialPtr) {
         return io.zenoh.jni.config.WhatAmI.fromInt(__ret)
     }
 
-    /** Zenoh id of the node that emitted this hello message. */
+    /**
+     * Zenoh id of the node that emitted this hello message.
+     *
+     * The Rust `ZenohId` result is delivered decomposed: the builder callback receives (`bytes`).
+     */
+    @Suppress("UNCHECKED_CAST")
     public fun getZid(onError: JniErrorHandler<ZenohId>): ZenohId {
         if (this.isClosed()) return onError.run("Operation on a closed native handle.")
         val __bcap = JniErrorHandlerCapture.acquire()
         val __ret = withSortedHandleLocks(this) {
             val this_ptr = this.ptr
-            JNINative.helloGetZid(this_ptr, __bcap)
+            JNINative.helloGetZid(this_ptr, __ZenohIdBuilder, __bcap)
         }
         if (__bcap.failed) return onError.run(__bcap.ze0)
-        return ZenohId(__ret)
+        return __ret as ZenohId
     }
 
     /** Locators advertised in this hello message. */
@@ -111,27 +117,13 @@ public fun interface HelloCallback {
     public fun run(getWhatami: Int, getZid: ZenohId, getLocators: List<String>)
 }
 
-public fun interface HelloCallbackRaw {
-    public fun run(getWhatami: Int, getZid: ByteArray, getLocators: List<String>)
-}
-
-public fun HelloCallback.asRaw(): HelloCallbackRaw =
-    HelloCallbackRaw {
-        getWhatami,
-        getZid,
-        getLocators ->
-        run(
-            getWhatami,
-            ZenohId(getZid),
-            getLocators
-        )
-    }
-
 /**
  * Discover Zenoh nodes and report each received hello message.
  *
  * `whatami` combines the node kinds to discover: router (`1`), peer (`2`),
- * and client (`4`). When no configuration is supplied, the default scouting
+ * and client (`4`). A raw bitfield is used here deliberately: zenoh's
+ * `WhatAmIMatcher` is a Rust-specific type that does not translate cleanly to
+ * other languages. When no configuration is supplied, the default scouting
  * configuration is used.
  *
  * The close callback is called when scouting ends.
@@ -156,7 +148,7 @@ public fun scout(
         config?.let { __locks.add(it) }
         withSortedHandleLocks(__locks) {
             val config_ptr = config?.ptr ?: 0L
-            JNINative.scout(whatami, config_ptr, callback.asRaw(), onClose, __bcap, __dcap)
+            JNINative.scout(whatami, config_ptr, callback, onClose, __bcap, __dcap)
         }
     }
     if (__bcap.failed) return onBindingError.run(__bcap.ze0)

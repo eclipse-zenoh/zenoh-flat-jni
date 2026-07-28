@@ -254,7 +254,7 @@ internal object JNINative {
         encodingSel: Int,
         encoding00Present: Boolean,
         encoding00Value: Int,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Long,
         attachment: ByteArray?,
         errorSink: Any,
@@ -313,19 +313,17 @@ internal object JNINative {
 
     external fun configNewFromFile(path: String, errorSink: Any, domainSink: Any): Long
 
-    external fun configNewFromJson(s: String, errorSink: Any, domainSink: Any): Long
-
     external fun configNewFromJson5(s: String, errorSink: Any, domainSink: Any): Long
 
     external fun configNewFromYaml(s: String, errorSink: Any, domainSink: Any): Long
 
     external fun encodingGetId(e: Long, errorSink: Any): Int
 
-    external fun encodingGetSchema(e: Long, errorSink: Any): String?
+    external fun encodingGetSchema(e: Long, errorSink: Any): ByteArray?
 
     external fun encodingNewClone(e: Long, errorSink: Any): Long
 
-    external fun encodingNewFromId(id: Int, schema: String?, errorSink: Any): Long
+    external fun encodingNewFromId(id: Int, schema: ByteArray?, errorSink: Any): Long
 
     external fun encodingNewFromString(s: String, errorSink: Any): Long
 
@@ -333,7 +331,7 @@ internal object JNINative {
         eSel: Int,
         e00Present: Boolean,
         e00Value: Int,
-        e01: String?,
+        e01: ByteArray?,
         e1: Long,
         schema: String,
         errorSink: Any,
@@ -345,13 +343,13 @@ internal object JNINative {
 
     external fun helloGetWhatami(h: Long, errorSink: Any): Int
 
-    external fun helloGetZid(h: Long, errorSink: Any): ByteArray
+    external fun helloGetZid(h: Long, build: Any, errorSink: Any): Any?
 
     external fun initAndroidLogs(filter: String, errorSink: Any)
 
     external fun initZenohLogsFromEnvOr(fallbackFilter: String, errorSink: Any)
 
-    external fun keyexprGetStr(ke: Long, errorSink: Any): String
+    external fun keyexprAsStr(ke: Long, errorSink: Any): String
 
     external fun keyexprIncludes(a: Long, bSel: Int, b0: String?, b1: Long, errorSink: Any): Boolean
 
@@ -453,7 +451,7 @@ internal object JNINative {
         encodingSel: Int,
         encoding00Present: Boolean,
         encoding00Value: Int,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Long,
         attachment: ByteArray?,
         errorSink: Any,
@@ -467,7 +465,7 @@ internal object JNINative {
         encodingSel: Int,
         encoding00Present: Boolean,
         encoding00Value: Int,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Long,
         attachment: ByteArray?,
         callback: Any,
@@ -482,7 +480,7 @@ internal object JNINative {
 
     external fun queryGetEncoding(q: Long, errorSink: Any): Long
 
-    external fun queryGetKeyexpr(q: Long, errorSink: Any): Long
+    external fun queryGetKeyExpr(q: Long, errorSink: Any): Long
 
     external fun queryGetParameters(q: Long, errorSink: Any): String
 
@@ -493,8 +491,9 @@ internal object JNINative {
         keyExprSel: Int,
         keyExpr0: String?,
         keyExpr1: Long,
-        timestampNtp64Present: Boolean,
-        timestampNtp64Value: Long,
+        timestampPresent: Boolean,
+        timestampNtp64: Long,
+        timestampId: ByteArray?,
         attachment: ByteArray?,
         expressPresent: Boolean,
         expressValue: Boolean,
@@ -508,7 +507,7 @@ internal object JNINative {
         encodingSel: Int,
         encoding00Present: Boolean,
         encoding00Value: Int,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Long,
         errorSink: Any,
         domainSink: Any,
@@ -525,10 +524,11 @@ internal object JNINative {
         encodingSel: Int,
         encoding00Present: Boolean,
         encoding00Value: Int,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Long,
-        timestampNtp64Present: Boolean,
-        timestampNtp64Value: Long,
+        timestampPresent: Boolean,
+        timestampNtp64: Long,
+        timestampId: ByteArray?,
         attachment: ByteArray?,
         expressPresent: Boolean,
         expressValue: Boolean,
@@ -542,9 +542,7 @@ internal object JNINative {
 
     external fun replyGetErr(r: Long, errorSink: Any): Long
 
-    external fun replyGetReplierEid(r: Long, errorSink: Any): Int
-
-    external fun replyGetReplierZid(r: Long, errorSink: Any): ByteArray?
+    external fun replyGetReplierId(r: Long, build: Any, errorSink: Any): Any?
 
     external fun replyGetSample(r: Long, errorSink: Any): Long
 
@@ -568,20 +566,17 @@ internal object JNINative {
 
     external fun sampleGetReliability(s: Long, errorSink: Any): Int
 
-    external fun sampleGetSourceEid(s: Long, errorSink: Any): Int
+    external fun sampleGetSourceInfo(s: Long, build: Any, errorSink: Any): Any?
 
-    external fun sampleGetSourceSn(s: Long, errorSink: Any): Long
-
-    external fun sampleGetSourceZid(s: Long, errorSink: Any): ByteArray?
-
-    external fun sampleGetTimestamp(s: Long, errorSink: Any): Long
+    external fun sampleGetTimestamp(s: Long, build: Any, errorSink: Any): Any?
 
     external fun sampleNewDelete(
         keyExprSel: Int,
         keyExpr0: String?,
         keyExpr1: Long,
-        timestampNtp64Present: Boolean,
-        timestampNtp64Value: Long,
+        timestampPresent: Boolean,
+        timestampNtp64: Long,
+        timestampId: ByteArray?,
         attachment: ByteArray?,
         congestionControlPresent: Boolean,
         congestionControlValue: Int,
@@ -591,9 +586,9 @@ internal object JNINative {
         expressValue: Boolean,
         reliabilityPresent: Boolean,
         reliabilityValue: Int,
-        build: Any,
         errorSink: Any,
-    ): Any?
+        domainSink: Any,
+    ): Long
 
     external fun sampleNewPut(
         keyExprSel: Int,
@@ -603,10 +598,11 @@ internal object JNINative {
         encodingSel: Int,
         encoding00Present: Boolean,
         encoding00Value: Int,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Long,
-        timestampNtp64Present: Boolean,
-        timestampNtp64Value: Long,
+        timestampPresent: Boolean,
+        timestampNtp64: Long,
+        timestampId: ByteArray?,
         attachment: ByteArray?,
         congestionControlPresent: Boolean,
         congestionControlValue: Int,
@@ -616,9 +612,9 @@ internal object JNINative {
         expressValue: Boolean,
         reliabilityPresent: Boolean,
         reliabilityValue: Int,
-        build: Any,
         errorSink: Any,
-    ): Any?
+        domainSink: Any,
+    ): Long
 
     external fun scout(
         whatami: Int,
@@ -637,7 +633,7 @@ internal object JNINative {
         encodingSel: Int,
         encoding00Present: Boolean,
         encoding00Value: Int,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Long,
         congestionControlPresent: Boolean,
         congestionControlValue: Int,
@@ -654,9 +650,9 @@ internal object JNINative {
         publisherDetectionValue: Boolean,
         cachePresent: Boolean,
         cacheMaxSamples: Long,
-        cacheRepliesPriority: Int,
-        cacheRepliesCongestionControl: Int,
-        cacheRepliesIsExpress: Boolean,
+        cacheRepliesConfigPriority: Int,
+        cacheRepliesConfigCongestionControl: Int,
+        cacheRepliesConfigIsExpress: Boolean,
         errorSink: Any,
         domainSink: Any,
     ): Long
@@ -675,8 +671,8 @@ internal object JNINative {
         historyMaxAgePresent: Boolean,
         historyMaxAgeValue: Double,
         recoveryPresent: Boolean,
-        recoveryPeriodicQueries: Long,
-        recoveryHeartbeat: Boolean,
+        recoveryMode: io.zenoh.jni.pubsub.RecoveryMode?,
+        recoveryRetentionPeriod: Long,
         queryTimeout: Long,
         subscriberDetectionPresent: Boolean,
         subscriberDetectionValue: Boolean,
@@ -699,7 +695,7 @@ internal object JNINative {
         encodingSel: Int,
         encoding00Present: Boolean,
         encoding00Value: Int,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Long,
         congestionControlPresent: Boolean,
         congestionControlValue: Int,
@@ -780,10 +776,8 @@ internal object JNINative {
 
     external fun sessionGet(
         session: Long,
-        keyExprSel: Int,
-        keyExpr0: String?,
-        keyExpr1: Long,
-        parameters: String?,
+        selectorKeyExpr: Long,
+        selectorParameters: String,
         timeoutMsPresent: Boolean,
         timeoutMsValue: Long,
         targetPresent: Boolean,
@@ -802,7 +796,7 @@ internal object JNINative {
         encodingSel: Int,
         encoding00Present: Boolean,
         encoding00Value: Int,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Long,
         attachment: ByteArray?,
         callback: Any,
@@ -815,7 +809,7 @@ internal object JNINative {
 
     external fun sessionGetRoutersZid(session: Long, acc: Any?, fold: Any, errorSink: Any): Any?
 
-    external fun sessionGetZid(session: Long, errorSink: Any): ByteArray
+    external fun sessionGetZid(session: Long, build: Any, errorSink: Any): Any?
 
     external fun sessionPut(
         session: Long,
@@ -826,7 +820,7 @@ internal object JNINative {
         encodingSel: Int,
         encoding00Present: Boolean,
         encoding00Value: Int,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Long,
         congestionControlPresent: Boolean,
         congestionControlValue: Int,
@@ -848,21 +842,15 @@ internal object JNINative {
         domainSink: Any,
     )
 
-    external fun timestampGetId(t: Long, errorSink: Any): ByteArray
-
-    external fun timestampGetNtp64(t: Long, errorSink: Any): Long
-
     external fun tryInitZenohLogsFromEnv(errorSink: Any)
-
-    external fun zbytesAsBytes(z: Long, errorSink: Any): ByteArray
 
     external fun zbytesNewClone(z: Long, errorSink: Any): Long
 
     external fun zbytesNewFromVec(bytes: ByteArray, errorSink: Any): Long
 
-    external fun zenohIdToBytes(z: ByteArray, errorSink: Any): ByteArray
+    external fun zbytesToBytes(z: Long, errorSink: Any): ByteArray
 
-    external fun zenohIdToString(z: ByteArray, errorSink: Any): String
+    external fun zenohIdToString(zBytes: ByteArray, errorSink: Any, domainSink: Any): String
 
     external fun constGetEncodingApplicationCbor(errorSink: Any): String
 

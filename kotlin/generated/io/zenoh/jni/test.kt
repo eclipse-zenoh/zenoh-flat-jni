@@ -90,6 +90,12 @@ public fun parametersExtend(s: String, other: String, onError: JniErrorHandler<S
 /**
  * Return `true` if the parameters string contains at least one entry and
  * none of its keys are empty.
+ *
+ * This predicate is **not** part of the public `zenoh` API: base zenoh exposes
+ * well-formedness only as an internal helper. It is provided here as a
+ * correspondence-test oracle — bindings that reimplement parameters processing
+ * natively (for example on the JVM, where crossing the native/managed boundary
+ * per operation is expensive) can check their implementation against it.
  */
 public fun parametersIsWellFormed(s: String, onError: JniErrorHandler<Boolean>): Boolean {
     val __bcap = JniErrorHandlerCapture.acquire()

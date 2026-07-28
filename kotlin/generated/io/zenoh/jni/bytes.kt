@@ -40,8 +40,13 @@ public class Encoding(initialPtr: Long) : GcNativeHandle(initialPtr) {
         return __ret
     }
 
-    /** Return the schema associated with an encoding, when present. */
-    public fun getSchema(onError: JniErrorHandler<String?>): String? {
+    /**
+     * Return the schema associated with an encoding, when present.
+     *
+     * A schema is raw bytes: zenoh transmits it verbatim and does not require it to
+     * be valid UTF-8, so it is returned losslessly rather than as a string.
+     */
+    public fun getSchema(onError: JniErrorHandler<ByteArray?>): ByteArray? {
         if (this.isClosed()) return onError.run("Operation on a closed native handle.")
         val __bcap = JniErrorHandlerCapture.acquire()
         val __ret = withSortedHandleLocks(this) {
@@ -86,12 +91,17 @@ public class Encoding(initialPtr: Long) : GcNativeHandle(initialPtr) {
          * Schema interpretation is application-defined; for example, `utf-8` may
          * accompany `text/plain`.
          *
+         * The schema is a string here because the base zenoh operation is: for a custom
+         * encoding it merges the supplied schema with the textual encoding name already
+         * held in the schema field, which is a text operation. Use
+         * [`encoding_new_from_id`] to set a schema that is not valid UTF-8.
+         *
          * Parameter `e` is the Rust `Encoding` argument, expanded: pass EITHER its `encoding_new_from_id` inputs OR an existing `Encoding` — the selector chooses the arm (crosses as `eSel`, `e00`, `e01`, `e1`).
          */
         public fun newWithSchema(
             eSel: Int,
             e00: Int?,
-            e01: String?,
+            e01: ByteArray?,
             e1: Encoding?,
             schema: String,
             onError: JniErrorHandler<Encoding>,
@@ -118,8 +128,22 @@ public class Encoding(initialPtr: Long) : GcNativeHandle(initialPtr) {
             return Encoding(__ret)
         }
 
-        /** Create an encoding from its numeric identifier and optional schema. */
-        public fun newFromId(id: Int, schema: String?, onError: JniErrorHandler<Encoding>): Encoding {
+        /**
+         * Create an encoding from its numeric identifier and optional schema.
+         *
+         * The schema is raw bytes and is stored verbatim (see [`encoding_get_schema`]),
+         * so this is the exact inverse of [`encoding_get_id`] / [`encoding_get_schema`]:
+         * the pair round-trips losslessly even for a schema that is not valid UTF-8.
+         *
+         * The identifier is zenoh's own `EncodingId`, so every value it can hold is a
+         * valid encoding id: there is no out-of-range case to reject and nothing is
+         * narrowed on the way in.
+         */
+        public fun newFromId(
+            id: Int,
+            schema: ByteArray?,
+            onError: JniErrorHandler<Encoding>,
+        ): Encoding {
             val __bcap = JniErrorHandlerCapture.acquire()
             val __ret = JNINative.encodingNewFromId(id, schema, __bcap)
             if (__bcap.failed) return onError.run(__bcap.ze0)
@@ -160,12 +184,12 @@ public class ZBytes(initialPtr: Long) : NativeHandle(initialPtr) {
     }
 
     /** Return the payload as a contiguous sequence of bytes. */
-    public fun asBytes(onError: JniErrorHandler<ByteArray>): ByteArray {
+    public fun toBytes(onError: JniErrorHandler<ByteArray>): ByteArray {
         if (this.isClosed()) return onError.run("Operation on a closed native handle.")
         val __bcap = JniErrorHandlerCapture.acquire()
         val __ret = withSortedHandleLocks(this) {
             val this_ptr = this.ptr
-            JNINative.zbytesAsBytes(this_ptr, __bcap)
+            JNINative.zbytesToBytes(this_ptr, __bcap)
         }
         if (__bcap.failed) return onError.run(__bcap.ze0)
         return __ret

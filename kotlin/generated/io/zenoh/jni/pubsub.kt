@@ -20,27 +20,57 @@ import io.zenoh.jni.sample.SampleCallback
 import io.zenoh.jni.sample.asRaw
 import io.zenoh.jni.withSortedHandleLocks
 
+/**
+ * How an advanced subscriber recovers missed samples.
+ *
+ * The modes are mutually exclusive by construction, mirroring base zenoh's
+ * builder, whose type-state makes `periodic_queries` and `heartbeat`
+ * unreachable from one another. Because the choice is carried by the type,
+ * there is no precedence rule to document and no way to ask for both.
+ *
+ * JVM-side surface for the native Rust `RecoveryMode` sum: exactly one alternative is live.
+ */
+public sealed interface RecoveryMode {
+    /** Query for not-yet-received samples with this period. */
+    public data class PeriodicQueries(public val v0: ULong) : RecoveryMode
+
+    /** Subscribe to advanced publishers' heartbeats to detect misses. */
+    public data object Heartbeat : RecoveryMode
+
+    public companion object {
+        @JvmStatic
+        public fun fromParts(tag: Int, periodicQueries_v0: ULong): RecoveryMode =
+            when (tag) {
+                0 -> PeriodicQueries(periodicQueries_v0)
+                1 -> Heartbeat
+                else -> throw IllegalArgumentException("RecoveryMode: invalid tag $tag")
+            }
+    }
+}
+
 /** Configuration of an advanced publisher's retransmission cache. */
-public data class CacheConfig(val maxSamples: ULong, val replies: RepliesConfig) {
+public data class CacheConfig(val maxSamples: ULong, val repliesConfig: RepliesConfig) {
     public companion object {
         @JvmStatic
         public fun fromParts(
             maxSamples: Long,
-            replies_priority: Int,
-            replies_congestionControl: Int,
-            replies_isExpress: Boolean,
-        ): CacheConfig = CacheConfig(maxSamples.toULong(), RepliesConfig.fromParts(replies_priority, replies_congestionControl, replies_isExpress))
+            repliesConfig_priority: Int,
+            repliesConfig_congestionControl: Int,
+            repliesConfig_isExpress: Boolean,
+        ): CacheConfig = CacheConfig(maxSamples.toULong(), RepliesConfig.fromParts(repliesConfig_priority, repliesConfig_congestionControl, repliesConfig_isExpress))
     }
 }
 
 /**
  * Global identifier of an entity (publisher, subscriber, …) in a Zenoh system:
  * the node's [`ZenohId`] plus the entity's per-session id.
+ *
+ * This information is available only when unstable features are enabled.
  */
 public data class EntityGlobalId(val zid: ZenohId, val eid: Long) {
     public companion object {
         @JvmStatic
-        public fun fromParts(zid: ByteArray, eid: Long): EntityGlobalId = EntityGlobalId(ZenohId(zid), eid)
+        public fun fromParts(zid_bytes: ByteArray, eid: Long): EntityGlobalId = EntityGlobalId(ZenohId.fromParts(zid_bytes), eid)
     }
 }
 
@@ -69,7 +99,7 @@ public data class HistoryConfig(val detectLatePublishers: Boolean, val maxSample
 public data class Miss(val source: EntityGlobalId, val nb: Long) {
     public companion object {
         @JvmStatic
-        public fun fromParts(source_zid: ByteArray, source_eid: Long, nb: Long): Miss = Miss(EntityGlobalId.fromParts(source_zid, source_eid), nb)
+        public fun fromParts(source_zid_bytes: ByteArray, source_eid: Long, nb: Long): Miss = Miss(EntityGlobalId.fromParts(source_zid_bytes, source_eid), nb)
     }
 }
 
@@ -89,14 +119,16 @@ public data class MissDetectionConfig(val heartbeat: ULong?, val sporadic: Boole
 /**
  * Retransmission (missed-sample recovery) configuration for an advanced
  * subscriber.
- *
- * At most one recovery mode applies: a `periodic_queries` period, or
- * `heartbeat` subscription. If neither is set, recovery uses its defaults.
  */
-public data class RecoveryConfig(val periodicQueries: ULong?, val heartbeat: Boolean) {
+public data class RecoveryConfig(val mode: RecoveryMode?, val retentionPeriod: ULong?) {
     public companion object {
         @JvmStatic
-        public fun fromParts(periodicQueries: Long, heartbeat: Boolean): RecoveryConfig = RecoveryConfig(if (periodicQueries == -1L) null else periodicQueries.toULong(), heartbeat)
+        public fun fromParts(
+            mode__present: Boolean,
+            mode__tag: Int,
+            mode_periodicQueries_v0: Long,
+            retentionPeriod: Long,
+        ): RecoveryConfig = RecoveryConfig(if (mode__present) when (mode__tag) { 0 -> RecoveryMode.PeriodicQueries(mode_periodicQueries_v0.toULong()); 1 -> RecoveryMode.Heartbeat; else -> throw IllegalArgumentException("RecoveryMode: invalid tag $mode__tag") } else null, if (retentionPeriod == -1L) null else retentionPeriod.toULong())
     }
 }
 
@@ -148,7 +180,7 @@ public class AdvancedPublisher(initialPtr: Long) : GcNativeHandle(initialPtr) {
         payload: ByteArray,
         encodingSel: Int,
         encoding00: Int?,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Encoding?,
         attachment: ByteArray?,
         onBindingError: JniErrorHandler<Unit>,
@@ -343,7 +375,7 @@ public class AdvancedSubscriber(initialPtr: Long) : GcNativeHandle(initialPtr) {
             val this_ptr = this.ptr
             JNINative.advancedSubscriberDeclareSampleMissListener(
                 this_ptr,
-                callback,
+                callback.asRaw(),
                 onClose,
                 __bcap,
                 __dcap,
@@ -375,7 +407,7 @@ public class AdvancedSubscriber(initialPtr: Long) : GcNativeHandle(initialPtr) {
             val this_ptr = this.ptr
             JNINative.advancedSubscriberDeclareBackgroundSampleMissListener(
                 this_ptr,
-                callback,
+                callback.asRaw(),
                 onClose,
                 __bcap,
                 __dcap,
@@ -521,7 +553,7 @@ public class Publisher(initialPtr: Long) : GcNativeHandle(initialPtr) {
         payload: ByteArray,
         encodingSel: Int,
         encoding00: Int?,
-        encoding01: String?,
+        encoding01: ByteArray?,
         encoding1: Encoding?,
         attachment: ByteArray?,
         onBindingError: JniErrorHandler<Unit>,
@@ -640,3 +672,24 @@ public class Subscriber(initialPtr: Long) : GcNativeHandle(initialPtr) {
 public fun interface MissCallback {
     public fun run(miss: Miss)
 }
+
+public fun interface MissCallbackRaw {
+    public fun run(source__zid__bytes: ByteArray, source__eid: Long, nb: Long)
+}
+
+public fun MissCallback.asRaw(): MissCallbackRaw =
+    MissCallbackRaw {
+        source__zid__bytes,
+        source__eid,
+        nb ->
+        run(
+            Miss.fromParts(source__zid__bytes, source__eid, nb)
+        )
+    }
+
+public fun interface EntityGlobalIdBuilder<out R> {
+    public fun run(zid__bytes: ByteArray, eid: Long): R
+}
+
+internal val __EntityGlobalIdBuilder: EntityGlobalIdBuilder<EntityGlobalId> =
+EntityGlobalIdBuilder { zid__bytes, eid -> EntityGlobalId.fromParts(zid__bytes, eid) }

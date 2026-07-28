@@ -14,6 +14,11 @@ import io.zenoh.jni.withSortedHandleLocks
 /**
  * The role of a node in a Zenoh network.
  *
+ * The discriminants are bit flags, not an ordinal sequence: they are combined
+ * with a bitwise or into the bitfield that [`crate::scout`] accepts. The
+ * `repr` is therefore part of what this type means and is kept, unlike the
+ * crate's ordinary enumerations, whose lowering each binding chooses.
+ *
  * JVM-side surface for the native Rust `WhatAmI` enum.
  */
 public enum class WhatAmI(public val value: Int) {
@@ -28,25 +33,51 @@ public enum class WhatAmI(public val value: Int) {
 }
 
 /**
- * Typed by-value wrapper for the native Rust `ZenohId` (a `Copy` blob carried
- * as its raw bytes; `@JvmInline`-erased to `ByteArray` at the JNI boundary).
+ * Identifier of a Zenoh node, as a plain value.
+ *
+ * A node identifier is a **bounded** blob — exactly [`ZENOH_ID_MAX_SIZE`] bytes
+ * wide — so it is fully described by its bytes, costs nothing to copy whole,
+ * and needs no allocation. It is a value, not a handle: there is no lifecycle
+ * to manage and nothing to release.
+ *
+ * The bound is carried by the type rather than by this comment: the field is a
+ * fixed-size array, so no reader has to be told how long an identifier may be.
  */
-@JvmInline
-public value class ZenohId(public val bytes: ByteArray) {
-    /** Serialize a Zenoh node identifier as raw bytes (16 bytes, little-endian). */
-    public fun toBytes(onError: JniErrorHandler<ByteArray>): ByteArray {
+public data class ZenohId(val bytes: ByteArray) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is ZenohId) return false
+        return bytes.contentEquals(other.bytes)
+    }
+
+    override fun hashCode(): Int {
+        return bytes.contentHashCode()
+    }
+
+    override fun toString(): String = "ZenohId(bytes=${bytes.contentToString()})"
+
+    /**
+     * Format a Zenoh node identifier as its standard string form.
+     *
+     * Fails only for all-zero bytes, which are not an identifier — every other
+     * value of the field is one, since the type already fixes the width. Rendering
+     * is zenoh's own, so an identifier obtained from zenoh always renders exactly
+     * as zenoh renders it.
+     *
+     * On a domain error `onError` receives the decomposed Rust `Error` error (`message`); a binding/system failure goes to `onBindingError` instead.
+     */
+    public fun toStr(onBindingError: JniErrorHandler<String>, onError: ErrorHandler<String>): String {
         val __bcap = JniErrorHandlerCapture.acquire()
-        val __ret = JNINative.zenohIdToBytes(this.bytes, __bcap)
-        if (__bcap.failed) return onError.run(__bcap.ze0)
+        val __dcap = ErrorHandlerCapture.acquire()
+        val __ret = JNINative.zenohIdToString(this.bytes, __bcap, __dcap)
+        if (__bcap.failed) return onBindingError.run(__bcap.ze0)
+        if (__dcap.failed) return onError.run(__dcap.ze0!!)
         return __ret
     }
 
-    /** Format a Zenoh node identifier as its standard string form. */
-    public fun toStr(onError: JniErrorHandler<String>): String {
-        val __bcap = JniErrorHandlerCapture.acquire()
-        val __ret = JNINative.zenohIdToString(this.bytes, __bcap)
-        if (__bcap.failed) return onError.run(__bcap.ze0)
-        return __ret
+    public companion object {
+        @JvmStatic
+        public fun fromParts(bytes: ByteArray): ZenohId = ZenohId(bytes)
     }
 }
 
@@ -156,25 +187,11 @@ public class Config(initialPtr: Long) : GcNativeHandle(initialPtr) {
         }
 
         /**
-         * Parse a configuration from JSON text.
-         *
-         * On a domain error `onError` receives the decomposed Rust `Error` error (`message`); a binding/system failure goes to `onBindingError` instead.
-         */
-        public fun newFromJson(
-            s: String,
-            onBindingError: JniErrorHandler<Config>,
-            onError: ErrorHandler<Config>,
-        ): Config {
-            val __bcap = JniErrorHandlerCapture.acquire()
-            val __dcap = ErrorHandlerCapture.acquire()
-            val __ret = JNINative.configNewFromJson(s, __bcap, __dcap)
-            if (__bcap.failed) return onBindingError.run(__bcap.ze0)
-            if (__dcap.failed) return onError.run(__dcap.ze0!!)
-            return Config(__ret)
-        }
-
-        /**
          * Parse a configuration from a JSON5-formatted string.
+         *
+         * Delegates to [`zenoh::Config::from_json5`], so it applies zenoh's own
+         * validation: a config that deserializes but is semantically invalid is
+         * rejected. JSON is a subset of JSON5, so plain JSON text parses as well.
          *
          * On a domain error `onError` receives the decomposed Rust `Error` error (`message`); a binding/system failure goes to `onBindingError` instead.
          */
@@ -194,6 +211,10 @@ public class Config(initialPtr: Long) : GcNativeHandle(initialPtr) {
         /**
          * Parse a configuration from a YAML-formatted string.
          *
+         * Base zenoh has no YAML constructor (it parses YAML only when loading a
+         * `.yaml` file via [`zenoh::Config::from_file`]); this is a binding
+         * convenience for parsing YAML held in memory.
+         *
          * On a domain error `onError` receives the decomposed Rust `Error` error (`message`); a binding/system failure goes to `onBindingError` instead.
          */
         public fun newFromYaml(
@@ -211,26 +232,19 @@ public class Config(initialPtr: Long) : GcNativeHandle(initialPtr) {
     }
 }
 
-public fun interface ZenohIdFolder<A> {
-    public fun run(acc: A, element: ZenohId): A
+public fun interface ZenohIdBuilder<out R> {
+    public fun run(bytes: ByteArray): R
 }
+
+internal val __ZenohIdBuilder: ZenohIdBuilder<ZenohId> =
+ZenohIdBuilder { bytes -> ZenohId.fromParts(bytes) }
 
 public fun interface ZenohIdFolderRaw<A> {
-    public fun run(acc: A, element: ByteArray): A
+    public fun run(acc: A, bytes: ByteArray): A
 }
-
-public fun <A> ZenohIdFolder<A>.asRaw(): ZenohIdFolderRaw<A> =
-    ZenohIdFolderRaw<A> {
-        acc,
-        element ->
-        run(
-            acc,
-            ZenohId(element)
-        )
-    }
 
 internal object __ZenohIdFolderRawHolder {
     @JvmField
     val instance: ZenohIdFolderRaw<ArrayList<ZenohId>> =
-    ZenohIdFolderRaw { acc, element -> acc.add(ZenohId(element)); acc }
+    ZenohIdFolderRaw { acc, bytes -> acc.add(ZenohId.fromParts(bytes)); acc }
 }
