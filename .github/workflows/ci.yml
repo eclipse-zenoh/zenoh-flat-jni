@@ -88,7 +88,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: zenoh-flat-jni/target
-          key: ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}-${{ needs.resolve-prebindgen.outputs.sha }}-${{ hashFiles('zenoh-flat-jni/Cargo.toml') }}
+          key: ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}-${{ needs.resolve-prebindgen.outputs.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}-
+            ${{ runner.os }}-cargo-build-target-
 
       - name: Run format check
         run: cargo fmt --check -- --config "unstable_features=true,imports_granularity=Crate,group_imports=StdExternalCrate"
@@ -161,7 +164,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: zenoh-flat-jni/target
-          key: ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}-${{ needs.resolve-prebindgen.outputs.sha }}-${{ hashFiles('zenoh-flat-jni/Cargo.toml') }}
+          key: ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}-${{ needs.resolve-prebindgen.outputs.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}-
+            ${{ runner.os }}-cargo-build-target-
 
       - name: Run tests
         run: cargo test --all --all-features --verbose
@@ -220,7 +226,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: zenoh-flat-jni/target
-          key: ${{ runner.os }}-gradle-test-target-${{ env.ZENOH_FLAT_REF }}-${{ needs.resolve-prebindgen.outputs.sha }}-${{ hashFiles('zenoh-flat-jni/Cargo.toml') }}
+          key: ${{ runner.os }}-gradle-test-target-${{ env.ZENOH_FLAT_REF }}-${{ needs.resolve-prebindgen.outputs.sha }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-test-target-${{ env.ZENOH_FLAT_REF }}-
+            ${{ runner.os }}-gradle-test-target-
 
       # Runs the Kotlin correspondence tests: each verifies a pure-Kotlin
       # implementation (Parameters, SerializationCodec, EncodingCodec, ZenohId)
@@ -273,7 +282,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: zenoh-flat-jni/target
-          key: ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}-${{ needs.resolve-prebindgen.outputs.sha }}-${{ hashFiles('zenoh-flat-jni/Cargo.toml') }}
+          key: ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}-${{ needs.resolve-prebindgen.outputs.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}-
+            ${{ runner.os }}-cargo-build-target-
 
       - name: Build release
         run: cargo build --release
