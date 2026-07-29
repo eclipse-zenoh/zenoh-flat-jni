@@ -52,7 +52,7 @@
 use prebindgen::{
     convert,
     core::Registry,
-    data_class, enum_class, expand_param, expand_return, fun,
+    data_class, enum_class, expand_param, expand_return, fields, fun,
     lang::{ConstDecl, FunctionDecl, JniGen},
     package, ptr_class, sealed_class, sig,
 };
@@ -456,9 +456,19 @@ fn main() {
                         // All sample getters are record sources AND instance methods on
                         // the Sample class; decomposition happens via the canonical
                         // output below.
-                        .method(fun!(sample_get_key_expr))
+                        // The handle's own accessors hand back handles: a
+                        // caller who already holds the Sample wants the nested
+                        // value, not its decomposition (which is what the
+                        // canonical output below is for).
+                        .method(
+                            fun!(sample_get_key_expr)
+                                .expand_return(expand_return!(KeyExpr).field_self()),
+                        )
                         .method(fun!(sample_get_payload))
-                        .method(fun!(sample_get_encoding))
+                        .method(
+                            fun!(sample_get_encoding)
+                                .expand_return(expand_return!(Encoding).field_self()),
+                        )
                         .method(fun!(sample_get_kind))
                         .method(fun!(sample_get_timestamp))
                         .method(fun!(sample_get_express))
@@ -474,21 +484,19 @@ fn main() {
         )
         // Identity-only input: exactly the default (documented no-op).
         .expand(expand_param!(Sample).variant_self())
-        // Full-sample decomposition; field names inherit from the members above.
-        .expand(
-            expand_return!(Sample)
-                .field(fun!(sample_get_key_expr))
-                .field(fun!(sample_get_payload))
-                .field(fun!(sample_get_encoding))
-                .field(fun!(sample_get_kind))
-                .field(fun!(sample_get_timestamp))
-                .field(fun!(sample_get_express))
-                .field(fun!(sample_get_priority))
-                .field(fun!(sample_get_congestion_control))
-                .field(fun!(sample_get_attachment))
-                .field(fun!(sample_get_reliability))
-                .field(fun!(sample_get_source_info)),
-        )
+        // Full-sample decomposition, taken from `SampleStruct` so the field list
+        // cannot drift from zenoh-flat's own value form. The CONSUMING form:
+        // every delivery position for a sample is owned (`impl Fn(Sample)`
+        // callbacks, owned returns), so the fields MOVE out instead of being
+        // cloned one by one out of a value that is about to be dropped.
+        // `timestamp_stack` is dropped (an override stating no leaves): it is
+        // `None` unless zenoh recorded path instrumentation, and giving it a
+        // Kotlin identity would pull in the whole `TimestampStackRecord` /
+        // `TimestampInstrumentation` subtree for a slot nothing reads. Declare
+        // it when a consumer wants it.
+        .expand(expand_return!(Sample).fields_self_into(
+            fields!(sample_into_struct).field("timestamp_stack", expand_return!(TimestampStack)),
+        ))
         // ── Pub/Sub ───────────────────────────────────────────────────────
         // key_expr / payload / attachment / encoding params are auto-constructed
         // by their types' canonical inputs (no per-fn calls).
@@ -616,12 +624,19 @@ fn main() {
                 )
                 .class(
                     ptr_class!(Reply)
-                        // Record sources are class methods — `reply.sample()`'s
-                        // standalone export is therefore the cloned-handle form.
+                        // `reply.sample()` / `reply.err()` on a held handle are
+                        // the cloned-handle form — the decomposition lives in
+                        // the canonical output below.
                         .method(fun!(reply_get_replier_id))
                         .method(fun!(reply_is_ok))
-                        .method(fun!(reply_get_sample))
-                        .method(fun!(reply_get_err)),
+                        .method(
+                            fun!(reply_get_sample)
+                                .expand_return(expand_return!(Sample).field_self()),
+                        )
+                        .method(
+                            fun!(reply_get_err)
+                                .expand_return(expand_return!(ReplyError).field_self()),
+                        ),
                 ),
         )
         // Canonical output: the queryable callback decomposes a `Query` into

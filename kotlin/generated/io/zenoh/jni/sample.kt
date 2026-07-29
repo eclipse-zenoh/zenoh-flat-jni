@@ -81,7 +81,11 @@ public class Sample(initialPtr: Long) : NativeHandle(initialPtr) {
         return KeyExpr(__ret)
     }
 
-    /** Return the sample payload. */
+    /**
+     * Return the sample payload.
+     *
+     * The Rust `ZBytes` result is converted and returned as a single value.
+     */
     public fun getPayload(onError: JniErrorHandler<ZBytes>): ZBytes {
         if (this.isClosed()) return onError.run("Operation on a closed native handle.")
         val __bcap = JniErrorHandlerCapture.acquire()
@@ -170,7 +174,11 @@ public class Sample(initialPtr: Long) : NativeHandle(initialPtr) {
         return io.zenoh.jni.qos.CongestionControl.fromInt(__ret)
     }
 
-    /** Return user-defined metadata associated with the sample, when present. */
+    /**
+     * Return user-defined metadata associated with the sample, when present.
+     *
+     * The Rust `ZBytes` result is converted and returned as a single value.
+     */
     public fun getAttachment(onError: JniErrorHandler<ZBytes?>): ZBytes? {
         if (this.isClosed()) return onError.run("Operation on a closed native handle.")
         val __bcap = JniErrorHandlerCapture.acquire()
@@ -225,65 +233,65 @@ public class Sample(initialPtr: Long) : NativeHandle(initialPtr) {
 
 public fun interface SampleCallback {
     public fun run(
-        getKeyExpr__asStr: String,
-        getPayload: ZBytes,
-        getEncoding__getId: Int,
-        getEncoding__getSchema: ByteArray?,
-        getKind: Int,
-        getTimestamp: Timestamp?,
-        getExpress: Boolean,
-        getPriority: Int,
-        getCongestionControl: Int,
-        getAttachment: ZBytes?,
-        getReliability: Int,
-        getSourceInfo: SourceInfo?,
+        keyExpr__asStr: String,
+        payload: ZBytes,
+        encoding__getId: Int,
+        encoding__getSchema: ByteArray?,
+        kind: Int,
+        timestamp: Timestamp?,
+        express: Boolean,
+        priority: Int,
+        congestionControl: Int,
+        attachment: ZBytes?,
+        reliability: Int,
+        sourceInfo: SourceInfo?,
     )
 }
 
 public fun interface SampleCallbackRaw {
     public fun run(
-        getKeyExpr__asStr: String,
-        getPayload: Long,
-        getEncoding__getId: Int,
-        getEncoding__getSchema: ByteArray?,
-        getKind: Int,
-        getTimestamp: Timestamp?,
-        getExpress: Boolean,
-        getPriority: Int,
-        getCongestionControl: Int,
-        getAttachment: Long?,
-        getReliability: Int,
-        getSourceInfo: SourceInfo?,
+        keyExpr__asStr: String,
+        payload: Long,
+        encoding__getId: Int,
+        encoding__getSchema: ByteArray?,
+        kind: Int,
+        timestamp: Timestamp?,
+        express: Boolean,
+        priority: Int,
+        congestionControl: Int,
+        attachment: Long?,
+        reliability: Int,
+        sourceInfo: SourceInfo?,
     )
 }
 
 public fun SampleCallback.asRaw(): SampleCallbackRaw =
     SampleCallbackRaw {
-        getKeyExpr__asStr,
-        getPayload,
-        getEncoding__getId,
-        getEncoding__getSchema,
-        getKind,
-        getTimestamp,
-        getExpress,
-        getPriority,
-        getCongestionControl,
-        getAttachment,
-        getReliability,
-        getSourceInfo ->
+        keyExpr__asStr,
+        payload,
+        encoding__getId,
+        encoding__getSchema,
+        kind,
+        timestamp,
+        express,
+        priority,
+        congestionControl,
+        attachment,
+        reliability,
+        sourceInfo ->
         run(
-            getKeyExpr__asStr,
-            ZBytes(getPayload),
-            getEncoding__getId,
-            getEncoding__getSchema,
-            getKind,
-            getTimestamp,
-            getExpress,
-            getPriority,
-            getCongestionControl,
-            getAttachment?.let { ZBytes(it) },
-            getReliability,
-            getSourceInfo
+            keyExpr__asStr,
+            ZBytes(payload),
+            encoding__getId,
+            encoding__getSchema,
+            kind,
+            timestamp,
+            express,
+            priority,
+            congestionControl,
+            attachment?.let { ZBytes(it) },
+            reliability,
+            sourceInfo
         )
     }
 

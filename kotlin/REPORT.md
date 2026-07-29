@@ -290,12 +290,14 @@ Base package: `io.zenoh.jni`
 ## class `io.zenoh.jni.sample.Sample` (ptr_class, Rust `Sample`)
 
 - `sample_get_attachment` — `fun getAttachment(onError: JniErrorHandler<ZBytes?>): ZBytes?`
+  - shaped by: return `ZBytes` decomposed → [handle] (Return delivery)
 - `sample_get_congestion_control` — `fun getCongestionControl(onError: JniErrorHandler<CongestionControl>): CongestionControl`
 - `sample_get_encoding` — `fun getEncoding(onError: JniErrorHandler<Encoding>): Encoding`
 - `sample_get_express` — `fun getExpress(onError: JniErrorHandler<Boolean>): Boolean`
 - `sample_get_key_expr` — `fun getKeyExpr(onError: JniErrorHandler<KeyExpr>): KeyExpr`
 - `sample_get_kind` — `fun getKind(onError: JniErrorHandler<SampleKind>): SampleKind`
 - `sample_get_payload` — `fun getPayload(onError: JniErrorHandler<ZBytes>): ZBytes`
+  - shaped by: return `ZBytes` decomposed → [handle] (Return delivery)
 - `sample_get_priority` — `fun getPriority(onError: JniErrorHandler<Priority>): Priority`
 - `sample_get_reliability` — `fun getReliability(onError: JniErrorHandler<Reliability>): Reliability`
 - `sample_get_source_info` — `fun getSourceInfo(onError: JniErrorHandler<SourceInfo?>): SourceInfo?`
