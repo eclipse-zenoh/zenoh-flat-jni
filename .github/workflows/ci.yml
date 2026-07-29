@@ -46,7 +46,7 @@ jobs:
       - name: Check out zenoh-flat
         uses: actions/checkout@v4
         with:
-          repository: ZettaScaleLabs/zenoh-flat
+          repository: eclipse-zenoh/zenoh-flat
           ref: ${{ env.ZENOH_FLAT_REF }}
           path: zenoh-flat
 
@@ -117,7 +117,7 @@ jobs:
       - name: Check out zenoh-flat
         uses: actions/checkout@v4
         with:
-          repository: ZettaScaleLabs/zenoh-flat
+          repository: eclipse-zenoh/zenoh-flat
           ref: ${{ env.ZENOH_FLAT_REF }}
           path: zenoh-flat
 
@@ -190,7 +190,7 @@ jobs:
       - name: Check out zenoh-flat
         uses: actions/checkout@v4
         with:
-          repository: ZettaScaleLabs/zenoh-flat
+          repository: eclipse-zenoh/zenoh-flat
           ref: ${{ env.ZENOH_FLAT_REF }}
           path: zenoh-flat
 
@@ -257,7 +257,7 @@ jobs:
       - name: Check out zenoh-flat
         uses: actions/checkout@v4
         with:
-          repository: ZettaScaleLabs/zenoh-flat
+          repository: eclipse-zenoh/zenoh-flat
           ref: ${{ env.ZENOH_FLAT_REF }}
           path: zenoh-flat
 

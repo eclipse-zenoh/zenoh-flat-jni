@@ -4,7 +4,7 @@ version = "1.9.0"
 edition = "2021"
 description = "Zenoh JNI bindings and Kotlin wrappers - generated from zenoh-flat via prebindgen"
 license = "EPL-2.0 OR Apache-2.0"
-repository = "https://github.com/ZettaScaleLabs/zenoh-flat-jni"
+repository = "https://github.com/eclipse-zenoh/zenoh-flat-jni"
 homepage = "https://zenoh.io"
 
 [features]
