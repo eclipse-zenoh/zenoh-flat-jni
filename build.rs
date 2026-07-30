@@ -432,7 +432,29 @@ fn main() {
         // originating node id), so it crosses as a flat data class — its fields
         // become decoupled leaves, and nested in a `Sample` it contributes those
         // leaves directly (no handle, no accessor crossing).
-        .package(package!("time").class(data_class!(Timestamp)))
+        // `TimestampStack` is path instrumentation — a debugging aid, `None`
+        // unless zenoh recorded any, and read on the rare occasion someone asks.
+        // So it stays a HANDLE with its own accessors rather than joining the
+        // bulk decompositions that carry it: fetching it costs an extra crossing
+        // (`sample.timestampStack()`, then `records()`), which is the right
+        // trade for a field almost every delivery would otherwise pay for.
+        // Its records materialize only on that second call.
+        .package(
+            package!("time")
+                .class(data_class!(Timestamp))
+                .class(enum_class!(InterceptionPoint))
+                // A record's timestamp is zenoh's own clock OR application
+                // bytes, never both — a genuine sum, so a sealed interface.
+                .class(sealed_class!(InstrumentationTimestamp))
+                .class(data_class!(TimestampInstrumentation))
+                .class(data_class!(TimestampStackRecord))
+                .class(
+                    ptr_class!(TimestampStack)
+                        .gc_managed()
+                        .method(fun!(timestamp_stack_get_instrumentation))
+                        .method(fun!(timestamp_stack_get_records)),
+                ),
+        )
         // ── Sample ────────────────────────────────────────────────────────
         // Canonical INPUT: identity only — a `Sample` param takes the owned
         // handle directly. (The full-options constructors carry `Option<ptr_class>`
@@ -476,7 +498,9 @@ fn main() {
                         .method(fun!(sample_get_congestion_control))
                         .method(fun!(sample_get_attachment))
                         .method(fun!(sample_get_reliability))
-                        .method(fun!(sample_get_source_info)),
+                        .method(fun!(sample_get_source_info))
+                        // Fetched on demand — see the `time` package above.
+                        .method(fun!(sample_get_timestamp_stack)),
                 )
                 // Standalone sample constructors (callable from Kotlin); consumed by handle.
                 .fun(fun!(sample_new_put))
@@ -489,11 +513,11 @@ fn main() {
         // every delivery position for a sample is owned (`impl Fn(Sample)`
         // callbacks, owned returns), so the fields MOVE out instead of being
         // cloned one by one out of a value that is about to be dropped.
-        // `timestamp_stack` is dropped (an override stating no leaves): it is
-        // `None` unless zenoh recorded path instrumentation, and giving it a
-        // Kotlin identity would pull in the whole `TimestampStackRecord` /
-        // `TimestampInstrumentation` subtree for a slot nothing reads. Declare
-        // it when a consumer wants it.
+        // `timestamp_stack` is held OUT of it (an override stating no leaves).
+        // It is debugging instrumentation, `None` unless zenoh recorded any, so
+        // a slot on every sample would be paid for by every delivery to serve
+        // almost none. It is reachable instead through `sample.timestampStack()`
+        // — one extra crossing, on the rare call that wants it.
         .expand(expand_return!(Sample).fields_self_into(
             fields!(sample_into_struct).field("timestamp_stack", expand_return!(TimestampStack)),
         ))
@@ -620,7 +644,10 @@ fn main() {
                 .class(
                     ptr_class!(ReplyError)
                         .method(fun!(reply_error_get_payload))
-                        .method(fun!(reply_error_get_encoding)),
+                        .method(fun!(reply_error_get_encoding))
+                        // On demand, like a sample's — and likewise absent from
+                        // the canonical output below.
+                        .method(fun!(reply_error_get_timestamp_stack)),
                 )
                 .class(
                     ptr_class!(Reply)

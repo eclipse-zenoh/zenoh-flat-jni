@@ -19,6 +19,7 @@ import io.zenoh.jni.releaseCell
 import io.zenoh.jni.sample.Sample
 import io.zenoh.jni.sample.SourceInfo
 import io.zenoh.jni.time.Timestamp
+import io.zenoh.jni.time.TimestampStack
 import io.zenoh.jni.withSortedHandleLocks
 
 /**
@@ -670,6 +671,23 @@ public class ReplyError(initialPtr: Long) : NativeHandle(initialPtr) {
         }
         if (__bcap.failed) return onError.run(__bcap.ze0)
         return Encoding(__ret)
+    }
+
+    /**
+     * Return the timestamps this error accumulated along its path, when
+     * instrumentation recorded any.
+     *
+     * This information is available only when unstable features are enabled.
+     */
+    public fun getTimestampStack(onError: JniErrorHandler<TimestampStack?>): TimestampStack? {
+        if (this.isClosed()) return onError.run("Operation on a closed native handle.")
+        val __bcap = JniErrorHandlerCapture.acquire()
+        val __ret = withSortedHandleLocks(this) {
+            val this_ptr = this.ptr
+            JNINative.replyErrorGetTimestampStack(this_ptr, __bcap)
+        }
+        if (__bcap.failed) return onError.run(__bcap.ze0)
+        return __ret.let { if (it == 0L) null else TimestampStack(it) }
     }
 
     public companion object {
