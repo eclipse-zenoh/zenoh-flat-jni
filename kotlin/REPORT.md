@@ -286,22 +286,26 @@ Base package: `io.zenoh.jni`
 
 - `reply_error_get_encoding` — `fun getEncoding(onError: JniErrorHandler<Encoding>): Encoding`
 - `reply_error_get_payload` — `fun getPayload(onError: JniErrorHandler<ZBytes>): ZBytes`
+- `reply_error_get_timestamp_stack` — `fun getTimestampStack(onError: JniErrorHandler<TimestampStack?>): TimestampStack?`
 
 ## class `io.zenoh.jni.sample.Sample` (ptr_class, Rust `Sample`)
 
 - `sample_get_attachment` — `fun getAttachment(onError: JniErrorHandler<ZBytes?>): ZBytes?`
+  - shaped by: return `ZBytes` decomposed → [handle] (Return delivery)
 - `sample_get_congestion_control` — `fun getCongestionControl(onError: JniErrorHandler<CongestionControl>): CongestionControl`
 - `sample_get_encoding` — `fun getEncoding(onError: JniErrorHandler<Encoding>): Encoding`
 - `sample_get_express` — `fun getExpress(onError: JniErrorHandler<Boolean>): Boolean`
 - `sample_get_key_expr` — `fun getKeyExpr(onError: JniErrorHandler<KeyExpr>): KeyExpr`
 - `sample_get_kind` — `fun getKind(onError: JniErrorHandler<SampleKind>): SampleKind`
 - `sample_get_payload` — `fun getPayload(onError: JniErrorHandler<ZBytes>): ZBytes`
+  - shaped by: return `ZBytes` decomposed → [handle] (Return delivery)
 - `sample_get_priority` — `fun getPriority(onError: JniErrorHandler<Priority>): Priority`
 - `sample_get_reliability` — `fun getReliability(onError: JniErrorHandler<Reliability>): Reliability`
 - `sample_get_source_info` — `fun getSourceInfo(onError: JniErrorHandler<SourceInfo?>): SourceInfo?`
   - shaped by: return `SourceInfo` decomposed → [source__zid__bytes, source__eid, sn] (Callback delivery)
 - `sample_get_timestamp` — `fun getTimestamp(onError: JniErrorHandler<Timestamp?>): Timestamp?`
   - shaped by: return `Timestamp` decomposed → [ntp64, id] (Callback delivery)
+- `sample_get_timestamp_stack` — `fun getTimestampStack(onError: JniErrorHandler<TimestampStack?>): TimestampStack?`
 
 ## class `io.zenoh.jni.session.Session` (ptr_class, Rust `Session`)
 
@@ -362,6 +366,12 @@ Base package: `io.zenoh.jni`
 - `session_undeclare_keyexpr` — `fun undeclareKeyexpr(keyExpr: KeyExpr, onBindingError: JniErrorHandler<Unit>, onError: ErrorHandler<Unit>)`
   - shaped by: domain error `Error` decomposed → onError [message] (binding failures → onBindingError)
 
+## class `io.zenoh.jni.time.TimestampStack` (ptr_class, Rust `TimestampStack`)
+
+- `timestamp_stack_get_instrumentation` — `fun getInstrumentation(onError: JniErrorHandler<TimestampInstrumentation>): TimestampInstrumentation`
+  - shaped by: return `TimestampInstrumentation` decomposed → [send, route, receive] (Callback delivery)
+- `timestamp_stack_get_records` — `fun getRecords(onError: JniErrorHandler<List<TimestampStackRecord>>): List<TimestampStackRecord>`
+
 ## class `io.zenoh.jni.bytes.ZBytes` (ptr_class, Rust `ZBytes`)
 
 - `zbytes_new_clone` — `fun newClone(onError: JniErrorHandler<ZBytes>): ZBytes`
@@ -385,6 +395,8 @@ Base package: `io.zenoh.jni`
 - `EntityGlobalId`: data_class → `io.zenoh.jni.pubsub.EntityGlobalId` (wire `jni :: objects :: JObject`)
 - `Hello`: ptr_class → `io.zenoh.jni.scouting.Hello` (wire `jni :: sys :: jlong`)
 - `HistoryConfig`: data_class → `io.zenoh.jni.pubsub.HistoryConfig` (wire `jni :: objects :: JObject`)
+- `InstrumentationTimestamp`: sealed_class → `io.zenoh.jni.time.InstrumentationTimestamp` (wire `?`)
+- `InterceptionPoint`: enum_class → `io.zenoh.jni.time.InterceptionPoint` (wire `jni :: sys :: jint`)
 - `KeyExpr`: ptr_class → `io.zenoh.jni.keyexpr.KeyExpr` (wire `jni :: sys :: jlong`)
 - `LivelinessToken`: ptr_class → `io.zenoh.jni.liveliness.LivelinessToken` (wire `jni :: sys :: jlong`)
 - `MatchingListener`: ptr_class → `io.zenoh.jni.pubsub.MatchingListener` (wire `jni :: sys :: jlong`)
@@ -413,6 +425,9 @@ Base package: `io.zenoh.jni`
 - `SourceInfo`: data_class → `io.zenoh.jni.sample.SourceInfo` (wire `jni :: objects :: JObject`)
 - `Subscriber`: ptr_class → `io.zenoh.jni.pubsub.Subscriber` (wire `jni :: sys :: jlong`)
 - `Timestamp`: data_class → `io.zenoh.jni.time.Timestamp` (wire `jni :: objects :: JObject`)
+- `TimestampInstrumentation`: data_class → `io.zenoh.jni.time.TimestampInstrumentation` (wire `jni :: objects :: JObject`)
+- `TimestampStack`: ptr_class → `io.zenoh.jni.time.TimestampStack` (wire `jni :: sys :: jlong`)
+- `TimestampStackRecord`: data_class → `io.zenoh.jni.time.TimestampStackRecord` (wire `jni :: objects :: JObject`)
 - `WhatAmI`: enum_class → `io.zenoh.jni.config.WhatAmI` (wire `jni :: sys :: jint`)
 - `ZBytes`: ptr_class → `io.zenoh.jni.bytes.ZBytes` (wire `jni :: sys :: jlong`)
 - `ZenohId`: data_class → `io.zenoh.jni.config.ZenohId` (wire `jni :: objects :: JObject`)

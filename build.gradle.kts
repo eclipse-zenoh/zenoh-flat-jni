@@ -215,9 +215,9 @@ publishing {
                 }
 
                 scm {
-                    connection.set("scm:git:https://github.com/ZettaScaleLabs/zenoh-flat-jni.git")
-                    developerConnection.set("scm:git:https://github.com/ZettaScaleLabs/zenoh-flat-jni.git")
-                    url.set("https://github.com/ZettaScaleLabs/zenoh-flat-jni")
+                    connection.set("scm:git:https://github.com/eclipse-zenoh/zenoh-flat-jni.git")
+                    developerConnection.set("scm:git:https://github.com/eclipse-zenoh/zenoh-flat-jni.git")
+                    url.set("https://github.com/eclipse-zenoh/zenoh-flat-jni")
                 }
             }
         }

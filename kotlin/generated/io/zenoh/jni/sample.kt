@@ -16,6 +16,7 @@ import io.zenoh.jni.qos.CongestionControl
 import io.zenoh.jni.qos.Priority
 import io.zenoh.jni.qos.Reliability
 import io.zenoh.jni.time.Timestamp
+import io.zenoh.jni.time.TimestampStack
 import io.zenoh.jni.time.__TimestampBuilderRaw
 import io.zenoh.jni.withSortedHandleLocks
 
@@ -81,7 +82,11 @@ public class Sample(initialPtr: Long) : NativeHandle(initialPtr) {
         return KeyExpr(__ret)
     }
 
-    /** Return the sample payload. */
+    /**
+     * Return the sample payload.
+     *
+     * The Rust `ZBytes` result is converted and returned as a single value.
+     */
     public fun getPayload(onError: JniErrorHandler<ZBytes>): ZBytes {
         if (this.isClosed()) return onError.run("Operation on a closed native handle.")
         val __bcap = JniErrorHandlerCapture.acquire()
@@ -170,7 +175,11 @@ public class Sample(initialPtr: Long) : NativeHandle(initialPtr) {
         return io.zenoh.jni.qos.CongestionControl.fromInt(__ret)
     }
 
-    /** Return user-defined metadata associated with the sample, when present. */
+    /**
+     * Return user-defined metadata associated with the sample, when present.
+     *
+     * The Rust `ZBytes` result is converted and returned as a single value.
+     */
     public fun getAttachment(onError: JniErrorHandler<ZBytes?>): ZBytes? {
         if (this.isClosed()) return onError.run("Operation on a closed native handle.")
         val __bcap = JniErrorHandlerCapture.acquire()
@@ -217,6 +226,23 @@ public class Sample(initialPtr: Long) : NativeHandle(initialPtr) {
         return __ret as SourceInfo?
     }
 
+    /**
+     * Return the timestamps this sample accumulated along its path, when
+     * instrumentation recorded any.
+     *
+     * This information is available only when unstable features are enabled.
+     */
+    public fun getTimestampStack(onError: JniErrorHandler<TimestampStack?>): TimestampStack? {
+        if (this.isClosed()) return onError.run("Operation on a closed native handle.")
+        val __bcap = JniErrorHandlerCapture.acquire()
+        val __ret = withSortedHandleLocks(this) {
+            val this_ptr = this.ptr
+            JNINative.sampleGetTimestampStack(this_ptr, __bcap)
+        }
+        if (__bcap.failed) return onError.run(__bcap.ze0)
+        return __ret.let { if (it == 0L) null else TimestampStack(it) }
+    }
+
     public companion object {
         @JvmStatic
         external fun freePtr(ptr: Long)
@@ -225,65 +251,65 @@ public class Sample(initialPtr: Long) : NativeHandle(initialPtr) {
 
 public fun interface SampleCallback {
     public fun run(
-        getKeyExpr__asStr: String,
-        getPayload: ZBytes,
-        getEncoding__getId: Int,
-        getEncoding__getSchema: ByteArray?,
-        getKind: Int,
-        getTimestamp: Timestamp?,
-        getExpress: Boolean,
-        getPriority: Int,
-        getCongestionControl: Int,
-        getAttachment: ZBytes?,
-        getReliability: Int,
-        getSourceInfo: SourceInfo?,
+        keyExpr__asStr: String,
+        payload: ZBytes,
+        encoding__getId: Int,
+        encoding__getSchema: ByteArray?,
+        kind: Int,
+        timestamp: Timestamp?,
+        express: Boolean,
+        priority: Int,
+        congestionControl: Int,
+        attachment: ZBytes?,
+        reliability: Int,
+        sourceInfo: SourceInfo?,
     )
 }
 
 public fun interface SampleCallbackRaw {
     public fun run(
-        getKeyExpr__asStr: String,
-        getPayload: Long,
-        getEncoding__getId: Int,
-        getEncoding__getSchema: ByteArray?,
-        getKind: Int,
-        getTimestamp: Timestamp?,
-        getExpress: Boolean,
-        getPriority: Int,
-        getCongestionControl: Int,
-        getAttachment: Long?,
-        getReliability: Int,
-        getSourceInfo: SourceInfo?,
+        keyExpr__asStr: String,
+        payload: Long,
+        encoding__getId: Int,
+        encoding__getSchema: ByteArray?,
+        kind: Int,
+        timestamp: Timestamp?,
+        express: Boolean,
+        priority: Int,
+        congestionControl: Int,
+        attachment: Long?,
+        reliability: Int,
+        sourceInfo: SourceInfo?,
     )
 }
 
 public fun SampleCallback.asRaw(): SampleCallbackRaw =
     SampleCallbackRaw {
-        getKeyExpr__asStr,
-        getPayload,
-        getEncoding__getId,
-        getEncoding__getSchema,
-        getKind,
-        getTimestamp,
-        getExpress,
-        getPriority,
-        getCongestionControl,
-        getAttachment,
-        getReliability,
-        getSourceInfo ->
+        keyExpr__asStr,
+        payload,
+        encoding__getId,
+        encoding__getSchema,
+        kind,
+        timestamp,
+        express,
+        priority,
+        congestionControl,
+        attachment,
+        reliability,
+        sourceInfo ->
         run(
-            getKeyExpr__asStr,
-            ZBytes(getPayload),
-            getEncoding__getId,
-            getEncoding__getSchema,
-            getKind,
-            getTimestamp,
-            getExpress,
-            getPriority,
-            getCongestionControl,
-            getAttachment?.let { ZBytes(it) },
-            getReliability,
-            getSourceInfo
+            keyExpr__asStr,
+            ZBytes(payload),
+            encoding__getId,
+            encoding__getSchema,
+            kind,
+            timestamp,
+            express,
+            priority,
+            congestionControl,
+            attachment?.let { ZBytes(it) },
+            reliability,
+            sourceInfo
         )
     }
 

@@ -19,6 +19,7 @@ import io.zenoh.jni.releaseCell
 import io.zenoh.jni.sample.Sample
 import io.zenoh.jni.sample.SourceInfo
 import io.zenoh.jni.time.Timestamp
+import io.zenoh.jni.time.TimestampStack
 import io.zenoh.jni.withSortedHandleLocks
 
 /**
@@ -672,6 +673,23 @@ public class ReplyError(initialPtr: Long) : NativeHandle(initialPtr) {
         return Encoding(__ret)
     }
 
+    /**
+     * Return the timestamps this error accumulated along its path, when
+     * instrumentation recorded any.
+     *
+     * This information is available only when unstable features are enabled.
+     */
+    public fun getTimestampStack(onError: JniErrorHandler<TimestampStack?>): TimestampStack? {
+        if (this.isClosed()) return onError.run("Operation on a closed native handle.")
+        val __bcap = JniErrorHandlerCapture.acquire()
+        val __ret = withSortedHandleLocks(this) {
+            val this_ptr = this.ptr
+            JNINative.replyErrorGetTimestampStack(this_ptr, __bcap)
+        }
+        if (__bcap.failed) return onError.run(__bcap.ze0)
+        return __ret.let { if (it == 0L) null else TimestampStack(it) }
+    }
+
     public companion object {
         @JvmStatic
         external fun freePtr(ptr: Long)
@@ -730,18 +748,18 @@ public fun interface ReplyCallback {
     public fun run(
         getReplierId: EntityGlobalId?,
         isOk: Boolean,
-        getSample__getKeyExpr__asStr: String?,
-        getSample__getPayload: ZBytes?,
-        getSample__getEncoding__getId: Int?,
-        getSample__getEncoding__getSchema: ByteArray?,
-        getSample__getKind: Int?,
-        getSample__getTimestamp: Timestamp?,
-        getSample__getExpress: Boolean?,
-        getSample__getPriority: Int?,
-        getSample__getCongestionControl: Int?,
-        getSample__getAttachment: ZBytes?,
-        getSample__getReliability: Int?,
-        getSample__getSourceInfo: SourceInfo?,
+        getSample__keyExpr__asStr: String?,
+        getSample__payload: ZBytes?,
+        getSample__encoding__getId: Int?,
+        getSample__encoding__getSchema: ByteArray?,
+        getSample__kind: Int?,
+        getSample__timestamp: Timestamp?,
+        getSample__express: Boolean?,
+        getSample__priority: Int?,
+        getSample__congestionControl: Int?,
+        getSample__attachment: ZBytes?,
+        getSample__reliability: Int?,
+        getSample__sourceInfo: SourceInfo?,
         getErr__getPayload: ZBytes?,
         getErr__getEncoding__getId: Int?,
         getErr__getEncoding__getSchema: ByteArray?,
@@ -752,18 +770,18 @@ public fun interface ReplyCallbackRaw {
     public fun run(
         getReplierId: EntityGlobalId?,
         isOk: Boolean,
-        getSample__getKeyExpr__asStr: String?,
-        getSample__getPayload: Long?,
-        getSample__getEncoding__getId: Int?,
-        getSample__getEncoding__getSchema: ByteArray?,
-        getSample__getKind: Int?,
-        getSample__getTimestamp: Timestamp?,
-        getSample__getExpress: Boolean?,
-        getSample__getPriority: Int?,
-        getSample__getCongestionControl: Int?,
-        getSample__getAttachment: Long?,
-        getSample__getReliability: Int?,
-        getSample__getSourceInfo: SourceInfo?,
+        getSample__keyExpr__asStr: String?,
+        getSample__payload: Long?,
+        getSample__encoding__getId: Int?,
+        getSample__encoding__getSchema: ByteArray?,
+        getSample__kind: Int?,
+        getSample__timestamp: Timestamp?,
+        getSample__express: Boolean?,
+        getSample__priority: Int?,
+        getSample__congestionControl: Int?,
+        getSample__attachment: Long?,
+        getSample__reliability: Int?,
+        getSample__sourceInfo: SourceInfo?,
         getErr__getPayload: Long?,
         getErr__getEncoding__getId: Int?,
         getErr__getEncoding__getSchema: ByteArray?,
@@ -774,36 +792,36 @@ public fun ReplyCallback.asRaw(): ReplyCallbackRaw =
     ReplyCallbackRaw {
         getReplierId,
         isOk,
-        getSample__getKeyExpr__asStr,
-        getSample__getPayload,
-        getSample__getEncoding__getId,
-        getSample__getEncoding__getSchema,
-        getSample__getKind,
-        getSample__getTimestamp,
-        getSample__getExpress,
-        getSample__getPriority,
-        getSample__getCongestionControl,
-        getSample__getAttachment,
-        getSample__getReliability,
-        getSample__getSourceInfo,
+        getSample__keyExpr__asStr,
+        getSample__payload,
+        getSample__encoding__getId,
+        getSample__encoding__getSchema,
+        getSample__kind,
+        getSample__timestamp,
+        getSample__express,
+        getSample__priority,
+        getSample__congestionControl,
+        getSample__attachment,
+        getSample__reliability,
+        getSample__sourceInfo,
         getErr__getPayload,
         getErr__getEncoding__getId,
         getErr__getEncoding__getSchema ->
         run(
             getReplierId,
             isOk,
-            getSample__getKeyExpr__asStr,
-            getSample__getPayload?.let { ZBytes(it) },
-            getSample__getEncoding__getId,
-            getSample__getEncoding__getSchema,
-            getSample__getKind,
-            getSample__getTimestamp,
-            getSample__getExpress,
-            getSample__getPriority,
-            getSample__getCongestionControl,
-            getSample__getAttachment?.let { ZBytes(it) },
-            getSample__getReliability,
-            getSample__getSourceInfo,
+            getSample__keyExpr__asStr,
+            getSample__payload?.let { ZBytes(it) },
+            getSample__encoding__getId,
+            getSample__encoding__getSchema,
+            getSample__kind,
+            getSample__timestamp,
+            getSample__express,
+            getSample__priority,
+            getSample__congestionControl,
+            getSample__attachment?.let { ZBytes(it) },
+            getSample__reliability,
+            getSample__sourceInfo,
             getErr__getPayload?.let { ZBytes(it) },
             getErr__getEncoding__getId,
             getErr__getEncoding__getSchema

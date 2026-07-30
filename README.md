@@ -1,12 +1,12 @@
 # Zenoh Flat JNI
 
-[![CI](https://github.com/ZettaScaleLabs/zenoh-flat-jni/actions/workflows/ci.yml/badge.svg)](https://github.com/ZettaScaleLabs/zenoh-flat-jni/actions/workflows/ci.yml)
+[![CI](https://github.com/eclipse-zenoh/zenoh-flat-jni/actions/workflows/ci.yml/badge.svg)](https://github.com/eclipse-zenoh/zenoh-flat-jni/actions/workflows/ci.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/org.eclipse.zenoh/zenoh-flat-jni)](https://central.sonatype.com/artifact/org.eclipse.zenoh/zenoh-flat-jni)
 [![License](https://img.shields.io/badge/License-EPL%202.0%20or%20Apache%202.0-blue)](https://www.eclipse.org/legal/epl-2.0/)
 
 Zenoh JNI bindings and Kotlin wrappers for the [Zenoh](https://zenoh.io) pub/sub, store/query and compute framework.
 
-This project provides low-level JNI bindings (Rust) and high-level Kotlin wrappers generated from the `zenoh-flat` Rust crate using [`prebindgen`](https://github.com/ZettaScaleLabs/prebindgen).
+This project provides low-level JNI bindings (Rust) and high-level Kotlin wrappers generated from the `zenoh-flat` Rust crate using [`prebindgen`](https://github.com/milyin/prebindgen).
 
 ## Overview
 
@@ -81,7 +81,7 @@ fun main() {
 
 ```bash
 # Clone the repository with dependencies
-git clone https://github.com/ZettaScaleLabs/zenoh-flat-jni.git
+git clone https://github.com/eclipse-zenoh/zenoh-flat-jni.git
 cd zenoh-flat-jni
 
 # Build Rust library
@@ -100,8 +100,8 @@ To use local versions of `zenoh-flat` and `prebindgen`:
 mkdir -p ~/zenoh-workspace
 cd ~/zenoh-workspace
 
-git clone https://github.com/ZettaScaleLabs/prebindgen.git
-git clone https://github.com/ZettaScaleLabs/zenoh-flat-jni.git
+git clone https://github.com/milyin/prebindgen.git
+git clone https://github.com/eclipse-zenoh/zenoh-flat-jni.git
 
 cd zenoh-flat-jni
 

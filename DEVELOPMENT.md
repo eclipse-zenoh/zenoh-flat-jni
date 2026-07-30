@@ -26,7 +26,7 @@ If you're contributing to zenoh-flat-jni or need to test local changes, follow t
 
 ```bash
 # Clone the repository
-git clone https://github.com/ZettaScaleLabs/zenoh-flat-jni.git
+git clone https://github.com/eclipse-zenoh/zenoh-flat-jni.git
 cd zenoh-flat-jni
 
 # Build Rust library
@@ -90,7 +90,7 @@ mkdir -p ~/zenoh-workspace
 cd ~/zenoh-workspace
 
 # Clone both repositories
-git clone https://github.com/ZettaScaleLabs/zenoh-flat-jni.git
+git clone https://github.com/eclipse-zenoh/zenoh-flat-jni.git
 git clone https://github.com/eclipse-zenoh/zenoh-java.git
 
 # Edit zenoh-java/settings.gradle.kts to uncomment includeBuild
@@ -117,7 +117,7 @@ To use these for local development:
 ```bash
 # Ensure the PREBINDGEN workspace is checked out as a sibling
 cd ~/workspace
-git clone https://github.com/ZettaScaleLabs/prebindgen.git
+git clone https://github.com/milyin/prebindgen.git
 cd prebindgen/zenoh-flat
 # zenoh-flat is inside the prebindgen workspace
 
@@ -217,6 +217,6 @@ See the `.github/workflows/publish.yml` for details.
 ## Documentation
 
 - [Zenoh](https://zenoh.io/)
-- [prebindgen](https://github.com/ZettaScaleLabs/prebindgen)
-- [zenoh-flat](https://github.com/ZettaScaleLabs/prebindgen/tree/main/zenoh-flat)
+- [prebindgen](https://github.com/milyin/prebindgen)
+- [zenoh-flat](https://github.com/milyin/prebindgen/tree/main/zenoh-flat)
 - [zenoh-java](https://github.com/eclipse-zenoh/zenoh-java)
