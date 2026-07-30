@@ -800,8 +800,10 @@ fn main() {
     // ── Outputs ───────────────────────────────────────────────────────────
     // Run the configured adapter over zenoh-flat's captured `#[prebindgen]`
     // items and write both generated artifacts.
-    let source = prebindgen::Source::new(zenoh_flat::PREBINDGEN_OUT_DIR);
-    let registry = match Registry::from_items(source.items_all()) {
+    let registry = match Registry::builder()
+        .source(zenoh_flat::PREBINDGEN_OUT_DIR)
+        .build()
+    {
         Ok(registry) => registry,
         Err(err) => fail("scan failed", err),
     };
