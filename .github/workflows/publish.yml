@@ -4,7 +4,7 @@
 # assembled and inspected in one place, consumed from an isolated file-based
 # repository on every runner platform, and only then staged on Central.
 # Releasing the staged deployment and creating the GitHub release are separate,
-# manually approved jobs. See the "Releasing" section of DEVELOPMENT.md.
+# manually approved jobs. See PUBLISHING.md.
 #
 name: Release
 
@@ -33,6 +33,8 @@ jobs:
       stage_only: ${{ steps.mode.outputs.stage_only }}
       zenoh_flat_ref: ${{ steps.inputs.outputs.zenoh_flat_ref }}
       prebindgen_ref: ${{ steps.inputs.outputs.prebindgen_ref }}
+      cargo_ndk_version: ${{ steps.inputs.outputs.cargo_ndk_version }}
+      android_ndk_version: ${{ steps.inputs.outputs.android_ndk_version }}
     steps:
       - uses: actions/checkout@v4
 
@@ -44,6 +46,8 @@ jobs:
           . ./release-inputs.env
           echo "zenoh_flat_ref=$ZENOH_FLAT_REF" >> "$GITHUB_OUTPUT"
           echo "prebindgen_ref=$PREBINDGEN_REF" >> "$GITHUB_OUTPUT"
+          echo "cargo_ndk_version=$CARGO_NDK_VERSION" >> "$GITHUB_OUTPUT"
+          echo "android_ndk_version=$ANDROID_NDK_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Check that every version declaration agrees
         id: version
@@ -205,7 +209,7 @@ jobs:
       - uses: nttld/setup-ndk@v1
         id: ndk
         with:
-          ndk-version: r26
+          ndk-version: ${{ needs.validate.outputs.android_ndk_version }}
           add-to-path: false
 
       - uses: dtolnay/rust-toolchain@stable
@@ -213,8 +217,10 @@ jobs:
           toolchain: 1.93.0
           targets: armv7-linux-androideabi,aarch64-linux-android,i686-linux-android,x86_64-linux-android
 
+      # `--locked` alone would still select whatever cargo-ndk is newest, so the
+      # exact version is pinned in release-inputs.env with the other inputs.
       - name: Install cargo-ndk
-        run: cargo install cargo-ndk --locked
+        run: cargo install cargo-ndk --locked --version ${{ needs.validate.outputs.cargo_ndk_version }}
 
       # cargo-ndk's -o writes exactly the AAR's jni/<abi>/ layout.
       - name: Build every advertised ABI
@@ -225,8 +231,12 @@ jobs:
             -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 \
             build --release --locked
 
-      - name: Record the checksums
-        run: shasum -a 256 android-libs/*/libzenoh_flat_jni.so >> "$GITHUB_STEP_SUMMARY"
+      - name: Record the toolchain and checksums
+        run: |
+          {
+            echo "NDK ${{ needs.validate.outputs.android_ndk_version }}, cargo-ndk ${{ needs.validate.outputs.cargo_ndk_version }}"
+            shasum -a 256 android-libs/*/libzenoh_flat_jni.so
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v4
         with:

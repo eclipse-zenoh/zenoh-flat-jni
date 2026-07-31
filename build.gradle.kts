@@ -317,7 +317,7 @@ val verifyAndroidArtifact by tasks.registering {
 if (isRemotePublication && !isMultiPlatform && !isAndroidBuild) {
     throw GradleException(
         "-PremotePublication=true requires cross-built natives in `jni-libs/` (desktop) " +
-            "or `android-libs/` (Android); see the Releasing section of DEVELOPMENT.md."
+            "or `android-libs/` (Android); see PUBLISHING.md."
     )
 }
 

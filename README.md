@@ -70,8 +70,9 @@ fun main() {
 
 ## Development
 
-Local setup, the Maven Central release pipeline and its dry-run procedure are
-documented in [DEVELOPMENT.md](DEVELOPMENT.md).
+Local setup is documented in [DEVELOPMENT.md](DEVELOPMENT.md); the Maven Central
+release pipeline, artifact layouts, verification gates and dry-run procedure are
+documented in [PUBLISHING.md](PUBLISHING.md).
 
 ### Prerequisites
 

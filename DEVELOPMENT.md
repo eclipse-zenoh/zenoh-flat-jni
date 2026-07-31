@@ -5,8 +5,7 @@ This document describes how to set up zenoh-flat-jni for local development.
 ## Prerequisites
 
 - Rust 1.70+ (install via [rustup](https://rustup.rs/))
-- JDK 11+ (for Gradle builds)
-- Gradle 7.0+
+- JDK 11+ (Gradle comes from the committed wrapper — use `./gradlew`)
 
 ## Standard Setup (Maven Central)
 
@@ -171,13 +170,16 @@ cargo clippy --all-targets --all-features -- -D warnings
 
 The Android ABIs are cross-compiled with [cargo-ndk](https://github.com/bbqsrc/cargo-ndk)
 straight into the AAR's `jni/<abi>/` layout; the AAR is then assembled from
-`android-libs/` (see [Releasing](#releasing)).
+`android-libs/` (see [PUBLISHING.md](PUBLISHING.md)). Use the cargo-ndk and NDK
+versions pinned in [`release-inputs.env`](release-inputs.env) — a release built
+with anything else is not the artifact CI verified.
 
 ```bash
-cargo install cargo-ndk
+. ./release-inputs.env
+cargo install cargo-ndk --locked --version "$CARGO_NDK_VERSION"
 rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android
 
-# ANDROID_NDK_HOME must point at NDK r26
+# ANDROID_NDK_HOME must point at the pinned NDK ($ANDROID_NDK_VERSION)
 cargo ndk -o android-libs -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 build --release
 
 ./gradlew androidAar verifyAndroidArtifact
@@ -219,40 +221,13 @@ Then try tests again.
 
 ## Releasing
 
-Maven Central releases are immutable, so the pipeline in
-[`.github/workflows/publish.yml`](.github/workflows/publish.yml) puts every gate
-*before* the irreversible step. Pushing a `v*` tag runs, in order:
+The Maven Central release pipeline, the artifact layouts it produces, its
+verification gates, the required secrets, and the known gaps are documented in
+[PUBLISHING.md](PUBLISHING.md).
 
-1. **validate** — version.txt, `Cargo.toml` and the tag must agree, and the
-   version must not already exist on Maven Central.
-2. **generated-sources** — rebuilds the bindings from the pinned inputs and
-   fails if the committed generated Rust/Kotlin differs.
-3. **desktop-natives / android-natives** — `cargo build --release --locked` per
-   target, packaged as `<target>/<target>.zip` and `jni/<abi>/`.
-4. **consumer-test** — assembles the JAR and AAR, verifies their contents, then
-   resolves and runs [`ci/consumer-smoke-test`](ci/consumer-smoke-test) against
-   an isolated file-based repository on every runner platform.
-5. **stage** — uploads and *closes* a Central staging deployment. Central
-   validates it; nothing is public yet.
-6. **release-staging** — releases the deployment. Guarded by the `maven-central`
-   GitHub environment; protect it with required reviewers.
-7. **verify-central** — waits for the coordinates to resolve, checks the served
-   JAR hash against the one CI verified, and reruns the consumer smoke test.
-8. **github-release** — only now.
-
-Two artifacts are published: `org.eclipse.zenoh:zenoh-flat-jni` (universal
-desktop JVM JAR, natives for all six targets) and
-`org.eclipse.zenoh:zenoh-flat-jni-android` (AAR, four ABIs).
-
-### Dry run
-
-`workflow_dispatch` with `stage_only=true` (the default) runs everything up to
-and including Central staging validation, then stops — drop the deployment from
-the Central Portal afterwards.
-
-To rehearse locally without touching Central, populate `jni-libs/` (and
-optionally `android-libs/`) and publish to the file-based repository the
-consumer test uses:
+To rehearse a publication locally without touching Central, populate `jni-libs/`
+(and optionally `android-libs/`) and publish to the same isolated file-based
+repository the CI consumer test uses:
 
 ```bash
 ./gradlew publishAllPublicationsToDryRunRepository
@@ -265,13 +240,6 @@ gradle run -PcandidateRepository="file://$PWD/../../build/dry-run-repository" \
 
 Do not use `mavenLocal()` for this: it can serve leftovers from earlier builds,
 which makes it impossible to prove which repository supplied an artifact.
-
-### Required secrets
-
-`CENTRAL_SONATYPE_TOKEN_USERNAME` / `CENTRAL_SONATYPE_TOKEN_PASSWORD` (Central
-Portal user tokens — the retired `s01.oss.sonatype.org` OSSRH credentials no
-longer work), plus `ORG_GPG_SUBKEY_ID`, `ORG_GPG_PRIVATE_KEY` and
-`ORG_GPG_PASSPHRASE`.
 
 ## Documentation
 
