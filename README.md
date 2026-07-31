@@ -70,12 +70,14 @@ fun main() {
 
 ## Development
 
+Local setup, the Maven Central release pipeline and its dry-run procedure are
+documented in [DEVELOPMENT.md](DEVELOPMENT.md).
+
 ### Prerequisites
 
 - Rust 1.70+ with JNI support
-- Gradle 7.0+
-- JDK 11+
-- Android SDK (for Android builds)
+- JDK 11+ (Gradle comes from the committed wrapper)
+- Android NDK r26 and `cargo-ndk` (for Android builds)
 
 ### Build from Source
 

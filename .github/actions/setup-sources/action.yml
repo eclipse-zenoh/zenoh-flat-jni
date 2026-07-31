@@ -1,0 +1,39 @@
+name: Check out sibling sources
+description: >
+  zenoh-flat-jni reaches zenoh-flat and prebindgen through sibling path
+  dependencies. Checking both out next to this repository makes a bare clone
+  build as-is and — unlike rewriting the manifests to git dependencies — keeps
+  the committed Cargo.lock valid, which `cargo build --locked` requires.
+
+inputs:
+  zenoh-flat-ref:
+    description: Commit of eclipse-zenoh/zenoh-flat to build against.
+    required: true
+  prebindgen-ref:
+    description: Commit of milyin/prebindgen to build against.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: eclipse-zenoh/zenoh-flat
+        ref: ${{ inputs.zenoh-flat-ref }}
+        path: zenoh-flat
+
+    - uses: actions/checkout@v4
+      with:
+        repository: milyin/prebindgen
+        ref: ${{ inputs.prebindgen-ref }}
+        path: prebindgen
+
+    - shell: bash
+      run: |
+        {
+          echo "### Build inputs (${{ github.job }})"
+          echo "| source | revision |"
+          echo "| --- | --- |"
+          echo "| zenoh-flat | \`${{ inputs.zenoh-flat-ref }}\` |"
+          echo "| prebindgen | \`${{ inputs.prebindgen-ref }}\` |"
+        } >> "$GITHUB_STEP_SUMMARY"

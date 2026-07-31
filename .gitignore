@@ -1,6 +1,7 @@
 # Rust
 target/
-Cargo.lock
+# Cargo.lock is committed: releases must rebuild from the exact same revisions
+# of prebindgen, zenoh-flat and zenoh (`cargo build --release --locked`).
 **/*.rs.bk
 *.pdb
 
@@ -26,3 +27,7 @@ build/
 
 # Local development
 *.local
+
+# Cross-build outputs staged by the release workflow
+jni-libs/
+android-libs/

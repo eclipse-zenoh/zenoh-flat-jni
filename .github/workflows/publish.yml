@@ -1,51 +1,457 @@
-name: Publish to Maven Central
+#
+# Release pipeline. Maven Central releases are immutable, so every gate below
+# runs *before* anything is released: the artifacts are cross-built in a matrix,
+# assembled and inspected in one place, consumed from an isolated file-based
+# repository on every runner platform, and only then staged on Central.
+# Releasing the staged deployment and creating the GitHub release are separate,
+# manually approved jobs. See the "Releasing" section of DEVELOPMENT.md.
+#
+name: Release
 
 on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      stage_only:
+        description: "Dry run: stage on Central for validation and stop (drop the deployment afterwards)."
+        type: boolean
+        default: true
 
 env:
   RUST_BACKTRACE: 1
   CARGO_TERM_COLOR: always
 
 jobs:
-  publish:
-    name: Publish to Maven Central
+  # ── 1. Validate release inputs ────────────────────────────────────────────
+  validate:
+    name: Validate release inputs
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      stage_only: ${{ steps.mode.outputs.stage_only }}
+      zenoh_flat_ref: ${{ steps.inputs.outputs.zenoh_flat_ref }}
+      prebindgen_ref: ${{ steps.inputs.outputs.prebindgen_ref }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read pinned build inputs
+        id: inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          . ./release-inputs.env
+          echo "zenoh_flat_ref=$ZENOH_FLAT_REF" >> "$GITHUB_OUTPUT"
+          echo "prebindgen_ref=$PREBINDGEN_REF" >> "$GITHUB_OUTPUT"
+
+      - name: Check that every version declaration agrees
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=$(tr -d '[:space:]' < version.txt)
+          cargo_version=$(sed -n '/^\[package\]/,/^\[/p' Cargo.toml \
+            | sed -n 's/^version = "\(.*\)"$/\1/p' | head -1)
+          test "$cargo_version" = "$version" \
+            || { echo "::error::Cargo.toml says $cargo_version, version.txt says $version"; exit 1; }
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            test "${GITHUB_REF_NAME#v}" = "$version" \
+              || { echo "::error::tag $GITHUB_REF_NAME does not match version $version"; exit 1; }
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Refuse to overwrite an existing Maven Central release
+        shell: bash
+        run: |
+          set -euo pipefail
+          v="${{ steps.version.outputs.version }}"
+          url="https://repo1.maven.org/maven2/org/eclipse/zenoh/zenoh-flat-jni/$v/zenoh-flat-jni-$v.pom"
+          if curl -sfIL -o /dev/null "$url"; then
+            echo "::error::org.eclipse.zenoh:zenoh-flat-jni:$v is already on Maven Central and cannot be replaced"
+            exit 1
+          fi
+
+      - name: Select release mode
+        id: mode
+        shell: bash
+        run: |
+          stage_only="${{ inputs.stage_only || 'false' }}"
+          echo "stage_only=$stage_only" >> "$GITHUB_OUTPUT"
+          echo "Releasing ${{ steps.version.outputs.version }} (stage only: $stage_only)" >> "$GITHUB_STEP_SUMMARY"
+
+  # ── 2. Regenerate and verify sources ──────────────────────────────────────
+  generated-sources:
+    name: Verify committed generated sources
+    needs: validate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: zenoh-flat-jni
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: zenoh-flat-jni
+
+      - uses: ./zenoh-flat-jni/.github/actions/setup-sources
+        with:
+          zenoh-flat-ref: ${{ needs.validate.outputs.zenoh_flat_ref }}
+          prebindgen-ref: ${{ needs.validate.outputs.prebindgen_ref }}
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.93.0
+
+      # build.rs writes the committed bindings; a diff here means the release
+      # would ship generated sources nobody reviewed.
+      - name: Regenerate the bindings
+        run: cargo build --release --locked
+
+      - name: Fail on generated-source drift
+        run: git diff --exit-code -- src/generated_bindings.rs kotlin/generated
+
+  # ── 3. Build the desktop native libraries ─────────────────────────────────
+  desktop-natives:
+    name: ${{ matrix.target }}
+    needs: validate
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { target: x86_64-unknown-linux-gnu,  os: ubuntu-latest,  lib: libzenoh_flat_jni.so }
+          - { target: aarch64-unknown-linux-gnu, os: ubuntu-latest,  lib: libzenoh_flat_jni.so }
+          - { target: x86_64-apple-darwin,       os: macos-latest,   lib: libzenoh_flat_jni.dylib }
+          - { target: aarch64-apple-darwin,      os: macos-latest,   lib: libzenoh_flat_jni.dylib }
+          - { target: x86_64-pc-windows-msvc,    os: windows-latest, lib: zenoh_flat_jni.dll }
+          - { target: aarch64-pc-windows-msvc,   os: windows-latest, lib: zenoh_flat_jni.dll }
+    defaults:
+      run:
+        working-directory: zenoh-flat-jni
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: zenoh-flat-jni
+
+      - uses: ./zenoh-flat-jni/.github/actions/setup-sources
+        with:
+          zenoh-flat-ref: ${{ needs.validate.outputs.zenoh_flat_ref }}
+          prebindgen-ref: ${{ needs.validate.outputs.prebindgen_ref }}
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.93.0
+          targets: ${{ matrix.target }}
+
+      # ponytail: plain cargo with the cross linker rather than `cross`, because
+      # the sibling path dependencies live outside the project directory that
+      # `cross` mounts into its container. Move to `cross` with an explicit
+      # Cross.toml volume mount if more exotic targets appear.
+      - name: Install the aarch64 Linux cross toolchain
+        if: matrix.target == 'aarch64-unknown-linux-gnu'
+        shell: bash
+        run: |
+          sudo apt-get -y update
+          sudo apt-get -y install gcc-aarch64-linux-gnu
+          {
+            echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc"
+            echo "CC_aarch64_unknown_linux_gnu=aarch64-linux-gnu-gcc"
+          } >> "$GITHUB_ENV"
+
+      - name: Build
+        run: cargo build --release --locked --target ${{ matrix.target }}
+
+      # The JAR resource layout NativeLibrary.determineTarget() resolves:
+      # <target>/<target>.zip holding exactly the one library.
+      - name: Package
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$GITHUB_WORKSPACE/zenoh-flat-jni/jni-libs/${{ matrix.target }}"
+          mkdir -p "$out"
+          cd "target/${{ matrix.target }}/release"
+          if command -v zip >/dev/null; then
+            zip -j "$out/${{ matrix.target }}.zip" "${{ matrix.lib }}"
+          else
+            7z -y a "$out/${{ matrix.target }}.zip" "${{ matrix.lib }}"
+          fi
+          cd "$GITHUB_WORKSPACE/zenoh-flat-jni/jni-libs"
+          shasum -a 256 "${{ matrix.target }}/${{ matrix.target }}.zip" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.target }}
+          path: zenoh-flat-jni/jni-libs
+          if-no-files-found: error
+
+  # ── 4. Build the Android native libraries ─────────────────────────────────
+  android-natives:
+    name: Android ABIs
+    needs: validate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: zenoh-flat-jni
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: zenoh-flat-jni
+
+      - uses: ./zenoh-flat-jni/.github/actions/setup-sources
+        with:
+          zenoh-flat-ref: ${{ needs.validate.outputs.zenoh_flat_ref }}
+          prebindgen-ref: ${{ needs.validate.outputs.prebindgen_ref }}
+
+      - uses: nttld/setup-ndk@v1
+        id: ndk
+        with:
+          ndk-version: r26
+          add-to-path: false
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.93.0
+          targets: armv7-linux-androideabi,aarch64-linux-android,i686-linux-android,x86_64-linux-android
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk --locked
+
+      # cargo-ndk's -o writes exactly the AAR's jni/<abi>/ layout.
+      - name: Build every advertised ABI
+        env:
+          ANDROID_NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
+        run: |
+          cargo ndk -o android-libs \
+            -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 \
+            build --release --locked
+
+      - name: Record the checksums
+        run: shasum -a 256 android-libs/*/libzenoh_flat_jni.so >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-natives
+          path: zenoh-flat-jni/android-libs
+          if-no-files-found: error
+
+  # ── 5+6. Assemble the publications, then consume them from an isolated repo ─
+  consumer-test:
+    name: Consume the candidate on ${{ matrix.os }}
+    needs: [validate, desktop-natives, android-natives, generated-sources]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Every advertised desktop target a GitHub runner can execute.
+        # aarch64-pc-windows-msvc has no runner and is covered by archive
+        # inspection only (verifyDesktopArtifact).
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-13, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      # `ci/consumer-smoke-test` has no wrapper of its own on purpose — it is a
+      # stand-in for an external consumer — so put a matching Gradle on PATH.
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.5'
+
+      - name: Stage the cross-built desktop natives
+        uses: actions/download-artifact@v4
+        with:
+          pattern: desktop-*
+          merge-multiple: true
+          path: jni-libs
+
+      - name: Stage the Android natives
+        uses: actions/download-artifact@v4
+        with:
+          name: android-natives
+          path: android-libs
+
+      # verifyDesktopArtifact / verifyAndroidArtifact run as publication
+      # dependencies and fail on a missing, duplicated or stray native library.
+      - name: Publish the candidate to an isolated file repository
+        run: ./gradlew publishAllPublicationsToDryRunRepository --no-daemon
+
+      - name: Smoke-test the candidate as an external consumer
+        shell: bash
+        working-directory: ci/consumer-smoke-test
+        run: |
+          set -euo pipefail
+          repo="$(cd "$GITHUB_WORKSPACE/build/dry-run-repository" && pwd)"
+          gradle run --no-daemon --refresh-dependencies \
+            -PcandidateRepository="file://$repo" \
+            -PcandidateVersion="${{ needs.validate.outputs.version }}"
+
+      - name: Record the candidate checksums
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+          set -euo pipefail
+          find build/dry-run-repository \( -name '*.jar' -o -name '*.aar' -o -name '*.pom' \) \
+            | sort | xargs shasum -a 256 | tee candidate-checksums.txt >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'ubuntu-latest'
+        with:
+          name: candidate-checksums
+          path: candidate-checksums.txt
+
+  # ── 7. Upload to Central staging and wait for validation ──────────────────
+  stage:
+    name: Stage on Maven Central
+    needs: [validate, consumer-test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Install JDK
-        uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '11'
-          cache: gradle
 
-      - name: Build Rust library
-        run: cargo build --release
+      - uses: gradle/actions/setup-gradle@v4
 
-      - name: Setup GPG
-        run: |
-          mkdir -p ~/.gnupg
-          echo "${{ secrets.ORG_GPG_PRIVATE_KEY }}" | base64 -d | gpg --batch --import
-          echo "${{ secrets.ORG_GPG_PASSPHRASE }}" | gpg --batch --pinentry-mode loopback --passphrase-fd 0 --list-secret-keys
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: desktop-*
+          merge-multiple: true
+          path: jni-libs
 
-      - name: Build and publish JAR
-        run: ./gradlew publish --no-parallel -DremotePublication=true -Drelease=true
+      - uses: actions/download-artifact@v4
+        with:
+          name: android-natives
+          path: android-libs
+
+      # Uploads and *closes* the staging repository: Central runs its validation
+      # (signatures, checksums, POM completeness) but nothing is released, so a
+      # failed or unwanted deployment can simply be dropped.
+      - name: Upload and close the staging repository
+        run: >
+          ./gradlew publishToSonatype closeSonatypeStagingRepository
+          --no-daemon --no-parallel -PremotePublication=true -Prelease=true
         env:
+          CENTRAL_SONATYPE_TOKEN_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
+          CENTRAL_SONATYPE_TOKEN_PASSWORD: ${{ secrets.CENTRAL_SONATYPE_TOKEN_PASSWORD }}
           ORG_GPG_SUBKEY_ID: ${{ secrets.ORG_GPG_SUBKEY_ID }}
           ORG_GPG_PRIVATE_KEY: ${{ secrets.ORG_GPG_PRIVATE_KEY }}
           ORG_GPG_PASSPHRASE: ${{ secrets.ORG_GPG_PASSPHRASE }}
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
 
-      - name: Create Release
-        uses: ncipollo/release-action@v1
+  # ── 8. Release, then verify from Maven Central ────────────────────────────
+  release-staging:
+    name: Release the staged deployment
+    needs: [validate, stage]
+    if: needs.validate.outputs.stage_only != 'true'
+    runs-on: ubuntu-latest
+    # Protect this environment with required reviewers: everything before it is
+    # reversible, this step is not.
+    environment: maven-central
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Release the closed staging repository
+        run: >
+          ./gradlew findSonatypeStagingRepository releaseSonatypeStagingRepository
+          --no-daemon --no-parallel -PremotePublication=true -Prelease=true
+        env:
+          CENTRAL_SONATYPE_TOKEN_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
+          CENTRAL_SONATYPE_TOKEN_PASSWORD: ${{ secrets.CENTRAL_SONATYPE_TOKEN_PASSWORD }}
+          ORG_GPG_SUBKEY_ID: ${{ secrets.ORG_GPG_SUBKEY_ID }}
+          ORG_GPG_PRIVATE_KEY: ${{ secrets.ORG_GPG_PRIVATE_KEY }}
+          ORG_GPG_PASSPHRASE: ${{ secrets.ORG_GPG_PASSPHRASE }}
+
+  verify-central:
+    name: Verify from Maven Central on ${{ matrix.os }}
+    needs: [validate, release-staging]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-13, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.5'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: candidate-checksums
+
+      - name: Wait until the coordinates resolve
+        shell: bash
+        env:
+          VERSION: ${{ needs.validate.outputs.version }}
+        run: |
+          set -euo pipefail
+          base="https://repo1.maven.org/maven2/org/eclipse/zenoh/zenoh-flat-jni/$VERSION"
+          for _ in $(seq 1 60); do
+            if curl -sfIL -o /dev/null "$base/zenoh-flat-jni-$VERSION.pom"; then
+              echo "resolved"; exit 0
+            fi
+            sleep 60
+          done
+          echo "::error::$VERSION did not appear on Maven Central within 60 minutes"
+          exit 1
+
+      - name: Compare the released JAR with the verified candidate
+        shell: bash
+        env:
+          VERSION: ${{ needs.validate.outputs.version }}
+        run: |
+          set -euo pipefail
+          jar="zenoh-flat-jni-$VERSION.jar"
+          curl -sfL -o "$jar" \
+            "https://repo1.maven.org/maven2/org/eclipse/zenoh/zenoh-flat-jni/$VERSION/$jar"
+          released=$(shasum -a 256 "$jar" | cut -d' ' -f1)
+          candidate=$(grep "/$jar\$" candidate-checksums.txt | cut -d' ' -f1)
+          test -n "$candidate" || { echo "::error::no candidate checksum recorded for $jar"; exit 1; }
+          test "$released" = "$candidate" \
+            || { echo "::error::Central serves $released, CI verified $candidate"; exit 1; }
+
+      - name: Smoke-test the released artifact
+        shell: bash
+        working-directory: ci/consumer-smoke-test
+        run: |
+          gradle run --no-daemon --refresh-dependencies \
+            -PcandidateRepository=https://repo1.maven.org/maven2 \
+            -PcandidateVersion="${{ needs.validate.outputs.version }}"
+
+  # ── 9. Only now is there something to announce ────────────────────────────
+  github-release:
+    name: Create the GitHub release
+    needs: [validate, verify-central]
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: ncipollo/release-action@v1
         with:
           draft: false
           prerelease: false
+          body: |
+            `org.eclipse.zenoh:zenoh-flat-jni:${{ needs.validate.outputs.version }}` and
+            `org.eclipse.zenoh:zenoh-flat-jni-android:${{ needs.validate.outputs.version }}`
+            are available on Maven Central.
+
+            Built from zenoh-flat `${{ needs.validate.outputs.zenoh_flat_ref }}`
+            and prebindgen `${{ needs.validate.outputs.prebindgen_ref }}`.

@@ -126,7 +126,14 @@ cd prebindgen/zenoh-flat
 
 ### Published Versions (CI/Release)
 
-In the CI/CD pipeline (GitHub Actions), zenoh-flat and prebindgen are fetched via git, and eventually will be published to crates.io. The path dependencies are temporary for local development.
+CI and the release pipeline check both repositories out as siblings of this one,
+at the revisions pinned in [`release-inputs.env`](release-inputs.env), so a bare
+clone builds without a PREBINDGEN workspace. Keeping the manifests untouched is
+what lets releases build `--locked` against the committed `Cargo.lock`.
+
+`Cargo.lock` must be regenerated and committed whenever a pinned revision moves —
+the release build fails otherwise. The path dependencies are temporary; they
+become version constraints once zenoh-flat and prebindgen reach crates.io.
 
 ## Testing
 
@@ -162,12 +169,18 @@ cargo clippy --all-targets --all-features -- -D warnings
 
 ## Building for Android
 
-```bash
-# Build native library for Android
-./gradlew -Pandroid=true build
+The Android ABIs are cross-compiled with [cargo-ndk](https://github.com/bbqsrc/cargo-ndk)
+straight into the AAR's `jni/<abi>/` layout; the AAR is then assembled from
+`android-libs/` (see [Releasing](#releasing)).
 
-# Run Android tests
-./gradlew -Pandroid=true androidTest
+```bash
+cargo install cargo-ndk
+rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android
+
+# ANDROID_NDK_HOME must point at NDK r26
+cargo ndk -o android-libs -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 build --release
+
+./gradlew androidAar verifyAndroidArtifact
 ```
 
 ## CI/CD
@@ -204,15 +217,61 @@ cargo build --release
 
 Then try tests again.
 
-## Publishing to Maven Central
+## Releasing
 
-This is typically done via the GitHub Actions CI/CD pipeline on release tags. To publish manually:
+Maven Central releases are immutable, so the pipeline in
+[`.github/workflows/publish.yml`](.github/workflows/publish.yml) puts every gate
+*before* the irreversible step. Pushing a `v*` tag runs, in order:
 
-1. Ensure you have GPG keys configured
-2. Have OSSRH credentials
-3. Run: `./gradlew publish -DremotePublication=true`
+1. **validate** — version.txt, `Cargo.toml` and the tag must agree, and the
+   version must not already exist on Maven Central.
+2. **generated-sources** — rebuilds the bindings from the pinned inputs and
+   fails if the committed generated Rust/Kotlin differs.
+3. **desktop-natives / android-natives** — `cargo build --release --locked` per
+   target, packaged as `<target>/<target>.zip` and `jni/<abi>/`.
+4. **consumer-test** — assembles the JAR and AAR, verifies their contents, then
+   resolves and runs [`ci/consumer-smoke-test`](ci/consumer-smoke-test) against
+   an isolated file-based repository on every runner platform.
+5. **stage** — uploads and *closes* a Central staging deployment. Central
+   validates it; nothing is public yet.
+6. **release-staging** — releases the deployment. Guarded by the `maven-central`
+   GitHub environment; protect it with required reviewers.
+7. **verify-central** — waits for the coordinates to resolve, checks the served
+   JAR hash against the one CI verified, and reruns the consumer smoke test.
+8. **github-release** — only now.
 
-See the `.github/workflows/publish.yml` for details.
+Two artifacts are published: `org.eclipse.zenoh:zenoh-flat-jni` (universal
+desktop JVM JAR, natives for all six targets) and
+`org.eclipse.zenoh:zenoh-flat-jni-android` (AAR, four ABIs).
+
+### Dry run
+
+`workflow_dispatch` with `stage_only=true` (the default) runs everything up to
+and including Central staging validation, then stops — drop the deployment from
+the Central Portal afterwards.
+
+To rehearse locally without touching Central, populate `jni-libs/` (and
+optionally `android-libs/`) and publish to the file-based repository the
+consumer test uses:
+
+```bash
+./gradlew publishAllPublicationsToDryRunRepository
+find build/dry-run-repository -type f
+
+cd ci/consumer-smoke-test
+gradle run -PcandidateRepository="file://$PWD/../../build/dry-run-repository" \
+           -PcandidateVersion="$(cat ../../version.txt)"
+```
+
+Do not use `mavenLocal()` for this: it can serve leftovers from earlier builds,
+which makes it impossible to prove which repository supplied an artifact.
+
+### Required secrets
+
+`CENTRAL_SONATYPE_TOKEN_USERNAME` / `CENTRAL_SONATYPE_TOKEN_PASSWORD` (Central
+Portal user tokens — the retired `s01.oss.sonatype.org` OSSRH credentials no
+longer work), plus `ORG_GPG_SUBKEY_ID`, `ORG_GPG_PRIVATE_KEY` and
+`ORG_GPG_PASSPHRASE`.
 
 ## Documentation
 
