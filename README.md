@@ -70,6 +70,10 @@ fun main() {
 
 ## Development
 
+The Maven Central release process, current publishing blockers, required
+multi-platform artifact layout, and dry-run procedure are documented in
+[PUBLISHING.md](PUBLISHING.md).
+
 ### Prerequisites
 
 - Rust 1.70+ with JNI support
