@@ -1,7 +1,7 @@
 //! Build script for the zenoh-flat JNI/Kotlin layer.
 //!
 //! Reads the `#[prebindgen]` items captured by `zenoh-flat` and drives them
-//! through the [`prebindgen::lang::JniGen`] adapter to produce:
+//! through the [`prebindgen_jni::JniGen`] adapter to produce:
 //!   * `src/generated_bindings.rs` — the Rust-side JNI wrappers (included by
 //!     `src/lib.rs`), and
 //!   * `kotlin/generated/**` — the matching typed Kotlin classes.
@@ -49,13 +49,11 @@
 //! (`KeyExpr`, `Session`, `keyexpr_new_try_from`, `open`, …); the Kotlin-side
 //! names are derived from them automatically.
 
-use prebindgen::{
-    convert,
-    core::Registry,
-    data_class, enum_class, expand_param, expand_return, fields, fun,
-    lang::{ConstDecl, FunctionDecl, JniGen},
-    package, ptr_class, sealed_class, sig,
+use prebindgen_jni::{
+    data_class, enum_class, matching, package, ptr_class, sealed_class, ConstDecl, FunctionDecl,
+    JniGen,
 };
+use prebindgen_registry::{convert, expand_param, expand_return, fields, fun, sig};
 use syn::parse_quote as pq;
 
 fn fail(context: &str, err: impl std::fmt::Display) -> ! {
@@ -223,7 +221,10 @@ fn main() {
         }
     }
 
-    let mut jni = JniGen::new()
+    let mut jni = JniGen::builder()
+        // zenoh-flat's captured `#[prebindgen]` items — the single source of
+        // this binding.
+        .source(zenoh_flat::PREBINDGEN_OUT_DIR)
         .set_package_prefix("io.zenoh.jni") // base package of the generated JNI bindings
         // Every generated native call routes through `JNINative`; trigger our own
         // loader from its static initializer so the native library is loaded
@@ -755,9 +756,7 @@ fn main() {
     // are superseded here by the `ENCODING_*` consts above — acknowledge the
     // whole naming family so the generator doesn't warn about undeclared
     // functions.
-    jni = jni.ignore(prebindgen::matching(|name| {
-        name.starts_with("encoding_const_")
-    }));
+    jni = jni.ignore(matching(|name| name.starts_with("encoding_const_")));
 
     // The remaining flat functions are intentionally outside this binding
     // surface. Handle classes already provide close/take lifecycle operations;
@@ -798,14 +797,11 @@ fn main() {
     }
 
     // ── Outputs ───────────────────────────────────────────────────────────
-    // Run the configured adapter over zenoh-flat's captured `#[prebindgen]`
-    // items and write both generated artifacts.
-    let registry = match Registry::builder()
-        .source(zenoh_flat::PREBINDGEN_OUT_DIR)
-        .build()
-    {
-        Ok(registry) => registry,
-        Err(err) => fail("scan failed", err),
+    // Resolve the declared surface against the source items and write both
+    // generated artifacts.
+    let generation = match jni.build() {
+        Ok(generation) => generation,
+        Err(err) => fail("build failed", err),
     };
 
     // Rust bindings → src/generated_bindings.rs. Absolute path so the file lands
@@ -814,10 +810,6 @@ fn main() {
     let rust_dest = std::path::Path::new(&crate_dir)
         .join("src")
         .join("generated_bindings.rs");
-    let generation = match registry.resolve(jni) {
-        Ok(generation) => generation,
-        Err(err) => fail("resolve failed", err),
-    };
     let rust_path = match generation.write_rust(&rust_dest) {
         Ok(path) => path,
         Err(err) => fail("write_rust failed", err),

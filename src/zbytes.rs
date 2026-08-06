@@ -17,7 +17,7 @@ use jni::{
     sys::jobject,
     JNIEnv,
 };
-use prebindgen::lang::JniBindingError;
+use prebindgen_jni_runtime::JniBindingError;
 use zenoh::bytes::ZBytes;
 use zenoh_ext::{VarInt, ZDeserializeError, ZDeserializer, ZSerializer};
 
@@ -33,7 +33,8 @@ type JResult<T> = core::result::Result<T, JniBindingError<()>>;
 /// throwing callback straight from the upcall is safe — no lock is held
 /// across the throw.)
 fn signal_error(env: &mut JNIEnv, on_error: &JObject, err: &impl core::fmt::Display) {
-    static MID: prebindgen::lang::CachedIfaceMethod = prebindgen::lang::CachedIfaceMethod::new();
+    static MID: prebindgen_jni_runtime::CachedIfaceMethod =
+        prebindgen_jni_runtime::CachedIfaceMethod::new();
     // If a JVM exception is already pending (a Java upcall threw), let it
     // propagate untouched — do NOT invoke the callback over it (and do not
     // clear it): the pending exception surfaces when we return the sentinel.

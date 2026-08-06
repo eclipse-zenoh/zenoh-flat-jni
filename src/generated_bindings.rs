@@ -1,5 +1,5 @@
 #[allow(dead_code)]
-pub(crate) type __JniErr = ::prebindgen::lang::JniBindingError<()>;
+pub(crate) type __JniErr = ::prebindgen_jni_runtime::JniBindingError<()>;
 /// See module-level docs at [`owned_object_prerequisite_items`].
 #[allow(dead_code)]
 pub(crate) struct OwnedObject<T: ?Sized> {
@@ -41,7 +41,7 @@ impl<T: ?Sized> OwnedObject<T> {
 pub(crate) fn signal_binding_error(
     env: &mut jni::JNIEnv,
     sink: &jni::objects::JObject,
-    mid: &::prebindgen::lang::CachedIfaceMethod,
+    mid: &::prebindgen_jni_runtime::CachedIfaceMethod,
     fqn: &str,
     descr: &str,
     je: &str,
@@ -69,7 +69,7 @@ pub(crate) fn signal_binding_error(
 pub(crate) fn signal_domain_error(
     env: &mut jni::JNIEnv,
     sink: &jni::objects::JObject,
-    mid: &::prebindgen::lang::CachedIfaceMethod,
+    mid: &::prebindgen_jni_runtime::CachedIfaceMethod,
     fqn: &str,
     descr: &str,
     ze: &[jni::sys::jvalue],
@@ -425,7 +425,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingZenohBytes<
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -456,7 +456,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingZenohBytesI
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -487,7 +487,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingZenohString
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -518,7 +518,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingZenohString
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -549,7 +549,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingZenohSerial
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -582,7 +582,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingZenohSerial
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -615,7 +615,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -648,7 +648,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -679,7 +679,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingTextPlain<'
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -710,7 +710,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingTextPlainId
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -741,7 +741,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -774,7 +774,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -805,7 +805,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingTextJson<'a
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -836,7 +836,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingTextJsonId<
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -867,7 +867,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -900,7 +900,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -931,7 +931,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -964,7 +964,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -995,7 +995,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1028,7 +1028,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1059,7 +1059,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingTextYaml<'a
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1090,7 +1090,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingTextYamlId<
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1121,7 +1121,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingTextJson5<'
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1152,7 +1152,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingTextJson5Id
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1185,7 +1185,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1218,7 +1218,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1251,7 +1251,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1284,7 +1284,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1317,7 +1317,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1350,7 +1350,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1383,7 +1383,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1416,7 +1416,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1447,7 +1447,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingImagePng<'a
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1478,7 +1478,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingImagePngId<
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1509,7 +1509,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingImageJpeg<'
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1540,7 +1540,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingImageJpegId
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1571,7 +1571,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingImageGif<'a
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1602,7 +1602,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingImageGifId<
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1633,7 +1633,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingImageBmp<'a
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1664,7 +1664,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingImageBmpId<
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1695,7 +1695,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingImageWebp<'
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1726,7 +1726,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingImageWebpId
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1757,7 +1757,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1790,7 +1790,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1823,7 +1823,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1856,7 +1856,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1887,7 +1887,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingTextHtml<'a
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1918,7 +1918,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingTextHtmlId<
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1949,7 +1949,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingTextXml<'a>
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -1980,7 +1980,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingTextXmlId<'
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2011,7 +2011,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingTextCss<'a>
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2042,7 +2042,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingTextCssId<'
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2073,7 +2073,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingTextJavascr
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2106,7 +2106,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingTextJavascr
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2137,7 +2137,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingTextMarkdow
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2168,7 +2168,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingTextMarkdow
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2199,7 +2199,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingTextCsv<'a>
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2230,7 +2230,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingTextCsvId<'
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2261,7 +2261,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2294,7 +2294,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2327,7 +2327,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2360,7 +2360,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2393,7 +2393,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2426,7 +2426,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2459,7 +2459,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2492,7 +2492,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2525,7 +2525,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2558,7 +2558,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2589,7 +2589,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2622,7 +2622,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2653,7 +2653,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2686,7 +2686,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2719,7 +2719,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2752,7 +2752,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2783,7 +2783,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2816,7 +2816,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingApplication
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2847,7 +2847,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingAudioAac<'a
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2878,7 +2878,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingAudioAacId<
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2909,7 +2909,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingAudioFlac<'
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2940,7 +2940,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingAudioFlacId
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -2971,7 +2971,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingAudioMp4<'a
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3002,7 +3002,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingAudioMp4Id<
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3033,7 +3033,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingAudioOgg<'a
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3064,7 +3064,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingAudioOggId<
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3095,7 +3095,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingAudioVorbis
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3126,7 +3126,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingAudioVorbis
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3157,7 +3157,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoH261<'
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3188,7 +3188,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoH261Id
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3219,7 +3219,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoH263<'
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3250,7 +3250,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoH263Id
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3281,7 +3281,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoH264<'
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3312,7 +3312,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoH264Id
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3343,7 +3343,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoH265<'
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3374,7 +3374,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoH265Id
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3405,7 +3405,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoH266<'
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3436,7 +3436,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoH266Id
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3467,7 +3467,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoMp4<'a
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3498,7 +3498,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoMp4Id<
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3529,7 +3529,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoOgg<'a
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3560,7 +3560,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoOggId<
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3591,7 +3591,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoRaw<'a
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3622,7 +3622,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoRawId<
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3653,7 +3653,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoVp8<'a
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3684,7 +3684,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoVp8Id<
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3715,7 +3715,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoVp9<'a
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3746,7 +3746,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoVp9Id<
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = {
@@ -3774,7 +3774,9 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_constGetEncodingVideoVp9Id<
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -3791,7 +3793,9 @@ pub(crate) unsafe fn AdvancedPublisher_to_jlong_95a60c4e<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -3808,7 +3812,9 @@ pub(crate) unsafe fn AdvancedSubscriber_to_jlong_9df4471c<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -3859,7 +3865,9 @@ pub(crate) unsafe fn CacheConfig_to_JObject_db89a97c<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -3876,7 +3884,9 @@ pub(crate) unsafe fn Config_to_jlong_d1f60c7d<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -3893,7 +3903,9 @@ pub(crate) unsafe fn CongestionControl_to_jint_62e38379<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -3910,7 +3922,9 @@ pub(crate) unsafe fn ConsolidationMode_to_jint_dd4eaedc<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -3952,7 +3966,9 @@ pub(crate) unsafe fn Duration_to_u64_e3980876<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -3969,7 +3985,9 @@ pub(crate) unsafe fn Encoding_to_jlong_072adb3b<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -3986,7 +4004,9 @@ pub(crate) unsafe fn Encoding_to_jlong_e0e31e0d<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4025,7 +4045,9 @@ pub(crate) unsafe fn EntityGlobalId_to_JObject_42df3b10<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4042,7 +4064,9 @@ pub(crate) unsafe fn Hello_to_jlong_bbd3fc65<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4088,7 +4112,9 @@ pub(crate) unsafe fn HistoryConfig_to_JObject_9af92cec<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4105,7 +4131,9 @@ pub(crate) unsafe fn InterceptionPoint_to_jint_a2f3ccf2<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4115,14 +4143,21 @@ pub(crate) unsafe fn JByteArray_to_Option_Vec_u8_6f4428ab<'env, 'v>(
     env: &mut jni::JNIEnv<'env>,
     v: &jni::objects::JByteArray<'v>,
 ) -> ::core::result::Result<Option<Vec<u8>>, __JniErr> {
-    Ok({ if v.is_null() { None } else { Some(JByteArray_to_Vec_u8_7936d5de(env, v)?) } })
+    Ok({
+        let __v: ::core::option::Option<Vec<u8>> = {
+            if v.is_null() { None } else { Some(JByteArray_to_Vec_u8_7936d5de(env, v)?) }
+        };
+        __v
+    })
 }
 #[allow(
     non_snake_case,
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4146,7 +4181,9 @@ pub(crate) unsafe fn JByteArray_to_Vec_u8_7936d5de<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4183,7 +4220,9 @@ pub(crate) unsafe fn JByteArray_to_u8_ZENOH_ID_MAX_SIZE_836d163f<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4222,7 +4261,9 @@ pub(crate) unsafe fn JObject_to_CacheConfig_db89a97c<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4258,7 +4299,9 @@ pub(crate) unsafe fn JObject_to_EntityGlobalId_42df3b10<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4315,7 +4358,9 @@ pub(crate) unsafe fn JObject_to_HistoryConfig_9af92cec<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4402,7 +4447,9 @@ pub(crate) unsafe fn JObject_to_InstrumentationTimestamp_b71e0556<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4448,7 +4495,9 @@ pub(crate) unsafe fn JObject_to_MissDetectionConfig_5213dfb7<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4481,7 +4530,9 @@ pub(crate) unsafe fn JObject_to_Miss_e2758329<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4492,7 +4543,14 @@ pub(crate) unsafe fn JObject_to_Option_CacheConfig_a6be794d<'env, 'v>(
     v: &jni::objects::JObject<'v>,
 ) -> ::core::result::Result<Option<zenoh_flat::CacheConfig>, __JniErr> {
     Ok({
-        if v.is_null() { None } else { Some(JObject_to_CacheConfig_db89a97c(env, v)?) }
+        let __v: ::core::option::Option<zenoh_flat::CacheConfig> = {
+            if v.is_null() {
+                None
+            } else {
+                Some(JObject_to_CacheConfig_db89a97c(env, v)?)
+            }
+        };
+        __v
     })
 }
 #[allow(
@@ -4500,7 +4558,9 @@ pub(crate) unsafe fn JObject_to_Option_CacheConfig_a6be794d<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4511,18 +4571,21 @@ pub(crate) unsafe fn JObject_to_Option_CongestionControl_7053bb49<'env, 'v>(
     v: &jni::objects::JObject<'v>,
 ) -> ::core::result::Result<Option<zenoh_flat::CongestionControl>, __JniErr> {
     Ok({
-        if !v.is_null() {
-            let __unboxed: jni::sys::jint = env
-                .call_method(&v, "intValue", "()I", &[])
-                .and_then(|val| val.i())
-                .map(|__x| __x as jni::sys::jint)
-                .map_err(|e| <__JniErr as ::core::convert::From<
-                    String,
-                >>::from(format!("Option unbox: {}", e)))?;
-            Some(jint_to_CongestionControl_62e38379(env, &__unboxed)?)
-        } else {
-            None
-        }
+        let __v: ::core::option::Option<zenoh_flat::CongestionControl> = {
+            if !v.is_null() {
+                let __unboxed: jni::sys::jint = env
+                    .call_method(&v, "intValue", "()I", &[])
+                    .and_then(|val| val.i())
+                    .map(|__x| __x as jni::sys::jint)
+                    .map_err(|e| <__JniErr as ::core::convert::From<
+                        String,
+                    >>::from(format!("Option unbox: {}", e)))?;
+                Some(jint_to_CongestionControl_62e38379(env, &__unboxed)?)
+            } else {
+                None
+            }
+        };
+        __v
     })
 }
 #[allow(
@@ -4530,7 +4593,9 @@ pub(crate) unsafe fn JObject_to_Option_CongestionControl_7053bb49<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4541,18 +4606,21 @@ pub(crate) unsafe fn JObject_to_Option_ConsolidationMode_25de8913<'env, 'v>(
     v: &jni::objects::JObject<'v>,
 ) -> ::core::result::Result<Option<zenoh_flat::ConsolidationMode>, __JniErr> {
     Ok({
-        if !v.is_null() {
-            let __unboxed: jni::sys::jint = env
-                .call_method(&v, "intValue", "()I", &[])
-                .and_then(|val| val.i())
-                .map(|__x| __x as jni::sys::jint)
-                .map_err(|e| <__JniErr as ::core::convert::From<
-                    String,
-                >>::from(format!("Option unbox: {}", e)))?;
-            Some(jint_to_ConsolidationMode_dd4eaedc(env, &__unboxed)?)
-        } else {
-            None
-        }
+        let __v: ::core::option::Option<zenoh_flat::ConsolidationMode> = {
+            if !v.is_null() {
+                let __unboxed: jni::sys::jint = env
+                    .call_method(&v, "intValue", "()I", &[])
+                    .and_then(|val| val.i())
+                    .map(|__x| __x as jni::sys::jint)
+                    .map_err(|e| <__JniErr as ::core::convert::From<
+                        String,
+                    >>::from(format!("Option unbox: {}", e)))?;
+                Some(jint_to_ConsolidationMode_dd4eaedc(env, &__unboxed)?)
+            } else {
+                None
+            }
+        };
+        __v
     })
 }
 #[allow(
@@ -4560,7 +4628,9 @@ pub(crate) unsafe fn JObject_to_Option_ConsolidationMode_25de8913<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4571,7 +4641,14 @@ pub(crate) unsafe fn JObject_to_Option_HistoryConfig_134d09bc<'env, 'v>(
     v: &jni::objects::JObject<'v>,
 ) -> ::core::result::Result<Option<zenoh_flat::HistoryConfig>, __JniErr> {
     Ok({
-        if v.is_null() { None } else { Some(JObject_to_HistoryConfig_9af92cec(env, v)?) }
+        let __v: ::core::option::Option<zenoh_flat::HistoryConfig> = {
+            if v.is_null() {
+                None
+            } else {
+                Some(JObject_to_HistoryConfig_9af92cec(env, v)?)
+            }
+        };
+        __v
     })
 }
 #[allow(
@@ -4579,7 +4656,9 @@ pub(crate) unsafe fn JObject_to_Option_HistoryConfig_134d09bc<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4590,11 +4669,14 @@ pub(crate) unsafe fn JObject_to_Option_MissDetectionConfig_5c3b0c2b<'env, 'v>(
     v: &jni::objects::JObject<'v>,
 ) -> ::core::result::Result<Option<zenoh_flat::MissDetectionConfig>, __JniErr> {
     Ok({
-        if v.is_null() {
-            None
-        } else {
-            Some(JObject_to_MissDetectionConfig_5213dfb7(env, v)?)
-        }
+        let __v: ::core::option::Option<zenoh_flat::MissDetectionConfig> = {
+            if v.is_null() {
+                None
+            } else {
+                Some(JObject_to_MissDetectionConfig_5213dfb7(env, v)?)
+            }
+        };
+        __v
     })
 }
 #[allow(
@@ -4602,7 +4684,9 @@ pub(crate) unsafe fn JObject_to_Option_MissDetectionConfig_5c3b0c2b<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4613,18 +4697,21 @@ pub(crate) unsafe fn JObject_to_Option_Priority_ad5cbb32<'env, 'v>(
     v: &jni::objects::JObject<'v>,
 ) -> ::core::result::Result<Option<zenoh_flat::Priority>, __JniErr> {
     Ok({
-        if !v.is_null() {
-            let __unboxed: jni::sys::jint = env
-                .call_method(&v, "intValue", "()I", &[])
-                .and_then(|val| val.i())
-                .map(|__x| __x as jni::sys::jint)
-                .map_err(|e| <__JniErr as ::core::convert::From<
-                    String,
-                >>::from(format!("Option unbox: {}", e)))?;
-            Some(jint_to_Priority_447102d2(env, &__unboxed)?)
-        } else {
-            None
-        }
+        let __v: ::core::option::Option<zenoh_flat::Priority> = {
+            if !v.is_null() {
+                let __unboxed: jni::sys::jint = env
+                    .call_method(&v, "intValue", "()I", &[])
+                    .and_then(|val| val.i())
+                    .map(|__x| __x as jni::sys::jint)
+                    .map_err(|e| <__JniErr as ::core::convert::From<
+                        String,
+                    >>::from(format!("Option unbox: {}", e)))?;
+                Some(jint_to_Priority_447102d2(env, &__unboxed)?)
+            } else {
+                None
+            }
+        };
+        __v
     })
 }
 #[allow(
@@ -4632,7 +4719,9 @@ pub(crate) unsafe fn JObject_to_Option_Priority_ad5cbb32<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4643,18 +4732,21 @@ pub(crate) unsafe fn JObject_to_Option_QueryTarget_08d4f26d<'env, 'v>(
     v: &jni::objects::JObject<'v>,
 ) -> ::core::result::Result<Option<zenoh_flat::QueryTarget>, __JniErr> {
     Ok({
-        if !v.is_null() {
-            let __unboxed: jni::sys::jint = env
-                .call_method(&v, "intValue", "()I", &[])
-                .and_then(|val| val.i())
-                .map(|__x| __x as jni::sys::jint)
-                .map_err(|e| <__JniErr as ::core::convert::From<
-                    String,
-                >>::from(format!("Option unbox: {}", e)))?;
-            Some(jint_to_QueryTarget_71d4db6a(env, &__unboxed)?)
-        } else {
-            None
-        }
+        let __v: ::core::option::Option<zenoh_flat::QueryTarget> = {
+            if !v.is_null() {
+                let __unboxed: jni::sys::jint = env
+                    .call_method(&v, "intValue", "()I", &[])
+                    .and_then(|val| val.i())
+                    .map(|__x| __x as jni::sys::jint)
+                    .map_err(|e| <__JniErr as ::core::convert::From<
+                        String,
+                    >>::from(format!("Option unbox: {}", e)))?;
+                Some(jint_to_QueryTarget_71d4db6a(env, &__unboxed)?)
+            } else {
+                None
+            }
+        };
+        __v
     })
 }
 #[allow(
@@ -4662,7 +4754,9 @@ pub(crate) unsafe fn JObject_to_Option_QueryTarget_08d4f26d<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4673,11 +4767,14 @@ pub(crate) unsafe fn JObject_to_Option_RecoveryConfig_0ab09326<'env, 'v>(
     v: &jni::objects::JObject<'v>,
 ) -> ::core::result::Result<Option<zenoh_flat::RecoveryConfig>, __JniErr> {
     Ok({
-        if v.is_null() {
-            None
-        } else {
-            Some(JObject_to_RecoveryConfig_99b77b36(env, v)?)
-        }
+        let __v: ::core::option::Option<zenoh_flat::RecoveryConfig> = {
+            if v.is_null() {
+                None
+            } else {
+                Some(JObject_to_RecoveryConfig_99b77b36(env, v)?)
+            }
+        };
+        __v
     })
 }
 #[allow(
@@ -4685,7 +4782,9 @@ pub(crate) unsafe fn JObject_to_Option_RecoveryConfig_0ab09326<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4696,7 +4795,14 @@ pub(crate) unsafe fn JObject_to_Option_RecoveryMode_836c4b98<'env, 'v>(
     v: &jni::objects::JObject<'v>,
 ) -> ::core::result::Result<Option<zenoh_flat::RecoveryMode>, __JniErr> {
     Ok({
-        if v.is_null() { None } else { Some(JObject_to_RecoveryMode_823c86d2(env, v)?) }
+        let __v: ::core::option::Option<zenoh_flat::RecoveryMode> = {
+            if v.is_null() {
+                None
+            } else {
+                Some(JObject_to_RecoveryMode_823c86d2(env, v)?)
+            }
+        };
+        __v
     })
 }
 #[allow(
@@ -4704,7 +4810,9 @@ pub(crate) unsafe fn JObject_to_Option_RecoveryMode_836c4b98<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4715,18 +4823,21 @@ pub(crate) unsafe fn JObject_to_Option_Reliability_60b5e063<'env, 'v>(
     v: &jni::objects::JObject<'v>,
 ) -> ::core::result::Result<Option<zenoh_flat::Reliability>, __JniErr> {
     Ok({
-        if !v.is_null() {
-            let __unboxed: jni::sys::jint = env
-                .call_method(&v, "intValue", "()I", &[])
-                .and_then(|val| val.i())
-                .map(|__x| __x as jni::sys::jint)
-                .map_err(|e| <__JniErr as ::core::convert::From<
-                    String,
-                >>::from(format!("Option unbox: {}", e)))?;
-            Some(jint_to_Reliability_5d4a96c8(env, &__unboxed)?)
-        } else {
-            None
-        }
+        let __v: ::core::option::Option<zenoh_flat::Reliability> = {
+            if !v.is_null() {
+                let __unboxed: jni::sys::jint = env
+                    .call_method(&v, "intValue", "()I", &[])
+                    .and_then(|val| val.i())
+                    .map(|__x| __x as jni::sys::jint)
+                    .map_err(|e| <__JniErr as ::core::convert::From<
+                        String,
+                    >>::from(format!("Option unbox: {}", e)))?;
+                Some(jint_to_Reliability_5d4a96c8(env, &__unboxed)?)
+            } else {
+                None
+            }
+        };
+        __v
     })
 }
 #[allow(
@@ -4734,7 +4845,9 @@ pub(crate) unsafe fn JObject_to_Option_Reliability_60b5e063<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4745,18 +4858,21 @@ pub(crate) unsafe fn JObject_to_Option_ReplyKeyExpr_91b36eb3<'env, 'v>(
     v: &jni::objects::JObject<'v>,
 ) -> ::core::result::Result<Option<zenoh_flat::ReplyKeyExpr>, __JniErr> {
     Ok({
-        if !v.is_null() {
-            let __unboxed: jni::sys::jint = env
-                .call_method(&v, "intValue", "()I", &[])
-                .and_then(|val| val.i())
-                .map(|__x| __x as jni::sys::jint)
-                .map_err(|e| <__JniErr as ::core::convert::From<
-                    String,
-                >>::from(format!("Option unbox: {}", e)))?;
-            Some(jint_to_ReplyKeyExpr_0d9719f5(env, &__unboxed)?)
-        } else {
-            None
-        }
+        let __v: ::core::option::Option<zenoh_flat::ReplyKeyExpr> = {
+            if !v.is_null() {
+                let __unboxed: jni::sys::jint = env
+                    .call_method(&v, "intValue", "()I", &[])
+                    .and_then(|val| val.i())
+                    .map(|__x| __x as jni::sys::jint)
+                    .map_err(|e| <__JniErr as ::core::convert::From<
+                        String,
+                    >>::from(format!("Option unbox: {}", e)))?;
+                Some(jint_to_ReplyKeyExpr_0d9719f5(env, &__unboxed)?)
+            } else {
+                None
+            }
+        };
+        __v
     })
 }
 #[allow(
@@ -4764,7 +4880,9 @@ pub(crate) unsafe fn JObject_to_Option_ReplyKeyExpr_91b36eb3<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4774,14 +4892,21 @@ pub(crate) unsafe fn JObject_to_Option_Timestamp_0e99ff4b<'env, 'v>(
     env: &mut jni::JNIEnv<'env>,
     v: &jni::objects::JObject<'v>,
 ) -> ::core::result::Result<Option<zenoh_flat::Timestamp>, __JniErr> {
-    Ok({ if v.is_null() { None } else { Some(JObject_to_Timestamp_2cba8ec4(env, v)?) } })
+    Ok({
+        let __v: ::core::option::Option<zenoh_flat::Timestamp> = {
+            if v.is_null() { None } else { Some(JObject_to_Timestamp_2cba8ec4(env, v)?) }
+        };
+        __v
+    })
 }
 #[allow(
     non_snake_case,
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4792,18 +4917,21 @@ pub(crate) unsafe fn JObject_to_Option_bool_5c82fffd<'env, 'v>(
     v: &jni::objects::JObject<'v>,
 ) -> ::core::result::Result<Option<bool>, __JniErr> {
     Ok({
-        if !v.is_null() {
-            let __unboxed: jni::sys::jboolean = env
-                .call_method(&v, "booleanValue", "()Z", &[])
-                .and_then(|val| val.z())
-                .map(|__x| __x as jni::sys::jboolean)
-                .map_err(|e| <__JniErr as ::core::convert::From<
-                    String,
-                >>::from(format!("Option unbox: {}", e)))?;
-            Some(jboolean_to_bool_31306d98(env, &__unboxed)?)
-        } else {
-            None
-        }
+        let __v: ::core::option::Option<bool> = {
+            if !v.is_null() {
+                let __unboxed: jni::sys::jboolean = env
+                    .call_method(&v, "booleanValue", "()Z", &[])
+                    .and_then(|val| val.z())
+                    .map(|__x| __x as jni::sys::jboolean)
+                    .map_err(|e| <__JniErr as ::core::convert::From<
+                        String,
+                    >>::from(format!("Option unbox: {}", e)))?;
+                Some(jboolean_to_bool_31306d98(env, &__unboxed)?)
+            } else {
+                None
+            }
+        };
+        __v
     })
 }
 #[allow(
@@ -4811,7 +4939,9 @@ pub(crate) unsafe fn JObject_to_Option_bool_5c82fffd<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4822,18 +4952,21 @@ pub(crate) unsafe fn JObject_to_Option_f64_b3f3e9a9<'env, 'v>(
     v: &jni::objects::JObject<'v>,
 ) -> ::core::result::Result<Option<f64>, __JniErr> {
     Ok({
-        if !v.is_null() {
-            let __unboxed: jni::sys::jdouble = env
-                .call_method(&v, "doubleValue", "()D", &[])
-                .and_then(|val| val.d())
-                .map(|__x| __x as jni::sys::jdouble)
-                .map_err(|e| <__JniErr as ::core::convert::From<
-                    String,
-                >>::from(format!("Option unbox: {}", e)))?;
-            Some(jdouble_to_f64_9e4a8f70(env, &__unboxed)?)
-        } else {
-            None
-        }
+        let __v: ::core::option::Option<f64> = {
+            if !v.is_null() {
+                let __unboxed: jni::sys::jdouble = env
+                    .call_method(&v, "doubleValue", "()D", &[])
+                    .and_then(|val| val.d())
+                    .map(|__x| __x as jni::sys::jdouble)
+                    .map_err(|e| <__JniErr as ::core::convert::From<
+                        String,
+                    >>::from(format!("Option unbox: {}", e)))?;
+                Some(jdouble_to_f64_9e4a8f70(env, &__unboxed)?)
+            } else {
+                None
+            }
+        };
+        __v
     })
 }
 #[allow(
@@ -4841,7 +4974,9 @@ pub(crate) unsafe fn JObject_to_Option_f64_b3f3e9a9<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4852,18 +4987,21 @@ pub(crate) unsafe fn JObject_to_Option_i64_2ba9a5ed<'env, 'v>(
     v: &jni::objects::JObject<'v>,
 ) -> ::core::result::Result<Option<i64>, __JniErr> {
     Ok({
-        if !v.is_null() {
-            let __unboxed: jni::sys::jlong = env
-                .call_method(&v, "longValue", "()J", &[])
-                .and_then(|val| val.j())
-                .map(|__x| __x as jni::sys::jlong)
-                .map_err(|e| <__JniErr as ::core::convert::From<
-                    String,
-                >>::from(format!("Option unbox: {}", e)))?;
-            Some(jlong_to_i64_fbf9a9bc(env, &__unboxed)?)
-        } else {
-            None
-        }
+        let __v: ::core::option::Option<i64> = {
+            if !v.is_null() {
+                let __unboxed: jni::sys::jlong = env
+                    .call_method(&v, "longValue", "()J", &[])
+                    .and_then(|val| val.j())
+                    .map(|__x| __x as jni::sys::jlong)
+                    .map_err(|e| <__JniErr as ::core::convert::From<
+                        String,
+                    >>::from(format!("Option unbox: {}", e)))?;
+                Some(jlong_to_i64_fbf9a9bc(env, &__unboxed)?)
+            } else {
+                None
+            }
+        };
+        __v
     })
 }
 #[allow(
@@ -4871,7 +5009,9 @@ pub(crate) unsafe fn JObject_to_Option_i64_2ba9a5ed<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4882,18 +5022,21 @@ pub(crate) unsafe fn JObject_to_Option_u16_e09bd2dc<'env, 'v>(
     v: &jni::objects::JObject<'v>,
 ) -> ::core::result::Result<Option<u16>, __JniErr> {
     Ok({
-        if !v.is_null() {
-            let __unboxed: jni::sys::jint = env
-                .call_method(&v, "intValue", "()I", &[])
-                .and_then(|val| val.i())
-                .map(|__x| __x as jni::sys::jint)
-                .map_err(|e| <__JniErr as ::core::convert::From<
-                    String,
-                >>::from(format!("Option unbox: {}", e)))?;
-            Some(jint_to_u16_28edf527(env, &__unboxed)?)
-        } else {
-            None
-        }
+        let __v: ::core::option::Option<u16> = {
+            if !v.is_null() {
+                let __unboxed: jni::sys::jint = env
+                    .call_method(&v, "intValue", "()I", &[])
+                    .and_then(|val| val.i())
+                    .map(|__x| __x as jni::sys::jint)
+                    .map_err(|e| <__JniErr as ::core::convert::From<
+                        String,
+                    >>::from(format!("Option unbox: {}", e)))?;
+                Some(jint_to_u16_28edf527(env, &__unboxed)?)
+            } else {
+                None
+            }
+        };
+        __v
     })
 }
 #[allow(
@@ -4901,7 +5044,9 @@ pub(crate) unsafe fn JObject_to_Option_u16_e09bd2dc<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4912,18 +5057,21 @@ pub(crate) unsafe fn JObject_to_Option_u64_32be16a2<'env, 'v>(
     v: &jni::objects::JObject<'v>,
 ) -> ::core::result::Result<Option<u64>, __JniErr> {
     Ok({
-        if !v.is_null() {
-            let __unboxed: jni::sys::jlong = env
-                .call_method(&v, "longValue", "()J", &[])
-                .and_then(|val| val.j())
-                .map(|__x| __x as jni::sys::jlong)
-                .map_err(|e| <__JniErr as ::core::convert::From<
-                    String,
-                >>::from(format!("Option unbox: {}", e)))?;
-            Some(jlong_to_u64_4384a5d6(env, &__unboxed)?)
-        } else {
-            None
-        }
+        let __v: ::core::option::Option<u64> = {
+            if !v.is_null() {
+                let __unboxed: jni::sys::jlong = env
+                    .call_method(&v, "longValue", "()J", &[])
+                    .and_then(|val| val.j())
+                    .map(|__x| __x as jni::sys::jlong)
+                    .map_err(|e| <__JniErr as ::core::convert::From<
+                        String,
+                    >>::from(format!("Option unbox: {}", e)))?;
+                Some(jlong_to_u64_4384a5d6(env, &__unboxed)?)
+            } else {
+                None
+            }
+        };
+        __v
     })
 }
 #[allow(
@@ -4931,7 +5079,9 @@ pub(crate) unsafe fn JObject_to_Option_u64_32be16a2<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -4977,7 +5127,9 @@ pub(crate) unsafe fn JObject_to_RecoveryConfig_99b77b36<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -5060,7 +5212,9 @@ pub(crate) unsafe fn JObject_to_RecoveryMode_823c86d2<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -5119,7 +5273,9 @@ pub(crate) unsafe fn JObject_to_RepliesConfig_eb8e9079<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -5174,7 +5330,9 @@ pub(crate) unsafe fn JObject_to_Selector_60d319dc<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -5210,7 +5368,9 @@ pub(crate) unsafe fn JObject_to_SourceInfo_355bb3a8<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -5254,7 +5414,9 @@ pub(crate) unsafe fn JObject_to_TimestampInstrumentation_4986e51d<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -5299,7 +5461,9 @@ pub(crate) unsafe fn JObject_to_TimestampStackRecord_9b3e6002<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -5333,7 +5497,9 @@ pub(crate) unsafe fn JObject_to_Timestamp_2cba8ec4<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -5360,7 +5526,9 @@ pub(crate) unsafe fn JObject_to_ZenohId_d483690b<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -5504,7 +5672,9 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Hello_Send_Sync_static_d937ec1a<'env, 'v
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -5642,7 +5812,9 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Miss_Send_Sync_static_192e5ce2<'env, 'v>
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -5748,7 +5920,7 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Query_Send_Sync_static_6c353bcb<'env, 'v
                                     );
                                 }
                             };
-                            match ::prebindgen::lang::box_jint(&mut env, __enc3) {
+                            match ::prebindgen_jni_runtime::box_jint(&mut env, __enc3) {
                                 ::core::result::Result::Ok(__o) => __o,
                                 ::core::result::Result::Err(__e) => {
                                     return ::core::result::Result::Err(
@@ -5813,7 +5985,7 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Query_Send_Sync_static_6c353bcb<'env, 'v
                                     );
                                 }
                             };
-                            match ::prebindgen::lang::box_jlong(&mut env, __h2) {
+                            match ::prebindgen_jni_runtime::box_jlong(&mut env, __h2) {
                                 ::core::result::Result::Ok(__o) => __o,
                                 ::core::result::Result::Err(__e) => {
                                     return ::core::result::Result::Err(
@@ -5843,7 +6015,7 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Query_Send_Sync_static_6c353bcb<'env, 'v
                                     );
                                 }
                             };
-                            match ::prebindgen::lang::box_jlong(&mut env, __h5) {
+                            match ::prebindgen_jni_runtime::box_jlong(&mut env, __h5) {
                                 ::core::result::Result::Ok(__o) => __o,
                                 ::core::result::Result::Err(__e) => {
                                     return ::core::result::Result::Err(
@@ -5914,7 +6086,9 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Query_Send_Sync_static_6c353bcb<'env, 'v
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -6022,7 +6196,7 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Reply_Send_Sync_static_a5b82e2d<'env, 'v
                                     );
                                 }
                             };
-                            match ::prebindgen::lang::box_jint(&mut env, __enc15) {
+                            match ::prebindgen_jni_runtime::box_jint(&mut env, __enc15) {
                                 ::core::result::Result::Ok(__o) => __o,
                                 ::core::result::Result::Err(__e) => {
                                     return ::core::result::Result::Err(
@@ -6073,7 +6247,7 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Reply_Send_Sync_static_a5b82e2d<'env, 'v
                                     );
                                 }
                             };
-                            match ::prebindgen::lang::box_jlong(&mut env, __h14) {
+                            match ::prebindgen_jni_runtime::box_jlong(&mut env, __h14) {
                                 ::core::result::Result::Ok(__o) => __o,
                                 ::core::result::Result::Err(__e) => {
                                     return ::core::result::Result::Err(
@@ -6144,7 +6318,7 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Reply_Send_Sync_static_a5b82e2d<'env, 'v
                                         );
                                     }
                                 };
-                                match ::prebindgen::lang::box_jint(&mut env, __enc4) {
+                                match ::prebindgen_jni_runtime::box_jint(&mut env, __enc4) {
                                     ::core::result::Result::Ok(__o) => __o,
                                     ::core::result::Result::Err(__e) => {
                                         return ::core::result::Result::Err(
@@ -6183,7 +6357,7 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Reply_Send_Sync_static_a5b82e2d<'env, 'v
                                         );
                                     }
                                 };
-                                match ::prebindgen::lang::box_jint(&mut env, __enc6) {
+                                match ::prebindgen_jni_runtime::box_jint(&mut env, __enc6) {
                                     ::core::result::Result::Ok(__o) => __o,
                                     ::core::result::Result::Err(__e) => {
                                         return ::core::result::Result::Err(
@@ -6222,7 +6396,10 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Reply_Send_Sync_static_a5b82e2d<'env, 'v
                                         );
                                     }
                                 };
-                                match ::prebindgen::lang::box_jboolean(&mut env, __enc8) {
+                                match ::prebindgen_jni_runtime::box_jboolean(
+                                    &mut env,
+                                    __enc8,
+                                ) {
                                     ::core::result::Result::Ok(__o) => __o,
                                     ::core::result::Result::Err(__e) => {
                                         return ::core::result::Result::Err(
@@ -6245,7 +6422,7 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Reply_Send_Sync_static_a5b82e2d<'env, 'v
                                         );
                                     }
                                 };
-                                match ::prebindgen::lang::box_jint(&mut env, __enc9) {
+                                match ::prebindgen_jni_runtime::box_jint(&mut env, __enc9) {
                                     ::core::result::Result::Ok(__o) => __o,
                                     ::core::result::Result::Err(__e) => {
                                         return ::core::result::Result::Err(
@@ -6268,7 +6445,10 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Reply_Send_Sync_static_a5b82e2d<'env, 'v
                                         );
                                     }
                                 };
-                                match ::prebindgen::lang::box_jint(&mut env, __enc10) {
+                                match ::prebindgen_jni_runtime::box_jint(
+                                    &mut env,
+                                    __enc10,
+                                ) {
                                     ::core::result::Result::Ok(__o) => __o,
                                     ::core::result::Result::Err(__e) => {
                                         return ::core::result::Result::Err(
@@ -6291,7 +6471,10 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Reply_Send_Sync_static_a5b82e2d<'env, 'v
                                         );
                                     }
                                 };
-                                match ::prebindgen::lang::box_jint(&mut env, __enc12) {
+                                match ::prebindgen_jni_runtime::box_jint(
+                                    &mut env,
+                                    __enc12,
+                                ) {
                                     ::core::result::Result::Ok(__o) => __o,
                                     ::core::result::Result::Err(__e) => {
                                         return ::core::result::Result::Err(
@@ -6320,7 +6503,7 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Reply_Send_Sync_static_a5b82e2d<'env, 'v
                                 let __h3: jni::sys::jlong = std::boxed::Box::into_raw(
                                     std::boxed::Box::new(__u0.payload),
                                 ) as jni::sys::jlong;
-                                match ::prebindgen::lang::box_jlong(&mut env, __h3) {
+                                match ::prebindgen_jni_runtime::box_jlong(&mut env, __h3) {
                                     ::core::result::Result::Ok(__o) => __o,
                                     ::core::result::Result::Err(__e) => {
                                         return ::core::result::Result::Err(
@@ -6337,7 +6520,7 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Reply_Send_Sync_static_a5b82e2d<'env, 'v
                                         let __h11: jni::sys::jlong = std::boxed::Box::into_raw(
                                             std::boxed::Box::new(__n),
                                         ) as jni::sys::jlong;
-                                        match ::prebindgen::lang::box_jlong(&mut env, __h11) {
+                                        match ::prebindgen_jni_runtime::box_jlong(&mut env, __h11) {
                                             ::core::result::Result::Ok(__o) => __o,
                                             ::core::result::Result::Err(__e) => {
                                                 return ::core::result::Result::Err(
@@ -6468,7 +6651,9 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Reply_Send_Sync_static_a5b82e2d<'env, 'v
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -6694,7 +6879,7 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Sample_Send_Sync_static_a050ca1d<'env, '
                                 let __h9: jni::sys::jlong = std::boxed::Box::into_raw(
                                     std::boxed::Box::new(__n),
                                 ) as jni::sys::jlong;
-                                match ::prebindgen::lang::box_jlong(&mut env, __h9) {
+                                match ::prebindgen_jni_runtime::box_jlong(&mut env, __h9) {
                                     ::core::result::Result::Ok(__o) => __o,
                                     ::core::result::Result::Err(__e) => {
                                         return ::core::result::Result::Err(
@@ -6764,7 +6949,9 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Sample_Send_Sync_static_a050ca1d<'env, '
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -6843,7 +7030,9 @@ pub(crate) unsafe fn JObject_to_impl_Fn_Send_Sync_static_90cfb0b9<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -6925,7 +7114,9 @@ pub(crate) unsafe fn JObject_to_impl_Fn_bool_Send_Sync_static_646c7f37<'env, 'v>
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -6935,14 +7126,21 @@ pub(crate) unsafe fn JString_to_Option_String_56d5e304<'env, 'v>(
     env: &mut jni::JNIEnv<'env>,
     v: &jni::objects::JString<'v>,
 ) -> ::core::result::Result<Option<String>, __JniErr> {
-    Ok({ if v.is_null() { None } else { Some(JString_to_String_c7f3ca43(env, v)?) } })
+    Ok({
+        let __v: ::core::option::Option<String> = {
+            if v.is_null() { None } else { Some(JString_to_String_c7f3ca43(env, v)?) }
+        };
+        __v
+    })
 }
 #[allow(
     non_snake_case,
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -6968,7 +7166,9 @@ pub(crate) unsafe fn JString_to_String_c7f3ca43<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -6985,7 +7185,9 @@ pub(crate) unsafe fn KeyExpr_to_jlong_57109ee0<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7002,7 +7204,9 @@ pub(crate) unsafe fn KeyExpr_to_jlong_5d6bcc5b<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7019,7 +7223,9 @@ pub(crate) unsafe fn LivelinessToken_to_jlong_d3477f0e<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7036,7 +7242,9 @@ pub(crate) unsafe fn MatchingListener_to_jlong_802284ad<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7077,7 +7285,9 @@ pub(crate) unsafe fn MissDetectionConfig_to_JObject_5213dfb7<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7121,7 +7331,9 @@ pub(crate) unsafe fn Miss_to_JObject_e2758329<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7132,15 +7344,18 @@ pub(crate) unsafe fn Option_Duration_to_jlong_1cfa4d44<'a>(
     v: Option<zenoh_flat::Duration>,
 ) -> ::core::result::Result<jni::sys::jlong, __JniErr> {
     Ok({
-        match v {
-            Some(value) => {
-                let __inner_s0 = Duration_to_u64_e3980876(env, value)
-                    .map_err(|__e| <__JniErr as ::core::convert::From<
-                        String,
-                    >>::from(__e.to_string()))?;
-                u64_to_jlong_4384a5d6(env, __inner_s0)?
+        let v: Option<zenoh_flat::Duration> = v;
+        {
+            match v {
+                Some(value) => {
+                    let __inner_s0 = Duration_to_u64_e3980876(env, value)
+                        .map_err(|__e| <__JniErr as ::core::convert::From<
+                            String,
+                        >>::from(__e.to_string()))?;
+                    u64_to_jlong_4384a5d6(env, __inner_s0)?
+                }
+                None => -1i64,
             }
-            None => -1i64,
         }
     })
 }
@@ -7149,7 +7364,9 @@ pub(crate) unsafe fn Option_Duration_to_jlong_1cfa4d44<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7160,9 +7377,12 @@ pub(crate) unsafe fn Option_Encoding_to_jlong_e89ec09d<'a>(
     v: Option<&zenoh_flat::Encoding>,
 ) -> ::core::result::Result<jni::sys::jlong, __JniErr> {
     Ok({
-        match v {
-            Some(value) => Encoding_to_jlong_072adb3b(env, value)?,
-            None => 0i64,
+        let v: Option<&zenoh_flat::Encoding> = v;
+        {
+            match v {
+                Some(value) => Encoding_to_jlong_072adb3b(env, value)?,
+                None => 0i64,
+            }
         }
     })
 }
@@ -7171,7 +7391,9 @@ pub(crate) unsafe fn Option_Encoding_to_jlong_e89ec09d<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7182,9 +7404,12 @@ pub(crate) unsafe fn Option_EntityGlobalId_to_JObject_edfc5f2b<'a>(
     v: Option<zenoh_flat::EntityGlobalId>,
 ) -> ::core::result::Result<jni::objects::JObject<'a>, __JniErr> {
     Ok({
-        match v {
-            Some(value) => EntityGlobalId_to_JObject_42df3b10(env, value)?,
-            None => jni::objects::JObject::null().into(),
+        let v: Option<zenoh_flat::EntityGlobalId> = v;
+        {
+            match v {
+                Some(value) => EntityGlobalId_to_JObject_42df3b10(env, value)?,
+                None => jni::objects::JObject::null().into(),
+            }
         }
     })
 }
@@ -7193,7 +7418,9 @@ pub(crate) unsafe fn Option_EntityGlobalId_to_JObject_edfc5f2b<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7204,9 +7431,12 @@ pub(crate) unsafe fn Option_ReplyError_to_jlong_d3e8c438<'a>(
     v: Option<&zenoh_flat::ReplyError>,
 ) -> ::core::result::Result<jni::sys::jlong, __JniErr> {
     Ok({
-        match v {
-            Some(value) => ReplyError_to_jlong_41e7bd88(env, value)?,
-            None => 0i64,
+        let v: Option<&zenoh_flat::ReplyError> = v;
+        {
+            match v {
+                Some(value) => ReplyError_to_jlong_41e7bd88(env, value)?,
+                None => 0i64,
+            }
         }
     })
 }
@@ -7215,7 +7445,9 @@ pub(crate) unsafe fn Option_ReplyError_to_jlong_d3e8c438<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7226,9 +7458,12 @@ pub(crate) unsafe fn Option_Sample_to_jlong_e48d7024<'a>(
     v: Option<&zenoh_flat::Sample>,
 ) -> ::core::result::Result<jni::sys::jlong, __JniErr> {
     Ok({
-        match v {
-            Some(value) => Sample_to_jlong_26fb3fbd(env, value)?,
-            None => 0i64,
+        let v: Option<&zenoh_flat::Sample> = v;
+        {
+            match v {
+                Some(value) => Sample_to_jlong_26fb3fbd(env, value)?,
+                None => 0i64,
+            }
         }
     })
 }
@@ -7237,7 +7472,9 @@ pub(crate) unsafe fn Option_Sample_to_jlong_e48d7024<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7248,9 +7485,12 @@ pub(crate) unsafe fn Option_SourceInfo_to_JObject_bc7e1137<'a>(
     v: Option<zenoh_flat::SourceInfo>,
 ) -> ::core::result::Result<jni::objects::JObject<'a>, __JniErr> {
     Ok({
-        match v {
-            Some(value) => SourceInfo_to_JObject_355bb3a8(env, value)?,
-            None => jni::objects::JObject::null().into(),
+        let v: Option<zenoh_flat::SourceInfo> = v;
+        {
+            match v {
+                Some(value) => SourceInfo_to_JObject_355bb3a8(env, value)?,
+                None => jni::objects::JObject::null().into(),
+            }
         }
     })
 }
@@ -7259,7 +7499,9 @@ pub(crate) unsafe fn Option_SourceInfo_to_JObject_bc7e1137<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7270,9 +7512,12 @@ pub(crate) unsafe fn Option_String_to_JString_56d5e304<'a>(
     v: Option<String>,
 ) -> ::core::result::Result<jni::objects::JString<'a>, __JniErr> {
     Ok({
-        match v {
-            Some(value) => String_to_JString_c7f3ca43(env, value)?,
-            None => jni::objects::JObject::null().into(),
+        let v: Option<String> = v;
+        {
+            match v {
+                Some(value) => String_to_JString_c7f3ca43(env, value)?,
+                None => jni::objects::JObject::null().into(),
+            }
         }
     })
 }
@@ -7281,7 +7526,9 @@ pub(crate) unsafe fn Option_String_to_JString_56d5e304<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7292,9 +7539,12 @@ pub(crate) unsafe fn Option_TimestampStack_to_jlong_14636a90<'a>(
     v: Option<&zenoh_flat::TimestampStack>,
 ) -> ::core::result::Result<jni::sys::jlong, __JniErr> {
     Ok({
-        match v {
-            Some(value) => TimestampStack_to_jlong_026bce82(env, value)?,
-            None => 0i64,
+        let v: Option<&zenoh_flat::TimestampStack> = v;
+        {
+            match v {
+                Some(value) => TimestampStack_to_jlong_026bce82(env, value)?,
+                None => 0i64,
+            }
         }
     })
 }
@@ -7303,7 +7553,9 @@ pub(crate) unsafe fn Option_TimestampStack_to_jlong_14636a90<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7314,9 +7566,12 @@ pub(crate) unsafe fn Option_Timestamp_to_JObject_0e99ff4b<'a>(
     v: Option<zenoh_flat::Timestamp>,
 ) -> ::core::result::Result<jni::objects::JObject<'a>, __JniErr> {
     Ok({
-        match v {
-            Some(value) => Timestamp_to_JObject_2cba8ec4(env, value)?,
-            None => jni::objects::JObject::null().into(),
+        let v: Option<zenoh_flat::Timestamp> = v;
+        {
+            match v {
+                Some(value) => Timestamp_to_JObject_2cba8ec4(env, value)?,
+                None => jni::objects::JObject::null().into(),
+            }
         }
     })
 }
@@ -7325,7 +7580,9 @@ pub(crate) unsafe fn Option_Timestamp_to_JObject_0e99ff4b<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7336,9 +7593,12 @@ pub(crate) unsafe fn Option_Vec_u8_to_JByteArray_6f4428ab<'a>(
     v: Option<Vec<u8>>,
 ) -> ::core::result::Result<jni::objects::JByteArray<'a>, __JniErr> {
     Ok({
-        match v {
-            Some(value) => Vec_u8_to_JByteArray_7936d5de(env, value)?,
-            None => jni::objects::JObject::null().into(),
+        let v: Option<Vec<u8>> = v;
+        {
+            match v {
+                Some(value) => Vec_u8_to_JByteArray_7936d5de(env, value)?,
+                None => jni::objects::JObject::null().into(),
+            }
         }
     })
 }
@@ -7347,7 +7607,9 @@ pub(crate) unsafe fn Option_Vec_u8_to_JByteArray_6f4428ab<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7358,9 +7620,12 @@ pub(crate) unsafe fn Option_ZBytes_to_jlong_c521cd2f<'a>(
     v: Option<&zenoh_flat::ZBytes>,
 ) -> ::core::result::Result<jni::sys::jlong, __JniErr> {
     Ok({
-        match v {
-            Some(value) => ZBytes_to_jlong_56134c74(env, value)?,
-            None => 0i64,
+        let v: Option<&zenoh_flat::ZBytes> = v;
+        {
+            match v {
+                Some(value) => ZBytes_to_jlong_56134c74(env, value)?,
+                None => 0i64,
+            }
         }
     })
 }
@@ -7369,7 +7634,9 @@ pub(crate) unsafe fn Option_ZBytes_to_jlong_c521cd2f<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7380,15 +7647,18 @@ pub(crate) unsafe fn Option_f64_to_JObject_b3f3e9a9<'a>(
     v: Option<f64>,
 ) -> ::core::result::Result<jni::objects::JObject<'a>, __JniErr> {
     Ok({
-        match v {
-            Some(value) => {
-                let __raw: jni::sys::jdouble = f64_to_jdouble_9e4a8f70(env, value)?;
-                ::prebindgen::lang::box_jdouble(env, __raw)
-                    .map_err(|e| <__JniErr as ::core::convert::From<
-                        String,
-                    >>::from(format!("Option box: {}", e)))?
+        let v: Option<f64> = v;
+        {
+            match v {
+                Some(value) => {
+                    let __raw: jni::sys::jdouble = f64_to_jdouble_9e4a8f70(env, value)?;
+                    ::prebindgen_jni_runtime::box_jdouble(env, __raw)
+                        .map_err(|e| <__JniErr as ::core::convert::From<
+                            String,
+                        >>::from(format!("Option box: {}", e)))?
+                }
+                None => jni::objects::JObject::null(),
             }
-            None => jni::objects::JObject::null(),
         }
     })
 }
@@ -7397,7 +7667,9 @@ pub(crate) unsafe fn Option_f64_to_JObject_b3f3e9a9<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7408,15 +7680,18 @@ pub(crate) unsafe fn Option_u64_to_JObject_32be16a2<'a>(
     v: Option<u64>,
 ) -> ::core::result::Result<jni::objects::JObject<'a>, __JniErr> {
     Ok({
-        match v {
-            Some(value) => {
-                let __raw: jni::sys::jlong = u64_to_jlong_4384a5d6(env, value)?;
-                ::prebindgen::lang::box_jlong(env, __raw)
-                    .map_err(|e| <__JniErr as ::core::convert::From<
-                        String,
-                    >>::from(format!("Option box: {}", e)))?
+        let v: Option<u64> = v;
+        {
+            match v {
+                Some(value) => {
+                    let __raw: jni::sys::jlong = u64_to_jlong_4384a5d6(env, value)?;
+                    ::prebindgen_jni_runtime::box_jlong(env, __raw)
+                        .map_err(|e| <__JniErr as ::core::convert::From<
+                            String,
+                        >>::from(format!("Option box: {}", e)))?
+                }
+                None => jni::objects::JObject::null(),
             }
-            None => jni::objects::JObject::null(),
         }
     })
 }
@@ -7425,7 +7700,9 @@ pub(crate) unsafe fn Option_u64_to_JObject_32be16a2<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7442,7 +7719,9 @@ pub(crate) unsafe fn Priority_to_jint_447102d2<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7459,7 +7738,9 @@ pub(crate) unsafe fn Publisher_to_jlong_7bfc8296<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7476,7 +7757,9 @@ pub(crate) unsafe fn Querier_to_jlong_9db85a56<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7493,7 +7776,9 @@ pub(crate) unsafe fn QueryTarget_to_jint_71d4db6a<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7510,7 +7795,9 @@ pub(crate) unsafe fn Query_to_jlong_3af47090<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7527,7 +7814,9 @@ pub(crate) unsafe fn Queryable_to_jlong_f7f9bb6c<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7541,7 +7830,8 @@ pub(crate) unsafe fn RecoveryConfig_to_JObject_99b77b36<'a>(
         let ___mode_present: jni::sys::jboolean;
         let ___mode__tag: jni::sys::jint;
         let ___mode_g0: jni::sys::jlong;
-        match &v.mode {
+        let __oc0: &::core::option::Option<_> = &v.mode;
+        match __oc0 {
             ::core::option::Option::Some(__o0) => {
                 ___mode_present = 1u8;
                 match __o0 {
@@ -7599,7 +7889,9 @@ pub(crate) unsafe fn RecoveryConfig_to_JObject_99b77b36<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7616,7 +7908,9 @@ pub(crate) unsafe fn Reliability_to_jint_5d4a96c8<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7662,7 +7956,9 @@ pub(crate) unsafe fn RepliesConfig_to_JObject_eb8e9079<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7679,7 +7975,9 @@ pub(crate) unsafe fn ReplyError_to_jlong_41e7bd88<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7696,7 +7994,9 @@ pub(crate) unsafe fn ReplyError_to_jlong_9db9d1a6<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7713,7 +8013,9 @@ pub(crate) unsafe fn ReplyKeyExpr_to_jint_0d9719f5<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7730,7 +8032,9 @@ pub(crate) unsafe fn Reply_to_jlong_8e506ce5<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7747,7 +8051,9 @@ pub(crate) unsafe fn Result_AdvancedPublisher_Error_to_AdvancedPublisher_757cecc
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7764,7 +8070,9 @@ pub(crate) unsafe fn Result_AdvancedSubscriber_Error_to_AdvancedSubscriber_af554
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7781,7 +8089,9 @@ pub(crate) unsafe fn Result_Config_Error_to_Config_745597c5<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7798,7 +8108,9 @@ pub(crate) unsafe fn Result_Error_to_unit_1cf21a9d<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7815,7 +8127,9 @@ pub(crate) unsafe fn Result_KeyExpr_Error_to_KeyExpr_61def08d<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7832,7 +8146,9 @@ pub(crate) unsafe fn Result_LivelinessToken_Error_to_LivelinessToken_9f3adb18<'a
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7849,7 +8165,9 @@ pub(crate) unsafe fn Result_MatchingListener_Error_to_MatchingListener_c791ef83<
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7866,7 +8184,9 @@ pub(crate) unsafe fn Result_Publisher_Error_to_Publisher_f0c2f227<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7883,7 +8203,9 @@ pub(crate) unsafe fn Result_Querier_Error_to_Querier_d4f296fb<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7900,7 +8222,9 @@ pub(crate) unsafe fn Result_Queryable_Error_to_Queryable_841895c5<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7917,7 +8241,9 @@ pub(crate) unsafe fn Result_SampleMissListener_Error_to_SampleMissListener_c2783
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7934,7 +8260,9 @@ pub(crate) unsafe fn Result_Sample_Error_to_Sample_372c9788<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7951,7 +8279,9 @@ pub(crate) unsafe fn Result_Scout_Error_to_Scout_6400eee0<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7968,7 +8298,9 @@ pub(crate) unsafe fn Result_Session_Error_to_Session_d603a635<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -7985,7 +8317,9 @@ pub(crate) unsafe fn Result_String_Error_to_String_1b7d13da<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8002,7 +8336,9 @@ pub(crate) unsafe fn Result_Subscriber_Error_to_Subscriber_f7ac5ca1<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8019,7 +8355,9 @@ pub(crate) unsafe fn Result_bool_Error_to_bool_d36f157c<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8036,7 +8374,9 @@ pub(crate) unsafe fn SampleKind_to_jint_d7ea75a8<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8053,7 +8393,9 @@ pub(crate) unsafe fn SampleMissListener_to_jlong_0301b1b4<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8070,7 +8412,9 @@ pub(crate) unsafe fn Sample_to_jlong_26fb3fbd<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8087,7 +8431,9 @@ pub(crate) unsafe fn Sample_to_jlong_f8134321<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8104,7 +8450,9 @@ pub(crate) unsafe fn Scout_to_jlong_794eae84<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8146,7 +8494,9 @@ pub(crate) unsafe fn Selector_to_JObject_60d319dc<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8163,7 +8513,9 @@ pub(crate) unsafe fn Session_to_jlong_4d3982f6<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8180,7 +8532,9 @@ pub(crate) unsafe fn SetIntersectionLevel_to_jint_0e49fc84<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8224,7 +8578,9 @@ pub(crate) unsafe fn SourceInfo_to_JObject_355bb3a8<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8239,7 +8595,7 @@ pub(crate) unsafe fn String_to_JString_c7f3ca43<'a>(
             .map_err(|e| {
                 <__JniErr as ::core::convert::From<
                     String,
-                >>::from(format!("encode_string: {}", e))
+                >>::from(format!("encode_str: {}", e))
             })?
     })
 }
@@ -8248,7 +8604,9 @@ pub(crate) unsafe fn String_to_JString_c7f3ca43<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8265,7 +8623,9 @@ pub(crate) unsafe fn Subscriber_to_jlong_73e1b4a2<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8311,7 +8671,9 @@ pub(crate) unsafe fn TimestampInstrumentation_to_JObject_4986e51d<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8383,7 +8745,9 @@ pub(crate) unsafe fn TimestampStackRecord_to_JObject_9b3e6002<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8400,7 +8764,9 @@ pub(crate) unsafe fn TimestampStack_to_jlong_026bce82<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8417,7 +8783,9 @@ pub(crate) unsafe fn TimestampStack_to_jlong_22dd1bd6<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8456,7 +8824,9 @@ pub(crate) unsafe fn Timestamp_to_JObject_2cba8ec4<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8467,6 +8837,7 @@ pub(crate) unsafe fn Vec_String_to_JObject_1e282499<'a>(
     v: Vec<String>,
 ) -> ::core::result::Result<jni::objects::JObject<'a>, __JniErr> {
     Ok({
+        let v: Vec<String> = v;
         let __list_obj = env
             .new_object("java/util/ArrayList", "()V", &[])
             .map_err(|e| <__JniErr as ::core::convert::From<
@@ -8493,7 +8864,9 @@ pub(crate) unsafe fn Vec_String_to_JObject_1e282499<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8504,6 +8877,7 @@ pub(crate) unsafe fn Vec_TimestampStackRecord_to_JObject_00e7df28<'a>(
     v: Vec<zenoh_flat::TimestampStackRecord>,
 ) -> ::core::result::Result<jni::objects::JObject<'a>, __JniErr> {
     Ok({
+        let v: Vec<zenoh_flat::TimestampStackRecord> = v;
         let __list_obj = env
             .new_object("java/util/ArrayList", "()V", &[])
             .map_err(|e| <__JniErr as ::core::convert::From<
@@ -8530,7 +8904,9 @@ pub(crate) unsafe fn Vec_TimestampStackRecord_to_JObject_00e7df28<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8541,6 +8917,7 @@ pub(crate) unsafe fn Vec_ZenohId_to_JObject_cd7f8e6c<'a>(
     v: Vec<zenoh_flat::ZenohId>,
 ) -> ::core::result::Result<jni::objects::JObject<'a>, __JniErr> {
     Ok({
+        let v: Vec<zenoh_flat::ZenohId> = v;
         let __list_obj = env
             .new_object("java/util/ArrayList", "()V", &[])
             .map_err(|e| <__JniErr as ::core::convert::From<
@@ -8567,7 +8944,9 @@ pub(crate) unsafe fn Vec_ZenohId_to_JObject_cd7f8e6c<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8591,7 +8970,9 @@ pub(crate) unsafe fn Vec_u8_to_JByteArray_7936d5de<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8608,7 +8989,9 @@ pub(crate) unsafe fn WhatAmI_to_jint_4c5d5738<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8625,7 +9008,9 @@ pub(crate) unsafe fn ZBytes_to_jlong_141dc9e1<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8642,7 +9027,9 @@ pub(crate) unsafe fn ZBytes_to_jlong_56134c74<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8677,7 +9064,9 @@ pub(crate) unsafe fn ZenohId_to_JObject_d483690b<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8694,7 +9083,9 @@ pub(crate) unsafe fn bool_to_jboolean_31306d98<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8711,7 +9102,9 @@ pub(crate) unsafe fn f64_to_jdouble_9e4a8f70<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8728,7 +9121,9 @@ pub(crate) unsafe fn jboolean_to_bool_31306d98<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8745,7 +9140,9 @@ pub(crate) unsafe fn jdouble_to_f64_9e4a8f70<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8779,7 +9176,9 @@ pub(crate) unsafe fn jint_to_CongestionControl_62e38379<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8814,7 +9213,9 @@ pub(crate) unsafe fn jint_to_ConsolidationMode_dd4eaedc<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8848,7 +9249,9 @@ pub(crate) unsafe fn jint_to_InterceptionPoint_a2f3ccf2<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8882,7 +9285,9 @@ pub(crate) unsafe fn jint_to_Priority_447102d2<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8914,7 +9319,9 @@ pub(crate) unsafe fn jint_to_QueryTarget_71d4db6a<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8945,7 +9352,9 @@ pub(crate) unsafe fn jint_to_Reliability_5d4a96c8<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -8976,7 +9385,9 @@ pub(crate) unsafe fn jint_to_ReplyKeyExpr_0d9719f5<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9005,7 +9416,9 @@ pub(crate) unsafe fn jint_to_SampleKind_d7ea75a8<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9040,7 +9453,9 @@ pub(crate) unsafe fn jint_to_SetIntersectionLevel_0e49fc84<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9070,7 +9485,9 @@ pub(crate) unsafe fn jint_to_WhatAmI_4c5d5738<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9087,7 +9504,9 @@ pub(crate) unsafe fn jint_to_i32_a3e3b6ef<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9111,7 +9530,9 @@ pub(crate) unsafe fn jint_to_u16_28edf527<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9135,7 +9556,9 @@ pub(crate) unsafe fn jint_to_u8_553cf6ec<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9159,7 +9582,9 @@ pub(crate) unsafe fn jlong_to_AdvancedPublisher_95a60c4e<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9183,7 +9608,9 @@ pub(crate) unsafe fn jlong_to_AdvancedSubscriber_9df4471c<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9207,7 +9634,9 @@ pub(crate) unsafe fn jlong_to_Config_d1f60c7d<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9231,7 +9660,9 @@ pub(crate) unsafe fn jlong_to_Encoding_e0e31e0d<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9255,7 +9686,9 @@ pub(crate) unsafe fn jlong_to_Hello_bbd3fc65<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9279,7 +9712,9 @@ pub(crate) unsafe fn jlong_to_KeyExpr_5d6bcc5b<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9303,7 +9738,9 @@ pub(crate) unsafe fn jlong_to_LivelinessToken_d3477f0e<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9327,7 +9764,9 @@ pub(crate) unsafe fn jlong_to_MatchingListener_802284ad<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9344,7 +9783,9 @@ pub(crate) unsafe fn jlong_to_Option_Config_61908788<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9355,18 +9796,21 @@ pub(crate) unsafe fn jlong_to_Option_Duration_1cfa4d44<'env, 'v>(
     v: &jni::sys::jlong,
 ) -> ::core::result::Result<Option<zenoh_flat::Duration>, __JniErr> {
     Ok({
-        if *v == -1i64 {
-            None
-        } else {
-            Some({
-                let __inner_s0 = jlong_to_u64_4384a5d6(env, v)?;
-                let __inner_s1 = u64_to_Duration_7c0845f9(env, __inner_s0)
-                    .map_err(|__e| <__JniErr as ::core::convert::From<
-                        String,
-                    >>::from(__e.to_string()))?;
-                __inner_s1
-            })
-        }
+        let __v: ::core::option::Option<zenoh_flat::Duration> = {
+            if *v == -1i64 {
+                None
+            } else {
+                Some({
+                    let __inner_s0 = jlong_to_u64_4384a5d6(env, v)?;
+                    let __inner_s1 = u64_to_Duration_7c0845f9(env, __inner_s0)
+                        .map_err(|__e| <__JniErr as ::core::convert::From<
+                            String,
+                        >>::from(__e.to_string()))?;
+                    __inner_s1
+                })
+            }
+        };
+        __v
     })
 }
 #[allow(
@@ -9374,7 +9818,9 @@ pub(crate) unsafe fn jlong_to_Option_Duration_1cfa4d44<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9391,7 +9837,9 @@ pub(crate) unsafe fn jlong_to_Option_Encoding_e89ec09d<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9408,7 +9856,9 @@ pub(crate) unsafe fn jlong_to_Option_KeyExpr_d960fa7d<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9419,7 +9869,7 @@ pub(crate) unsafe fn jlong_to_Option_KeyExpr_f7eec5be<'env, 'v>(
     v: &jni::sys::jlong,
 ) -> ::core::result::Result<Option<zenoh_flat::KeyExpr>, __JniErr> {
     Ok({
-        if *v == 0 {
+        let __v: ::core::option::Option<zenoh_flat::KeyExpr> = if *v == 0 {
             None
         } else if (*v & 1) == 1 {
             return ::core::result::Result::Err(
@@ -9429,7 +9879,8 @@ pub(crate) unsafe fn jlong_to_Option_KeyExpr_f7eec5be<'env, 'v>(
             );
         } else {
             Some(*std::boxed::Box::from_raw(*v as *mut zenoh_flat::KeyExpr))
-        }
+        };
+        __v
     })
 }
 #[allow(
@@ -9437,7 +9888,9 @@ pub(crate) unsafe fn jlong_to_Option_KeyExpr_f7eec5be<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9448,7 +9901,7 @@ pub(crate) unsafe fn jlong_to_Option_ZBytes_e82c3945<'env, 'v>(
     v: &jni::sys::jlong,
 ) -> ::core::result::Result<Option<zenoh_flat::ZBytes>, __JniErr> {
     Ok({
-        if *v == 0 {
+        let __v: ::core::option::Option<zenoh_flat::ZBytes> = if *v == 0 {
             None
         } else if (*v & 1) == 1 {
             return ::core::result::Result::Err(
@@ -9458,7 +9911,8 @@ pub(crate) unsafe fn jlong_to_Option_ZBytes_e82c3945<'env, 'v>(
             );
         } else {
             Some(*std::boxed::Box::from_raw(*v as *mut zenoh_flat::ZBytes))
-        }
+        };
+        __v
     })
 }
 #[allow(
@@ -9466,7 +9920,9 @@ pub(crate) unsafe fn jlong_to_Option_ZBytes_e82c3945<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9490,7 +9946,9 @@ pub(crate) unsafe fn jlong_to_Publisher_7bfc8296<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9514,7 +9972,9 @@ pub(crate) unsafe fn jlong_to_Querier_9db85a56<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9538,7 +9998,9 @@ pub(crate) unsafe fn jlong_to_Query_3af47090<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9562,7 +10024,9 @@ pub(crate) unsafe fn jlong_to_Queryable_f7f9bb6c<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9586,7 +10050,9 @@ pub(crate) unsafe fn jlong_to_ReplyError_9db9d1a6<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9610,7 +10076,9 @@ pub(crate) unsafe fn jlong_to_Reply_8e506ce5<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9634,7 +10102,9 @@ pub(crate) unsafe fn jlong_to_SampleMissListener_0301b1b4<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9658,7 +10128,9 @@ pub(crate) unsafe fn jlong_to_Sample_f8134321<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9682,7 +10154,9 @@ pub(crate) unsafe fn jlong_to_Scout_794eae84<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9706,7 +10180,9 @@ pub(crate) unsafe fn jlong_to_Session_4d3982f6<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9730,7 +10206,9 @@ pub(crate) unsafe fn jlong_to_Subscriber_73e1b4a2<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9754,7 +10232,9 @@ pub(crate) unsafe fn jlong_to_TimestampStack_22dd1bd6<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9778,7 +10258,9 @@ pub(crate) unsafe fn jlong_to_ZBytes_141dc9e1<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9795,7 +10277,9 @@ pub(crate) unsafe fn jlong_to_i64_fbf9a9bc<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9819,7 +10303,9 @@ pub(crate) unsafe fn jlong_to_u32_9594a230<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9836,7 +10322,9 @@ pub(crate) unsafe fn jlong_to_u64_4384a5d6<'env, 'v>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9860,7 +10348,9 @@ pub(crate) unsafe fn std_borrow_Cow_u8_to_JByteArray_c6a6bddf<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9884,7 +10374,9 @@ pub(crate) unsafe fn str_to_JString_7b77dc67<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9901,7 +10393,9 @@ pub(crate) unsafe fn u16_to_jint_28edf527<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9918,7 +10412,9 @@ pub(crate) unsafe fn u32_to_jlong_9594a230<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9949,7 +10445,9 @@ pub(crate) unsafe fn u64_to_Duration_7c0845f9<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9966,7 +10464,9 @@ pub(crate) unsafe fn u64_to_jlong_4384a5d6<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -9990,7 +10490,9 @@ pub(crate) unsafe fn u8_ZENOH_ID_MAX_SIZE_to_JByteArray_836d163f<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -10007,7 +10509,9 @@ pub(crate) unsafe fn u8_to_jint_553cf6ec<'a>(
     unused_mut,
     unused_variables,
     unused_braces,
+    unused_parens,
     dead_code,
+    clippy::useless_conversion,
     clippy::needless_question_mark,
     clippy::let_and_return,
     clippy::nonminimal_bool,
@@ -10033,11 +10537,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_advancedPublisherDeclareBac
     __domain_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let publisher = match jlong_to_AdvancedPublisher_95a60c4e(&mut env, &publisher) {
@@ -10159,11 +10663,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_advancedPublisherDeclareMat
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let publisher = match jlong_to_AdvancedPublisher_95a60c4e(&mut env, &publisher) {
@@ -10282,11 +10786,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_advancedPublisherDelete<'a>
     __domain_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let publisher = match jlong_to_AdvancedPublisher_95a60c4e(&mut env, &publisher) {
@@ -10411,11 +10915,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_advancedPublisherMatchingSt
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jboolean {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let publisher = match jlong_to_AdvancedPublisher_95a60c4e(&mut env, &publisher) {
@@ -10502,11 +11006,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_advancedPublisherPut<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let publisher = match jlong_to_AdvancedPublisher_95a60c4e(&mut env, &publisher) {
@@ -10801,11 +11305,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_advancedSubscriberDeclareBa
     __domain_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let subscriber = match jlong_to_AdvancedSubscriber_9df4471c(&mut env, &subscriber) {
@@ -10947,11 +11451,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_advancedSubscriberDeclareBa
     __domain_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let subscriber = match jlong_to_AdvancedSubscriber_9df4471c(&mut env, &subscriber) {
@@ -11075,11 +11579,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_advancedSubscriberDeclareDe
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let subscriber = match jlong_to_AdvancedSubscriber_9df4471c(&mut env, &subscriber) {
@@ -11221,11 +11725,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_advancedSubscriberDeclareSa
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let subscriber = match jlong_to_AdvancedSubscriber_9df4471c(&mut env, &subscriber) {
@@ -11344,11 +11848,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_configGetJson<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let c = match jlong_to_Config_d1f60c7d(&mut env, &c) {
@@ -11444,11 +11948,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_configInsertJson5<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let mut c = match jlong_to_Config_d1f60c7d(&mut env, &c) {
@@ -11555,7 +12059,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_configNewClone<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let c = match jlong_to_Config_d1f60c7d(&mut env, &c) {
@@ -11596,7 +12100,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_configNewDefault<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = zenoh_flat::config_new_default();
@@ -11625,11 +12129,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_configNewFromFile<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let path = match JString_to_String_c7f3ca43(&mut env, &path) {
@@ -11709,11 +12213,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_configNewFromJson5<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match JString_to_String_c7f3ca43(&mut env, &s) {
@@ -11793,11 +12297,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_configNewFromYaml<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match JString_to_String_c7f3ca43(&mut env, &s) {
@@ -11876,7 +12380,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_encodingGetId<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let e = match jlong_to_Encoding_e0e31e0d(&mut env, &e) {
@@ -11918,7 +12422,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_encodingGetSchema<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JByteArray<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let e = match jlong_to_Encoding_e0e31e0d(&mut env, &e) {
@@ -11960,7 +12464,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_encodingNewClone<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let e = match jlong_to_Encoding_e0e31e0d(&mut env, &e) {
@@ -12003,7 +12507,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_encodingNewFromId<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let id = match jint_to_u16_28edf527(&mut env, &id) {
@@ -12059,7 +12563,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_encodingNewFromString<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match JString_to_String_c7f3ca43(&mut env, &s) {
@@ -12106,7 +12610,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_encodingNewWithSchema<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __exp_e_sel = match jint_to_i32_a3e3b6ef(&mut env, &e_sel) {
@@ -12262,7 +12766,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_encodingToString<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let e = match jlong_to_Encoding_e0e31e0d(&mut env, &e) {
@@ -12306,7 +12810,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_helloGetLocators<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JObject<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let h = match jlong_to_Hello_bbd3fc65(&mut env, &h) {
@@ -12324,7 +12828,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_helloGetLocators<'a>(
         }
     };
     #[allow(non_upper_case_globals)]
-    static __CB_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __CB_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __CB_FQN: &str = "io/zenoh/jni/StringFolder";
     const __CB_DESCR: &str = "(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;";
     let __vec = zenoh_flat::hello_get_locators(&h);
@@ -12393,7 +12897,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_helloGetWhatami<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let h = match jlong_to_Hello_bbd3fc65(&mut env, &h) {
@@ -12436,7 +12940,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_helloGetZid<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JObject<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let h = match jlong_to_Hello_bbd3fc65(&mut env, &h) {
@@ -12454,7 +12958,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_helloGetZid<'a>(
         }
     };
     #[allow(non_upper_case_globals)]
-    static __CB_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __CB_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __CB_FQN: &str = "io/zenoh/jni/config/ZenohIdBuilder";
     const __CB_DESCR: &str = "([B)Ljava/lang/Object;";
     let __out = zenoh_flat::hello_get_zid(&h);
@@ -12519,7 +13023,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_initAndroidLogs<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let filter = match JString_to_String_c7f3ca43(&mut env, &filter) {
@@ -12561,7 +13065,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_initZenohLogsFromEnvOr<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let fallback_filter = match JString_to_String_c7f3ca43(&mut env, &fallback_filter) {
@@ -12603,7 +13107,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_keyexprAsStr<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let ke = match jlong_to_KeyExpr_5d6bcc5b(&mut env, &ke) {
@@ -12648,7 +13152,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_keyexprIncludes<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jboolean {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let a = match jlong_to_KeyExpr_5d6bcc5b(&mut env, &a) {
@@ -12787,7 +13291,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_keyexprIntersects<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jboolean {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let a = match jlong_to_KeyExpr_5d6bcc5b(&mut env, &a) {
@@ -12924,11 +13428,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_keyexprNewAutocanonize<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match JString_to_String_c7f3ca43(&mut env, &s) {
@@ -13007,7 +13511,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_keyexprNewClone<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let ke = match jlong_to_KeyExpr_5d6bcc5b(&mut env, &ke) {
@@ -13053,11 +13557,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_keyexprNewConcat<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __exp_a_sel = match jint_to_i32_a3e3b6ef(&mut env, &a_sel) {
@@ -13234,11 +13738,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_keyexprNewJoin<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __exp_a_sel = match jint_to_i32_a3e3b6ef(&mut env, &a_sel) {
@@ -13412,11 +13916,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_keyexprNewTryFrom<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match JString_to_String_c7f3ca43(&mut env, &s) {
@@ -13498,7 +14002,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_keyexprRelationTo<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let a = match jlong_to_KeyExpr_5d6bcc5b(&mut env, &a) {
@@ -13634,7 +14138,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_keyexprToString<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let ke = match jlong_to_KeyExpr_5d6bcc5b(&mut env, &ke) {
@@ -13683,11 +14187,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_livelinessDeclareSubscriber
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let session = match jlong_to_Session_4d3982f6(&mut env, &session) {
@@ -13922,11 +14426,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_livelinessDeclareToken<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let session = match jlong_to_Session_4d3982f6(&mut env, &session) {
@@ -14110,11 +14614,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_livelinessGet<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let session = match jlong_to_Session_4d3982f6(&mut env, &session) {
@@ -14348,11 +14852,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_open<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     if config == 0 || (config & 1) == 1 {
@@ -14432,7 +14936,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_parametersContainsKey<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jboolean {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match JString_to_String_c7f3ca43(&mut env, &s) {
@@ -14489,7 +14993,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_parametersExtend<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match JString_to_String_c7f3ca43(&mut env, &s) {
@@ -14546,7 +15050,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_parametersGet<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match JString_to_String_c7f3ca43(&mut env, &s) {
@@ -14604,7 +15108,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_parametersInsert<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match JString_to_String_c7f3ca43(&mut env, &s) {
@@ -14674,7 +15178,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_parametersIsWellFormed<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jboolean {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match JString_to_String_c7f3ca43(&mut env, &s) {
@@ -14717,7 +15221,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_parametersRemove<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match JString_to_String_c7f3ca43(&mut env, &s) {
@@ -14776,7 +15280,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_parametersValues<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JObject<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match JString_to_String_c7f3ca43(&mut env, &s) {
@@ -14808,7 +15312,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_parametersValues<'a>(
         }
     };
     #[allow(non_upper_case_globals)]
-    static __CB_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __CB_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __CB_FQN: &str = "io/zenoh/jni/StringFolder";
     const __CB_DESCR: &str = "(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;";
     let __vec = zenoh_flat::parameters_values(&s, &k);
@@ -14879,11 +15383,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_publisherDelete<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let publisher = match jlong_to_Publisher_7bfc8296(&mut env, &publisher) {
@@ -15012,11 +15516,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_publisherPut<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let publisher = match jlong_to_Publisher_7bfc8296(&mut env, &publisher) {
@@ -15315,11 +15819,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_querierGet<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let querier = match jlong_to_Querier_9db85a56(&mut env, &querier) {
@@ -15664,7 +16168,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_queryGetAcceptsReplies<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let q = match jlong_to_Query_3af47090(&mut env, &q) {
@@ -15706,7 +16210,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_queryGetAttachment<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let q = match jlong_to_Query_3af47090(&mut env, &q) {
@@ -15748,7 +16252,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_queryGetEncoding<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let q = match jlong_to_Query_3af47090(&mut env, &q) {
@@ -15790,7 +16294,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_queryGetKeyExpr<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let q = match jlong_to_Query_3af47090(&mut env, &q) {
@@ -15832,7 +16336,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_queryGetParameters<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let q = match jlong_to_Query_3af47090(&mut env, &q) {
@@ -15874,7 +16378,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_queryGetPayload<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let q = match jlong_to_Query_3af47090(&mut env, &q) {
@@ -15926,11 +16430,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_queryReplyDelete<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let query = match jlong_to_Query_3af47090(&mut env, &query) {
@@ -16226,11 +16730,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_queryReplyError<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let query = match jlong_to_Query_3af47090(&mut env, &query) {
@@ -16477,11 +16981,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_queryReplySample<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let query = match jlong_to_Query_3af47090(&mut env, &query) {
@@ -16590,11 +17094,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_queryReplySuccess<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let query = match jlong_to_Query_3af47090(&mut env, &query) {
@@ -17047,7 +17551,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_replyErrorGetEncoding<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let e = match jlong_to_ReplyError_9db9d1a6(&mut env, &e) {
@@ -17089,7 +17593,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_replyErrorGetPayload<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let e = match jlong_to_ReplyError_9db9d1a6(&mut env, &e) {
@@ -17131,7 +17635,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_replyErrorGetTimestampStack
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let e = match jlong_to_ReplyError_9db9d1a6(&mut env, &e) {
@@ -17173,7 +17677,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_replyGetErr<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let r = match jlong_to_Reply_8e506ce5(&mut env, &r) {
@@ -17216,7 +17720,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_replyGetReplierId<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JObject<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let r = match jlong_to_Reply_8e506ce5(&mut env, &r) {
@@ -17234,7 +17738,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_replyGetReplierId<'a>(
         }
     };
     #[allow(non_upper_case_globals)]
-    static __CB_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __CB_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __CB_FQN: &str = "io/zenoh/jni/pubsub/EntityGlobalIdBuilder";
     const __CB_DESCR: &str = "([BJ)Ljava/lang/Object;";
     let __out = zenoh_flat::reply_get_replier_id(&r);
@@ -17322,7 +17826,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_replyGetSample<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let r = match jlong_to_Reply_8e506ce5(&mut env, &r) {
@@ -17364,7 +17868,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_replyIsOk<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jboolean {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let r = match jlong_to_Reply_8e506ce5(&mut env, &r) {
@@ -17406,7 +17910,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sampleGetAttachment<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match jlong_to_Sample_f8134321(&mut env, &s) {
@@ -17448,7 +17952,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sampleGetCongestionControl<
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match jlong_to_Sample_f8134321(&mut env, &s) {
@@ -17490,7 +17994,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sampleGetEncoding<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match jlong_to_Sample_f8134321(&mut env, &s) {
@@ -17532,7 +18036,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sampleGetExpress<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jboolean {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match jlong_to_Sample_f8134321(&mut env, &s) {
@@ -17574,7 +18078,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sampleGetKeyExpr<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match jlong_to_Sample_f8134321(&mut env, &s) {
@@ -17616,7 +18120,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sampleGetKind<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match jlong_to_Sample_f8134321(&mut env, &s) {
@@ -17658,7 +18162,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sampleGetPayload<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match jlong_to_Sample_f8134321(&mut env, &s) {
@@ -17700,7 +18204,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sampleGetPriority<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match jlong_to_Sample_f8134321(&mut env, &s) {
@@ -17742,7 +18246,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sampleGetReliability<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jint {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match jlong_to_Sample_f8134321(&mut env, &s) {
@@ -17785,7 +18289,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sampleGetSourceInfo<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JObject<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match jlong_to_Sample_f8134321(&mut env, &s) {
@@ -17803,7 +18307,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sampleGetSourceInfo<'a>(
         }
     };
     #[allow(non_upper_case_globals)]
-    static __CB_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __CB_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __CB_FQN: &str = "io/zenoh/jni/sample/SourceInfoBuilder";
     const __CB_DESCR: &str = "([BJJ)Ljava/lang/Object;";
     let __out = zenoh_flat::sample_get_source_info(&s);
@@ -17913,7 +18417,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sampleGetTimestamp<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JObject<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match jlong_to_Sample_f8134321(&mut env, &s) {
@@ -17931,7 +18435,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sampleGetTimestamp<'a>(
         }
     };
     #[allow(non_upper_case_globals)]
-    static __CB_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __CB_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __CB_FQN: &str = "io/zenoh/jni/time/TimestampBuilderRaw";
     const __CB_DESCR: &str = "(J[B)Ljava/lang/Object;";
     let __out = zenoh_flat::sample_get_timestamp(&s);
@@ -18022,7 +18526,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sampleGetTimestampStack<'a>
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match jlong_to_Sample_f8134321(&mut env, &s) {
@@ -18079,11 +18583,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sampleNewDelete<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __exp_key_expr_sel = match jint_to_i32_a3e3b6ef(&mut env, &key_expr_sel) {
@@ -18442,11 +18946,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sampleNewPut<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __exp_key_expr_sel = match jint_to_i32_a3e3b6ef(&mut env, &key_expr_sel) {
@@ -18952,11 +19456,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_scout<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let whatami = match jint_to_i32_a3e3b6ef(&mut env, &whatami) {
@@ -19110,11 +19614,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionDeclareAdvancedPubli
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let session = match jlong_to_Session_4d3982f6(&mut env, &session) {
@@ -19680,11 +20184,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionDeclareAdvancedSubsc
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let session = match jlong_to_Session_4d3982f6(&mut env, &session) {
@@ -20059,11 +20563,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionDeclareKeyexpr<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let session = match jlong_to_Session_4d3982f6(&mut env, &session) {
@@ -20173,11 +20677,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionDeclarePublisher<'a>
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let session = match jlong_to_Session_4d3982f6(&mut env, &session) {
@@ -20591,11 +21095,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionDeclareQuerier<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let session = match jlong_to_Session_4d3982f6(&mut env, &session) {
@@ -20932,11 +21436,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionDeclareQueryable<'a>
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let session = match jlong_to_Session_4d3982f6(&mut env, &session) {
@@ -21178,11 +21682,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionDeclareSubscriber<'a
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let session = match jlong_to_Session_4d3982f6(&mut env, &session) {
@@ -21411,11 +21915,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionDelete<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let session = match jlong_to_Session_4d3982f6(&mut env, &session) {
@@ -21752,11 +22256,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionGet<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let session = match jlong_to_Session_4d3982f6(&mut env, &session) {
@@ -22274,7 +22778,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionGetPeersZid<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JObject<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let session = match jlong_to_Session_4d3982f6(&mut env, &session) {
@@ -22292,7 +22796,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionGetPeersZid<'a>(
         }
     };
     #[allow(non_upper_case_globals)]
-    static __CB_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __CB_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __CB_FQN: &str = "io/zenoh/jni/config/ZenohIdFolderRaw";
     const __CB_DESCR: &str = "(Ljava/lang/Object;[B)Ljava/lang/Object;";
     let __vec = zenoh_flat::session_get_peers_zid(&session);
@@ -22366,7 +22870,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionGetRoutersZid<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JObject<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let session = match jlong_to_Session_4d3982f6(&mut env, &session) {
@@ -22384,7 +22888,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionGetRoutersZid<'a>(
         }
     };
     #[allow(non_upper_case_globals)]
-    static __CB_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __CB_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __CB_FQN: &str = "io/zenoh/jni/config/ZenohIdFolderRaw";
     const __CB_DESCR: &str = "(Ljava/lang/Object;[B)Ljava/lang/Object;";
     let __vec = zenoh_flat::session_get_routers_zid(&session);
@@ -22457,7 +22961,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionGetZid<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JObject<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let session = match jlong_to_Session_4d3982f6(&mut env, &session) {
@@ -22475,7 +22979,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionGetZid<'a>(
         }
     };
     #[allow(non_upper_case_globals)]
-    static __CB_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __CB_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __CB_FQN: &str = "io/zenoh/jni/config/ZenohIdBuilder";
     const __CB_DESCR: &str = "([B)Ljava/lang/Object;";
     let __out = zenoh_flat::session_get_zid(&session);
@@ -22559,11 +23063,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionPut<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let session = match jlong_to_Session_4d3982f6(&mut env, &session) {
@@ -23040,11 +23544,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_sessionUndeclareKeyexpr<'a>
     __domain_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let session = match jlong_to_Session_4d3982f6(&mut env, &session) {
@@ -23140,7 +23644,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_timestampStackGetInstrument
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JObject<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match jlong_to_TimestampStack_22dd1bd6(&mut env, &s) {
@@ -23158,7 +23662,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_timestampStackGetInstrument
         }
     };
     #[allow(non_upper_case_globals)]
-    static __CB_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __CB_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __CB_FQN: &str = "io/zenoh/jni/time/TimestampInstrumentationBuilder";
     const __CB_DESCR: &str = "(ZZZ)Ljava/lang/Object;";
     let __out = zenoh_flat::timestamp_stack_get_instrumentation(&s);
@@ -23250,7 +23754,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_timestampStackGetRecords<'a
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JObject<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let s = match jlong_to_TimestampStack_22dd1bd6(&mut env, &s) {
@@ -23291,7 +23795,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_tryInitZenohLogsFromEnv<'a>
     __error_sink: jni::objects::JObject<'a>,
 ) -> () {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __out = zenoh_flat::try_init_zenoh_logs_from_env();
@@ -23319,7 +23823,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_zbytesNewClone<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let z = match jlong_to_ZBytes_141dc9e1(&mut env, &z) {
@@ -23361,7 +23865,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_zbytesNewFromVec<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::sys::jlong {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let bytes = match JByteArray_to_Vec_u8_7936d5de(&mut env, &bytes) {
@@ -23403,7 +23907,7 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_zbytesToBytes<'a>(
     __error_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JByteArray<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let z = match jlong_to_ZBytes_141dc9e1(&mut env, &z) {
@@ -23446,11 +23950,11 @@ pub unsafe extern "C" fn Java_io_zenoh_jni_JNINative_zenohIdToString<'a>(
     __domain_sink: jni::objects::JObject<'a>,
 ) -> jni::objects::JString<'a> {
     #[allow(non_upper_case_globals)]
-    static __SINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __SINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __SINK_FQN: &str = "io/zenoh/jni/JniErrorHandler";
     const __SINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     #[allow(non_upper_case_globals)]
-    static __DSINK_MID: ::prebindgen::lang::CachedIfaceMethod = ::prebindgen::lang::CachedIfaceMethod::new();
+    static __DSINK_MID: ::prebindgen_jni_runtime::CachedIfaceMethod = ::prebindgen_jni_runtime::CachedIfaceMethod::new();
     const __DSINK_FQN: &str = "io/zenoh/jni/ErrorHandler";
     const __DSINK_DESCR: &str = "(Ljava/lang/String;)Ljava/lang/Object;";
     let __flat_z_bytes = match JByteArray_to_u8_ZENOH_ID_MAX_SIZE_836d163f(

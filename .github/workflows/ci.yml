@@ -10,7 +10,10 @@ env:
   RUST_BACKTRACE: 1
   CARGO_TERM_COLOR: always
   # zenoh-flat remains a sibling path dependency until it is published.
-  ZENOH_FLAT_REF: 380d449e52eb51c9879ed33168ee8970b9dadf3c
+  # TODO: re-pin to a `main` commit once eclipse-zenoh/zenoh-flat#79 merges —
+  # this is that PR's head, which is what declares the handle type aliases the
+  # split prebindgen requires.
+  ZENOH_FLAT_REF: 8ca56d2bb9c00617c001928bf9b2bc564dd62071
 
 jobs:
   # prebindgen tracks `main`, but every job in a run must see the *same* main:
@@ -56,8 +59,7 @@ jobs:
           PREBINDGEN_SHA: ${{ needs.resolve-prebindgen.outputs.sha }}
         run: |
           sed -i.bak \
-            -e "s|prebindgen = { path = \"../prebindgen/prebindgen\" }|prebindgen = { git = \"https://github.com/milyin/prebindgen.git\", rev = \"$PREBINDGEN_SHA\" }|g" \
-            -e "s|prebindgen-proc-macro = { path = \"../prebindgen/prebindgen-proc-macro\",|prebindgen-proc-macro = { git = \"https://github.com/milyin/prebindgen.git\", rev = \"$PREBINDGEN_SHA\",|g" \
+            -E -e "s|(prebindgen[a-z-]*) = \{ path = \"\.\./prebindgen/[a-z-]+\"|\1 = { git = \"https://github.com/milyin/prebindgen.git\", rev = \"$PREBINDGEN_SHA\"|g" \
             Cargo.toml ../zenoh-flat/Cargo.toml
           rm Cargo.toml.bak ../zenoh-flat/Cargo.toml.bak
           grep -n prebindgen Cargo.toml ../zenoh-flat/Cargo.toml
@@ -127,8 +129,7 @@ jobs:
           PREBINDGEN_SHA: ${{ needs.resolve-prebindgen.outputs.sha }}
         run: |
           sed -i.bak \
-            -e "s|prebindgen = { path = \"../prebindgen/prebindgen\" }|prebindgen = { git = \"https://github.com/milyin/prebindgen.git\", rev = \"$PREBINDGEN_SHA\" }|g" \
-            -e "s|prebindgen-proc-macro = { path = \"../prebindgen/prebindgen-proc-macro\",|prebindgen-proc-macro = { git = \"https://github.com/milyin/prebindgen.git\", rev = \"$PREBINDGEN_SHA\",|g" \
+            -E -e "s|(prebindgen[a-z-]*) = \{ path = \"\.\./prebindgen/[a-z-]+\"|\1 = { git = \"https://github.com/milyin/prebindgen.git\", rev = \"$PREBINDGEN_SHA\"|g" \
             Cargo.toml ../zenoh-flat/Cargo.toml
           rm Cargo.toml.bak ../zenoh-flat/Cargo.toml.bak
           grep -n prebindgen Cargo.toml ../zenoh-flat/Cargo.toml
@@ -200,8 +201,7 @@ jobs:
           PREBINDGEN_SHA: ${{ needs.resolve-prebindgen.outputs.sha }}
         run: |
           sed -i.bak \
-            -e "s|prebindgen = { path = \"../prebindgen/prebindgen\" }|prebindgen = { git = \"https://github.com/milyin/prebindgen.git\", rev = \"$PREBINDGEN_SHA\" }|g" \
-            -e "s|prebindgen-proc-macro = { path = \"../prebindgen/prebindgen-proc-macro\",|prebindgen-proc-macro = { git = \"https://github.com/milyin/prebindgen.git\", rev = \"$PREBINDGEN_SHA\",|g" \
+            -E -e "s|(prebindgen[a-z-]*) = \{ path = \"\.\./prebindgen/[a-z-]+\"|\1 = { git = \"https://github.com/milyin/prebindgen.git\", rev = \"$PREBINDGEN_SHA\"|g" \
             Cargo.toml ../zenoh-flat/Cargo.toml
           rm Cargo.toml.bak ../zenoh-flat/Cargo.toml.bak
           grep -n prebindgen Cargo.toml ../zenoh-flat/Cargo.toml
@@ -267,8 +267,7 @@ jobs:
           PREBINDGEN_SHA: ${{ needs.resolve-prebindgen.outputs.sha }}
         run: |
           sed -i.bak \
-            -e "s|prebindgen = { path = \"../prebindgen/prebindgen\" }|prebindgen = { git = \"https://github.com/milyin/prebindgen.git\", rev = \"$PREBINDGEN_SHA\" }|g" \
-            -e "s|prebindgen-proc-macro = { path = \"../prebindgen/prebindgen-proc-macro\",|prebindgen-proc-macro = { git = \"https://github.com/milyin/prebindgen.git\", rev = \"$PREBINDGEN_SHA\",|g" \
+            -E -e "s|(prebindgen[a-z-]*) = \{ path = \"\.\./prebindgen/[a-z-]+\"|\1 = { git = \"https://github.com/milyin/prebindgen.git\", rev = \"$PREBINDGEN_SHA\"|g" \
             Cargo.toml ../zenoh-flat/Cargo.toml
           rm Cargo.toml.bak ../zenoh-flat/Cargo.toml.bak
           grep -n prebindgen Cargo.toml ../zenoh-flat/Cargo.toml
