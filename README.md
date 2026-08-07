@@ -111,7 +111,10 @@ cd zenoh-flat-jni
 
 # Adjust paths in Cargo.toml (temporarily):
 # zenoh-flat = { version = "1.9.0", path = "../../PREBINDGEN/zenoh-flat", ... }
-# prebindgen = { path = "../../PREBINDGEN/prebindgen/prebindgen" }
+# prebindgen-jni-runtime = { path = "../../PREBINDGEN/prebindgen/prebindgen-jni-runtime" }
+# [build-dependencies]
+# prebindgen-jni      = { path = "../../PREBINDGEN/prebindgen/prebindgen-jni" }
+# prebindgen-registry = { path = "../../PREBINDGEN/prebindgen/prebindgen-registry" }
 
 cargo build --release
 ```
@@ -142,7 +145,7 @@ The generated bindings are created via `prebindgen` in the build process:
 
 1. **Rust source** (`zenoh-flat`) marked with `#[prebindgen]` annotations
 2. **Proc-macro** captures annotated items to JSONL format
-3. **`prebindgen::lang::JniGen`** reads JSONL and generates:
+3. **`prebindgen_jni::JniGen`** reads JSONL and generates:
    - Rust JNI wrapper functions
    - Kotlin data classes and enums
 4. **Gradle** packages Rust dylib + Kotlin sources into a JAR

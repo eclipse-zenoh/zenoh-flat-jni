@@ -156,9 +156,10 @@ version. CI must use that wrapper and verify its checksum.
 
 ### 4. Standalone checkout cannot build
 
-`Cargo.toml` contains sibling path dependencies on `../zenoh-flat` and
-`../prebindgen/prebindgen`, while the publishing workflow checks out only this
-repository.
+`Cargo.toml` contains sibling path dependencies on `../zenoh-flat` and on the
+`../prebindgen/*` crates (`prebindgen-jni-runtime` at runtime,
+`prebindgen-jni` + `prebindgen-registry` at build time), while the publishing
+workflow checks out only this repository.
 
 **Required fix:** either:
 
