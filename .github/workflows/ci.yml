@@ -10,33 +10,14 @@ env:
   RUST_BACKTRACE: 1
   CARGO_TERM_COLOR: always
   # zenoh-flat remains a sibling path dependency until it is published.
-  # eclipse-zenoh/zenoh-flat#79 (the handle type aliases the split prebindgen
-  # requires) on `main`.
-  ZENOH_FLAT_REF: c4b7d2d4693594a092228fbc9aa67d2ee85a45d4
+  # eclipse-zenoh/zenoh-flat#80 (where zenoh-flat takes prebindgen from
+  # crates.io too) on `main`.
+  ZENOH_FLAT_REF: 81feb940cce9f4c3b33a87de397b2ce42cb5fc9e
 
 jobs:
-  # prebindgen tracks `main`, but every job in a run must see the *same* main:
-  # resolving it per-job lets a merge land mid-run and give two jobs different
-  # generators. Resolve once here, and pin the jobs to that exact commit.
-  resolve-prebindgen:
-    name: Resolve prebindgen main
-    runs-on: ubuntu-latest
-    outputs:
-      sha: ${{ steps.rev.outputs.sha }}
-    steps:
-      - name: Resolve prebindgen main to a commit
-        id: rev
-        shell: bash
-        run: |
-          sha=$(git ls-remote https://github.com/milyin/prebindgen.git refs/heads/main | cut -f1)
-          test -n "$sha" || { echo "could not resolve prebindgen main"; exit 1; }
-          echo "prebindgen main = $sha"
-          echo "sha=$sha" >> "$GITHUB_OUTPUT"
-
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    needs: resolve-prebindgen
     defaults:
       run:
         working-directory: zenoh-flat-jni
@@ -51,17 +32,6 @@ jobs:
           repository: eclipse-zenoh/zenoh-flat
           ref: ${{ env.ZENOH_FLAT_REF }}
           path: zenoh-flat
-
-      - name: Use prebindgen from GitHub main
-        shell: bash
-        env:
-          PREBINDGEN_SHA: ${{ needs.resolve-prebindgen.outputs.sha }}
-        run: |
-          sed -i.bak \
-            -E -e "s|(prebindgen[a-z-]*) = \{ path = \"\.\./prebindgen/[a-z-]+\"|\1 = { git = \"https://github.com/milyin/prebindgen.git\", rev = \"$PREBINDGEN_SHA\"|g" \
-            Cargo.toml ../zenoh-flat/Cargo.toml
-          rm Cargo.toml.bak ../zenoh-flat/Cargo.toml.bak
-          grep -n prebindgen Cargo.toml ../zenoh-flat/Cargo.toml
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -89,9 +59,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: zenoh-flat-jni/target
-          key: ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}-${{ needs.resolve-prebindgen.outputs.sha }}
+          key: ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}
           restore-keys: |
-            ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}-
             ${{ runner.os }}-cargo-build-target-
 
       - name: Run format check
@@ -100,10 +69,21 @@ jobs:
       - name: Run clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
 
+      # build.rs writes the committed artifacts on every build, and clippy above
+      # already ran it — so anything it changed means the tree was stale. Staging
+      # first catches emitted files that are new (plain `git diff` cannot see an
+      # untracked file).
+      - name: Check the committed generated artifacts are current
+        run: |
+          git add -A -- src/generated_bindings.rs kotlin/generated kotlin/REPORT.md
+          git diff --cached --exit-code || {
+            echo "::error::Generated artifacts are stale. Run 'cargo build' and commit the result."
+            exit 1
+          }
+
   test:
     name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    needs: resolve-prebindgen
     defaults:
       run:
         working-directory: zenoh-flat-jni
@@ -121,17 +101,6 @@ jobs:
           repository: eclipse-zenoh/zenoh-flat
           ref: ${{ env.ZENOH_FLAT_REF }}
           path: zenoh-flat
-
-      - name: Use prebindgen from GitHub main
-        shell: bash
-        env:
-          PREBINDGEN_SHA: ${{ needs.resolve-prebindgen.outputs.sha }}
-        run: |
-          sed -i.bak \
-            -E -e "s|(prebindgen[a-z-]*) = \{ path = \"\.\./prebindgen/[a-z-]+\"|\1 = { git = \"https://github.com/milyin/prebindgen.git\", rev = \"$PREBINDGEN_SHA\"|g" \
-            Cargo.toml ../zenoh-flat/Cargo.toml
-          rm Cargo.toml.bak ../zenoh-flat/Cargo.toml.bak
-          grep -n prebindgen Cargo.toml ../zenoh-flat/Cargo.toml
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -164,9 +133,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: zenoh-flat-jni/target
-          key: ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}-${{ needs.resolve-prebindgen.outputs.sha }}
+          key: ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}
           restore-keys: |
-            ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}-
             ${{ runner.os }}-cargo-build-target-
 
       - name: Run tests
@@ -175,7 +143,6 @@ jobs:
   gradle-test:
     name: Gradle test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    needs: resolve-prebindgen
     defaults:
       run:
         working-directory: zenoh-flat-jni
@@ -193,17 +160,6 @@ jobs:
           repository: eclipse-zenoh/zenoh-flat
           ref: ${{ env.ZENOH_FLAT_REF }}
           path: zenoh-flat
-
-      - name: Use prebindgen from GitHub main
-        shell: bash
-        env:
-          PREBINDGEN_SHA: ${{ needs.resolve-prebindgen.outputs.sha }}
-        run: |
-          sed -i.bak \
-            -E -e "s|(prebindgen[a-z-]*) = \{ path = \"\.\./prebindgen/[a-z-]+\"|\1 = { git = \"https://github.com/milyin/prebindgen.git\", rev = \"$PREBINDGEN_SHA\"|g" \
-            Cargo.toml ../zenoh-flat/Cargo.toml
-          rm Cargo.toml.bak ../zenoh-flat/Cargo.toml.bak
-          grep -n prebindgen Cargo.toml ../zenoh-flat/Cargo.toml
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -225,9 +181,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: zenoh-flat-jni/target
-          key: ${{ runner.os }}-gradle-test-target-${{ env.ZENOH_FLAT_REF }}-${{ needs.resolve-prebindgen.outputs.sha }}
+          key: ${{ runner.os }}-gradle-test-target-${{ env.ZENOH_FLAT_REF }}
           restore-keys: |
-            ${{ runner.os }}-gradle-test-target-${{ env.ZENOH_FLAT_REF }}-
             ${{ runner.os }}-gradle-test-target-
 
       # Runs the Kotlin correspondence tests: each verifies a pure-Kotlin
@@ -241,7 +196,6 @@ jobs:
   build:
     name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    needs: resolve-prebindgen
     defaults:
       run:
         working-directory: zenoh-flat-jni
@@ -260,17 +214,6 @@ jobs:
           ref: ${{ env.ZENOH_FLAT_REF }}
           path: zenoh-flat
 
-      - name: Use prebindgen from GitHub main
-        shell: bash
-        env:
-          PREBINDGEN_SHA: ${{ needs.resolve-prebindgen.outputs.sha }}
-        run: |
-          sed -i.bak \
-            -E -e "s|(prebindgen[a-z-]*) = \{ path = \"\.\./prebindgen/[a-z-]+\"|\1 = { git = \"https://github.com/milyin/prebindgen.git\", rev = \"$PREBINDGEN_SHA\"|g" \
-            Cargo.toml ../zenoh-flat/Cargo.toml
-          rm Cargo.toml.bak ../zenoh-flat/Cargo.toml.bak
-          grep -n prebindgen Cargo.toml ../zenoh-flat/Cargo.toml
-
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -280,9 +223,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: zenoh-flat-jni/target
-          key: ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}-${{ needs.resolve-prebindgen.outputs.sha }}
+          key: ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}
           restore-keys: |
-            ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}-
             ${{ runner.os }}-cargo-build-target-
 
       - name: Build release

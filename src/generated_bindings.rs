@@ -8591,7 +8591,7 @@ pub(crate) unsafe fn String_to_JString_c7f3ca43<'a>(
     v: String,
 ) -> ::core::result::Result<jni::objects::JString<'a>, __JniErr> {
     Ok({
-        env.new_string(v.as_str())
+        env.new_string(&*v)
             .map_err(|e| {
                 <__JniErr as ::core::convert::From<
                     String,
