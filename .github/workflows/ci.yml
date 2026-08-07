@@ -10,10 +10,9 @@ env:
   RUST_BACKTRACE: 1
   CARGO_TERM_COLOR: always
   # zenoh-flat remains a sibling path dependency until it is published.
-  # TODO: re-pin to a `main` commit once eclipse-zenoh/zenoh-flat#79 merges —
-  # this is that PR's head, which is what declares the handle type aliases the
-  # split prebindgen requires.
-  ZENOH_FLAT_REF: 8ca56d2bb9c00617c001928bf9b2bc564dd62071
+  # eclipse-zenoh/zenoh-flat#79 (the handle type aliases the split prebindgen
+  # requires) on `main`.
+  ZENOH_FLAT_REF: c4b7d2d4693594a092228fbc9aa67d2ee85a45d4
 
 jobs:
   # prebindgen tracks `main`, but every job in a run must see the *same* main:
