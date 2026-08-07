@@ -100,6 +100,19 @@ jobs:
       - name: Run clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
 
+      # build.rs writes the committed artifacts on every build, and clippy above
+      # already ran it — so anything it changed means the tree was stale. Staging
+      # first catches emitted files that are new (plain `git diff` cannot see an
+      # untracked file); the paths are scoped because the step above rewrites
+      # Cargo.toml.
+      - name: Check the committed generated artifacts are current
+        run: |
+          git add -A -- src/generated_bindings.rs kotlin/generated kotlin/REPORT.md
+          git diff --cached --exit-code || {
+            echo "::error::Generated artifacts are stale. Run 'cargo build' and commit the result."
+            exit 1
+          }
+
   test:
     name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
