@@ -9,34 +9,18 @@ on:
 env:
   RUST_BACKTRACE: 1
   CARGO_TERM_COLOR: always
-  # zenoh-flat remains a sibling path dependency until it is published.
-  # eclipse-zenoh/zenoh-flat#80 (where zenoh-flat takes prebindgen from
-  # crates.io too) on `main`.
-  ZENOH_FLAT_REF: 81feb940cce9f4c3b33a87de397b2ce42cb5fc9e
 
 jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: zenoh-flat-jni
     steps:
       - uses: actions/checkout@v4
-        with:
-          path: zenoh-flat-jni
-
-      - name: Check out zenoh-flat
-        uses: actions/checkout@v4
-        with:
-          repository: eclipse-zenoh/zenoh-flat
-          ref: ${{ env.ZENOH_FLAT_REF }}
-          path: zenoh-flat
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: 1.93.0
+          toolchain: 1.97.1
           components: rustfmt, clippy
 
       - name: Cache cargo registry
@@ -58,8 +42,8 @@ jobs:
       - name: Cache cargo build
         uses: actions/cache@v4
         with:
-          path: zenoh-flat-jni/target
-          key: ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}
+          path: target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-build-target-
 
@@ -84,28 +68,16 @@ jobs:
   test:
     name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        working-directory: zenoh-flat-jni
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
-        with:
-          path: zenoh-flat-jni
-
-      - name: Check out zenoh-flat
-        uses: actions/checkout@v4
-        with:
-          repository: eclipse-zenoh/zenoh-flat
-          ref: ${{ env.ZENOH_FLAT_REF }}
-          path: zenoh-flat
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: 1.93.0
+          toolchain: 1.97.1
 
       - name: Install JDK
         uses: actions/setup-java@v3
@@ -132,8 +104,8 @@ jobs:
       - name: Cache cargo build
         uses: actions/cache@v4
         with:
-          path: zenoh-flat-jni/target
-          key: ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}
+          path: target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-build-target-
 
@@ -143,28 +115,16 @@ jobs:
   gradle-test:
     name: Gradle test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        working-directory: zenoh-flat-jni
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
-        with:
-          path: zenoh-flat-jni
-
-      - name: Check out zenoh-flat
-        uses: actions/checkout@v4
-        with:
-          repository: eclipse-zenoh/zenoh-flat
-          ref: ${{ env.ZENOH_FLAT_REF }}
-          path: zenoh-flat
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: 1.93.0
+          toolchain: 1.97.1
 
       - name: Install JDK
         uses: actions/setup-java@v3
@@ -180,8 +140,8 @@ jobs:
       - name: Cache cargo build
         uses: actions/cache@v4
         with:
-          path: zenoh-flat-jni/target
-          key: ${{ runner.os }}-gradle-test-target-${{ env.ZENOH_FLAT_REF }}
+          path: target
+          key: ${{ runner.os }}-gradle-test-target-${{ hashFiles('Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-gradle-test-target-
 
@@ -196,34 +156,22 @@ jobs:
   build:
     name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        working-directory: zenoh-flat-jni
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
-        with:
-          path: zenoh-flat-jni
-
-      - name: Check out zenoh-flat
-        uses: actions/checkout@v4
-        with:
-          repository: eclipse-zenoh/zenoh-flat
-          ref: ${{ env.ZENOH_FLAT_REF }}
-          path: zenoh-flat
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: 1.93.0
+          toolchain: 1.97.1
 
       - name: Cache cargo build
         uses: actions/cache@v4
         with:
-          path: zenoh-flat-jni/target
-          key: ${{ runner.os }}-cargo-build-target-${{ env.ZENOH_FLAT_REF }}
+          path: target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-build-target-
 
