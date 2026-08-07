@@ -10,10 +10,9 @@ env:
   RUST_BACKTRACE: 1
   CARGO_TERM_COLOR: always
   # zenoh-flat remains a sibling path dependency until it is published.
-  # TODO: re-pin to a `main` commit once eclipse-zenoh/zenoh-flat#80 merges —
-  # this is that PR's head, where zenoh-flat also takes prebindgen from
-  # crates.io instead of a sibling path.
-  ZENOH_FLAT_REF: 936fd00b4b4d6b0e2b3bf8662a275aad4adffe36
+  # eclipse-zenoh/zenoh-flat#80 (where zenoh-flat takes prebindgen from
+  # crates.io too) on `main`.
+  ZENOH_FLAT_REF: 81feb940cce9f4c3b33a87de397b2ce42cb5fc9e
 
 jobs:
   lint:
