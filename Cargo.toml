@@ -25,9 +25,7 @@ zenoh-flat = { version = "1.9.0", path = "../zenoh-flat", features = ["unstable"
 # (`::prebindgen_jni_runtime::JniBindingError`) that the generated bindings
 # reference. This is the ~350-line leaf crate — a shipped binding library does
 # not depend on the generator.
-# CI rewrites the local prebindgen paths to its GitHub `main` branch.
-# TODO: Once prebindgen is published to crates.io, replace path dep with version constraint
-prebindgen-jni-runtime = { path = "../prebindgen/prebindgen-jni-runtime" }
+prebindgen-jni-runtime = "0.5"
 # Direct zenoh/zenoh-ext deps for the self-contained ZBytes serialization JNI.
 # Same git rev as zenoh-flat so Cargo unifies the crate instances.
 zenoh = { version = "1.9.0", git = "https://github.com/eclipse-zenoh/zenoh.git", branch = "main", features = ["unstable", "internal", "default"], default-features = false }
@@ -43,13 +41,13 @@ crate-type = ["staticlib", "dylib"]
 [build-dependencies]
 # Same feature set as the runtime dep so the captured `FEATURES` / cfg-gated
 # `#[prebindgen]` items match what the runtime crate actually compiles.
-# TODO: Once zenoh-flat and prebindgen are published, update to version constraints
+# TODO: Once zenoh-flat is published, update to a version constraint
 zenoh-flat = { version = "1.9.0", path = "../zenoh-flat", features = ["unstable"] }
 # The generator, post-#371 split: the JNI/Kotlin adapter plus the decl macros
 # (`convert!`, `fun!`, `expand_*!`, …) it shares with the language-agnostic
 # pipeline.
-prebindgen-jni = { path = "../prebindgen/prebindgen-jni" }
-prebindgen-registry = { path = "../prebindgen/prebindgen-registry" }
+prebindgen-jni = "0.5"
+prebindgen-registry = "0.5"
 syn = "2"
 
 # panic = "abort" is required on the JNI boundary — a Rust panic crossing
