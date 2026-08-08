@@ -70,16 +70,15 @@ fun main() {
 
 ## Development
 
-The Maven Central release process, current publishing blockers, required
-multi-platform artifact layout, and dry-run procedure are documented in
-[PUBLISHING.md](PUBLISHING.md).
+Local setup is documented in [DEVELOPMENT.md](DEVELOPMENT.md); the Maven Central
+release pipeline, artifact layouts, verification gates and dry-run procedure are
+documented in [PUBLISHING.md](PUBLISHING.md).
 
 ### Prerequisites
 
 - Rust 1.70+ with JNI support
-- Gradle 7.0+
-- JDK 11+
-- Android SDK (for Android builds)
+- JDK 11+ (Gradle comes from the committed wrapper)
+- Android NDK r26 and `cargo-ndk` (for Android builds)
 
 ### Build from Source
 
@@ -111,10 +110,7 @@ cd zenoh-flat-jni
 
 # Adjust paths in Cargo.toml (temporarily):
 # zenoh-flat = { version = "1.9.0", path = "../../PREBINDGEN/zenoh-flat", ... }
-# prebindgen-jni-runtime = { path = "../../PREBINDGEN/prebindgen/prebindgen-jni-runtime" }
-# [build-dependencies]
-# prebindgen-jni      = { path = "../../PREBINDGEN/prebindgen/prebindgen-jni" }
-# prebindgen-registry = { path = "../../PREBINDGEN/prebindgen/prebindgen-registry" }
+# prebindgen = { path = "../../PREBINDGEN/prebindgen/prebindgen" }
 
 cargo build --release
 ```
@@ -145,7 +141,7 @@ The generated bindings are created via `prebindgen` in the build process:
 
 1. **Rust source** (`zenoh-flat`) marked with `#[prebindgen]` annotations
 2. **Proc-macro** captures annotated items to JSONL format
-3. **`prebindgen_jni::JniGen`** reads JSONL and generates:
+3. **`prebindgen::lang::JniGen`** reads JSONL and generates:
    - Rust JNI wrapper functions
    - Kotlin data classes and enums
 4. **Gradle** packages Rust dylib + Kotlin sources into a JAR
