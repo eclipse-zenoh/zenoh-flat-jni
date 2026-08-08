@@ -261,7 +261,7 @@ cargo build --release --locked
 mkdir -p jni-libs/x86_64-unknown-linux-gnu
 (cd target/release && zip -j ../../jni-libs/x86_64-unknown-linux-gnu/x86_64-unknown-linux-gnu.zip libzenoh_flat_jni.so)
 
-./gradlew publishMavenPublicationToDryRunRepository -PremotePublication=true -Prelease=true
+./gradlew publishMavenPublicationToDryRunRepository -Prelease=true
 find build/dry-run-repository -type f -print
 
 cd ci/consumer-smoke-test
@@ -277,9 +277,11 @@ unzip -l build/distributions/zenoh-flat-jni-android-*.aar
 gpg --verify path/to/artifact.asc path/to/artifact
 ```
 
-`-PremotePublication=true` fails fast unless `jni-libs/` or `android-libs/` is
-present, so a remote publication cannot silently ship the publishing runner's
-own host library.
+`-PremotePublication=true` is omitted above because it also switches on GPG
+signing. It fails fast unless `jni-libs/` or `android-libs/` is present, so a
+*remote* publication cannot silently ship the publishing runner's own host
+library; the artifact layout itself is selected by `jni-libs/` being there, so a
+local dry run without it still produces the multi-platform JAR.
 
 ## Required secrets
 

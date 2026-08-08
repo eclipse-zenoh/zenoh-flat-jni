@@ -152,8 +152,12 @@ jobs:
         with:
           gradle-version: '8.5'
 
+      # No `-PremotePublication=true` here: that switches on signing, and this
+      # job has no GPG secrets. The JAR is the same multi-platform artifact
+      # either way — `jni-libs/` being present is what selects that layout — and
+      # verifyDesktopArtifact still runs.
       - name: Publish the candidate to an isolated file repository
-        run: ./gradlew publishMavenPublicationToDryRunRepository -PremotePublication=true -Prelease=true --no-daemon
+        run: ./gradlew publishMavenPublicationToDryRunRepository -Prelease=true --no-daemon
 
       # Resolved through the file repository, with `--refresh-dependencies` so a
       # cached artifact of the same coordinates cannot stand in for it.
