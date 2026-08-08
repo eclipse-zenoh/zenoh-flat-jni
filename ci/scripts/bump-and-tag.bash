@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+
+set -xeo pipefail
+
+readonly live_run=${LIVE_RUN:-false}
+# Release number
+readonly version=${VERSION:?input VERSION is required}
+# Dependencies' pattern
+readonly bump_deps_pattern=${BUMP_DEPS_PATTERN:-''}
+# Dependencies' version
+readonly bump_deps_version=${BUMP_DEPS_VERSION:-''}
+# Dependencies' git branch
+readonly bump_deps_branch=${BUMP_DEPS_BRANCH:-''}
+# Git actor name
+readonly git_user_name=${GIT_USER_NAME:?input GIT_USER_NAME is required}
+# Git actor email
+readonly git_user_email=${GIT_USER_EMAIL:?input GIT_USER_EMAIL is required}
+
+# Install toml-cli if not present
+ensure_toml_cli() {
+    if ! command -v toml &> /dev/null; then
+        echo "Installing toml-cli2..."
+        cargo +stable install toml-cli2
+    fi
+}
+
+# toml-cli doesn't support in-place modification
+# See: https://github.com/gnprice/toml-cli?tab=readme-ov-file#writing-ish-toml-set
+toml_set_in_place() {
+    local file="$1"
+    local key="$2"
+    local value="$3"
+    local tmp
+    tmp=$(mktemp)
+    toml set "$file" "$key" "$value" > "$tmp"
+    mv "$tmp" "$file"
+}
+
+ensure_toml_cli
+
+export GIT_AUTHOR_NAME=$git_user_name
+export GIT_AUTHOR_EMAIL=$git_user_email
+export GIT_COMMITTER_NAME=$git_user_name
+export GIT_COMMITTER_EMAIL=$git_user_email
+
+# Bump Gradle project version
+printf '%s' "$version" > version.txt
+# Propagate version change to the crate
+toml_set_in_place Cargo.toml "package.version" "$version"
+
+# Show the changes to be committed
+git diff version.txt Cargo.toml
+git commit version.txt Cargo.toml -m "chore: Bump version to \`$version\`"
+
+# Select all dependencies that match $bump_deps_pattern and bump them to $bump_deps_version.
+#
+# NOTE: `zenoh-flat` is declared in both `dependencies` and `build-dependencies`
+# — the generator must run against the same crate the library links — so both
+# tables are walked, as zenoh-c does for the same reason.
+if [[ "$bump_deps_pattern" != '' ]]; then
+  for deps_key in "dependencies" "build-dependencies"; do
+    deps=$(toml get Cargo.toml "$deps_key" | jq -r "keys[] | select(test(\"$bump_deps_pattern\"))")
+    for dep in $deps; do
+      if [[ -n $bump_deps_version ]]; then
+        toml_set_in_place Cargo.toml "$deps_key.$dep.version" "$bump_deps_version"
+      fi
+
+      if [[ -n $bump_deps_branch ]]; then
+        toml_set_in_place Cargo.toml "$deps_key.$dep.branch" "$bump_deps_branch"
+      fi
+    done
+  done
+
+  # Update the lockfile.
+  #
+  # NOTE: deliberately `cargo check` and not zenoh-c's `cargo generate-lockfile`.
+  # `generate-lockfile` re-resolves the whole graph to the newest semver-
+  # compatible versions, which would silently undo the Cargo.lock sync with
+  # zenoh — the ABI alignment this lockfile exists for. `cargo check` updates
+  # the lock minimally, keeping every pin the sync established.
+  #
+  # It runs build.rs as a side effect, so a bump that changes the generated
+  # bindings regenerates them; the committed artifacts are listed below so that
+  # regeneration lands on the release branch instead of being dropped.
+  cargo check
+
+  if [[ -n $bump_deps_version || -n $bump_deps_branch ]]; then
+    # Show the changes to be committed
+    git diff Cargo.toml Cargo.lock src/generated_bindings.rs kotlin/generated kotlin/REPORT.md
+    git commit Cargo.toml Cargo.lock src/generated_bindings.rs kotlin/generated kotlin/REPORT.md -m "chore: Bump \`$bump_deps_pattern\` dependencies to \`$bump_deps_version\`"
+  else
+    echo "warn: no changes have been made to any dependencies matching $bump_deps_pattern"
+  fi
+fi
+
+if [[ ${live_run} ]]; then
+  git tag --force "$version" -m "v$version"
+fi
+git log -10
+git show-ref --tags
+git push origin
+git push --force origin "$version"

@@ -19,8 +19,7 @@ zenoh-ext = ["dep:zenoh-ext"]
 # (`Reliability`, `CongestionControl::BlockFirst`, …) in lockstep with the
 # zenoh enum variants, so without it the flat↔native conversions go
 # non-exhaustive once Cargo unifies `zenoh` with `unstable`.
-# TODO: Once zenoh-flat is published to crates.io, replace path dep with: { version = "1.9.0", features = ["unstable"] }
-zenoh-flat = { version = "1.9.0", path = "../zenoh-flat", features = ["unstable"] }
+zenoh-flat = { version = "1.9.0", git = "https://github.com/eclipse-zenoh/zenoh-flat.git", branch = "main", features = ["unstable"] }
 # Runtime home of the JNI binding helpers and the default `JniBindingError`
 # (`::prebindgen_jni_runtime::JniBindingError`) that the generated bindings
 # reference. This is the ~350-line leaf crate — a shipped binding library does
@@ -41,8 +40,7 @@ crate-type = ["staticlib", "dylib"]
 [build-dependencies]
 # Same feature set as the runtime dep so the captured `FEATURES` / cfg-gated
 # `#[prebindgen]` items match what the runtime crate actually compiles.
-# TODO: Once zenoh-flat is published, update to a version constraint
-zenoh-flat = { version = "1.9.0", path = "../zenoh-flat", features = ["unstable"] }
+zenoh-flat = { version = "1.9.0", git = "https://github.com/eclipse-zenoh/zenoh-flat.git", branch = "main", features = ["unstable"] }
 # The generator, post-#371 split: the JNI/Kotlin adapter plus the decl macros
 # (`convert!`, `fun!`, `expand_*!`, …) it shares with the language-agnostic
 # pipeline.
