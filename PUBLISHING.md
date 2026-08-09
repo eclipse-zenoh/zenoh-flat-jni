@@ -31,9 +31,8 @@ If Maven Central is unfamiliar, read
 - [Release relationship](#release-relationship)
 - [How the pipeline works](#how-the-pipeline-works)
   - [1. `tag` — branch, bump, tag](#1-tag--branch-bump-tag)
-  - [2. `publish-jvm` — the desktop JVM artifact](#2-publish-jvm--the-desktop-jvm-artifact)
-  - [3. `publish-android` — the Android artifact](#3-publish-android--the-android-artifact)
-  - [4. `publish-github`](#4-publish-github)
+  - [2. `publish` — both artifacts, one staging repository](#2-publish--both-artifacts-one-staging-repository)
+  - [3. `publish-github`](#3-publish-github)
 - [How a publication reaches Maven Central](#how-a-publication-reaches-maven-central)
 - [Reproducibility](#reproducibility)
 - [Building and inspecting artifacts locally](#building-and-inspecting-artifacts-locally)
@@ -128,7 +127,7 @@ branch, bumps the version, tags it, builds, verifies and publishes.
 | --- | --- |
 | Use workflow from | `main` |
 | `live-run` | **unchecked** |
-| `version` | a provisional number, e.g. `1.9.0-rc1` |
+| `version` | `<fresh-rehearsal-version>` — provisional, and not one already used |
 | `zenoh-version` | empty, unless the Zenoh dependency is being moved |
 | `branch` | empty |
 | `maven_publish` | checked — or uncheck for the very first run |
@@ -149,8 +148,9 @@ Budget for **two** rehearsals, each with its own fresh version.
 
 **First, with `maven_publish` unchecked.** The six-target cross-build, the
 desktop artifact verification, the AAR assembly and verification, and the
-external consumer test on three platforms all run; nothing is uploaded
-anywhere. This separates "does it build and verify" from "do the credentials
+external consumer test on three platforms all run, and **nothing reaches
+Maven**. (The run still pushes the release branch and tag and uploads its
+build products as Actions artifacts — "nothing uploaded" would be too strong.) This separates "does it build and verify" from "do the credentials
 work", which makes a first failure far easier to read.
 
 **Then, with `maven_publish` checked.** Only this exercises signing, the Central
@@ -184,16 +184,17 @@ Supplying `zenoh-version` additionally re-points every `zenoh.*` dependency at
 `release/<zenoh-version>` and refreshes `Cargo.lock`; leaving it empty releases
 against whatever the manifest already declares.
 
-There are **two** irreversible moments, not one:
-`closeAndReleaseSonatypeStagingRepository` runs in `publish-jvm` and again in
-`publish-android`, each releasing its own artifact. `publish-android` is
-deliberately serialized behind `publish-jvm` (`needs: [tag, publish-jvm]`), so
-the AAR can only go public after the JVM artifact — the one with the consumer
-smoke test in front of it — already has. Were they parallel, an Android success
-followed by a JVM failure would leave `zenoh-flat-jni-android:<version>` public
-forever with no matching `zenoh-flat-jni:<version>`.
+The irreversible moment is the single `closeAndReleaseSonatypeStagingRepository`
+at the end of the `publish` job. Both publications are uploaded by one Gradle
+invocation, so they share one staging repository and are released by that one
+call: either both artifacts become public or neither does.
 
-Everything before the first of them — cross-build, verification, consumer test,
+This is why the two publish workflows were merged into one. Run as separate
+workflows — in either order — whichever released first would already be public
+and unwithdrawable when the second failed, and the second workflow's coordinate
+guard would not even have run yet.
+
+Everything before it — cross-build, verification, consumer test,
 staging upload, Central's own validation — is reversible, but *not*
 self-cleaning: a staging repository that fails validation is **left in place**.
 The Nexus plugin throws when the repository does not reach the expected state
@@ -218,12 +219,15 @@ are kept — and the snapshot is mutable, so both can be left alone. Delete the
 tag and branch if you would rather not keep them:
 
 ```bash
-git push origin --delete release/dry-run/1.9.0-rc1
-git push origin --delete 1.9.0-rc1
+git push origin --delete release/dry-run/<version>
+git push origin --delete <version>
 ```
 
-Use a fresh version for the next rehearsal rather than re-running an existing
-one, so no tag has to be force-moved.
+**Always use a version no rehearsal has used before.** `bump-and-tag.bash` runs
+`git tag --force` and force-pushes, so re-running a rehearsal under an existing
+version silently moves that tag to a new commit — including a tag someone is
+relying on as a record. `1.9.0-rc1` is already taken by the first rehearsal;
+`1.9.0-rc2` is the next free one.
 
 ## What gets published
 
@@ -269,7 +273,7 @@ image change cannot raise the floor unnoticed.
 The `desktopTargets` map in `build.gradle.kts` drives `verifyDesktopArtifact`,
 so a target missing from a build fails the release rather than shipping a JAR
 that silently lacks it. It does **not** drive the build: the same six targets are
-listed again in the matrix in `publish-jvm.yml`, and the two must be kept in
+listed again in the matrix in `publish.yml`, and the two must be kept in
 step by hand. Adding a target means editing both — the verifier is what makes
 forgetting the second one loud instead of silent.
 
@@ -372,24 +376,28 @@ becomes `release/dry-run/<version>`, and the version comes from `git describe`
 if — and only if — no `version` input was supplied.
 That is the dry run.
 
-### 2. `publish-jvm` — the desktop JVM artifact
+### 2. `publish` — both artifacts, one staging repository
 
-[`publish-jvm.yml`](.github/workflows/publish-jvm.yml), called as a reusable
-workflow:
+[`publish.yml`](.github/workflows/publish.yml), called as a reusable workflow.
+Everything is built and checked before anything is uploaded, and both
+publications are released together:
 
-- **`builds`** cross-compiles the six declared targets with `--locked` and
-  packages each as `<target>/<target>.zip` with its SHA-256 in the job summary.
-  The toolchain is not named in the workflow — `rust-toolchain.toml` supplies
-  it, so the release uses the compiler CI uses. On the host target it also fails
-  if `src/generated_bindings.rs`, `kotlin/generated` or `kotlin/REPORT.md`
-  differ from what is committed: a release must not ship generated sources
-  nobody reviewed.
+- **`desktop-natives`** cross-compiles the six declared targets with `--locked`
+  and packages each as `<target>/<target>.zip` with its SHA-256 in the job
+  summary. The toolchain is not named in the workflow — `rust-toolchain.toml`
+  supplies it, so the release uses the compiler CI uses. On the host target it
+  also fails if `src/generated_bindings.rs`, `kotlin/generated` or
+  `kotlin/REPORT.md` differ from what is committed: a release must not ship
+  generated sources nobody reviewed.
 
-  `aarch64-unknown-linux-gnu` is cross-compiled with plain Cargo and
-  `gcc-aarch64-linux-gnu` rather than `cross`, which is simpler than teaching
-  `cross`'s container about the build.
+  Both Linux targets are built with `cross`, at a pinned `CROSS_VERSION`, and
+  each records its measured glibc floor in the job summary.
 
-- **`consumer-test`** assembles the publication, publishes it to an isolated
+- **`android-natives`** builds the four ABIs with the pinned cargo-ndk and NDK.
+  `cargo ndk -o` writes exactly the AAR's `jni/<abi>/` layout, so nothing is
+  repackaged.
+
+- **`consumer-test`** assembles the JVM publication, publishes it to an isolated
   file repository under `build/dry-run-repository`, and runs
   [`ci/consumer-smoke-test`](ci/consumer-smoke-test) against it as an external
   Gradle project — no path dependency, no composite build. Its repository
@@ -406,34 +414,34 @@ workflow:
 
   It runs on Linux, macOS and Windows.
 
-- **`publish_jvm_package`** checks that `version.txt` and `Cargo.toml` agree,
-  refuses to proceed if those coordinates are already on Maven Central —
-  releases are immutable, so republishing cannot succeed, and finding that out
-  mid-upload is a confusing way to learn it; snapshots are exempt, living in a
-  mutable repository — then publishes. `verifyDesktopArtifact` runs as a publication dependency and
-  fails the build on a missing target ZIP, a ZIP whose contents are not exactly
-  the one expected library, or a stray native at the JAR root that would shadow
-  the per-target resources.
+- **`publish`** checks that `version.txt` and `Cargo.toml` agree, then checks
+  **both** coordinates — `zenoh-flat-jni` and `zenoh-flat-jni-android` — against
+  Maven Central and refuses to proceed if either is taken. Doing both before
+  either is published is the point: an occupied Android coordinate discovered
+  after the JVM release would have burned a version number.
 
-### 3. `publish-android` — the Android artifact
+  It then assembles and verifies both artifacts, unconditionally, so a
+  `maven_publish: false` rehearsal still exercises every check.
+  `verifyDesktopArtifact` fails on a missing target ZIP, a ZIP whose contents
+  are not exactly the one expected library, or a stray native at the JAR root
+  that would shadow the per-target resources; `verifyAndroidArtifact` checks the
+  manifest, `classes.jar`, `R.txt` and all four ABI libraries.
 
-[`publish-android.yml`](.github/workflows/publish-android.yml) builds the four
-ABIs with the pinned cargo-ndk and NDK — `cargo ndk -o` writes exactly the AAR's
-`jni/<abi>/` layout, so nothing is repackaged — and publishes the AAR.
-`verifyAndroidArtifact` checks the manifest, `classes.jar`, `R.txt` and all four
-ABI libraries.
+  Only then does it publish — see
+  [How a publication reaches Maven Central](#how-a-publication-reaches-maven-central).
 
-### 4. `publish-github`
+### 3. `publish-github`
 
 `eclipse-zenoh/ci/publish-crates-github` creates the GitHub release, after both
 Maven publications have succeeded.
 
 ## How a publication reaches Maven Central
 
-Both publish workflows end in one Gradle command:
+Publishing is one Gradle command, covering both publications:
 
 ```bash
 ./gradlew publishMavenPublicationToSonatypeRepository \
+          publishAndroidPublicationToSonatypeRepository \
           closeAndReleaseSonatypeStagingRepository \
           -PremotePublication=true -Prelease=true
 ```
@@ -453,9 +461,10 @@ Three steps hide in there, run by
 3. **Release it.** *This is the irreversible step.* The artifacts go public and
    can never be changed.
 
-Every gate described above exists to run before step 3 — and step 3 happens
-twice per release, once for the JVM artifact and once for the AAR, which is why
-`publish-android` is serialized behind `publish-jvm`.
+Every gate described above exists to run before step 3, and step 3 happens
+**once** per release: both publications are uploaded into the same staging
+repository by one Gradle invocation, so the single close-and-release either
+publishes both artifacts or neither.
 
 Two mechanical details are worth knowing, because both previously made a release
 impossible in this repository:
@@ -506,7 +515,7 @@ What a release does fix precisely is *what it is built from*:
 | `zenoh`, `zenoh-ext`, `zenoh-flat` | `version` + `git` + `branch` in `Cargo.toml`; the release bump re-points `branch` at `release/X.Y.Z` |
 | every transitive crate | `Cargo.lock`, committed and kept byte-aligned with Zenoh's by the shared lockfile-sync bot |
 | the Rust compiler | `rust-toolchain.toml` |
-| `cargo-ndk`, the NDK | pinned in `publish-android.yml`; `cargo install --locked` pins the dependencies of the *selected* release, not which release is selected |
+| `cross`, `cargo-ndk`, the NDK | pinned by exact version in `publish.yml`; `cargo install --locked` pins the dependencies of the *selected* release, not which release is selected, so each needs its own version pin |
 
 Every release build runs `--locked`, so a lockfile that does not match the
 manifest fails the build instead of silently resolving something else.
@@ -514,8 +523,13 @@ manifest fails the build instead of silently resolving something else.
 ## Building and inspecting artifacts locally
 
 Publishing locally goes to the same isolated repository the CI consumer test
-uses. One thing to know first: **`verifyDesktopArtifact` demands all six
-targets**, and a developer machine can only build its own. Publishing with just
+uses. The commands below are written for an **x86-64 Linux host** — on another
+platform, substitute that host's target triple and library name from the table
+in [Desktop JVM](#desktop-jvm), both in the real archive and in the placeholder
+list.
+
+One thing to know first: **`verifyDesktopArtifact` demands all six targets**,
+and a developer machine can only build its own. Publishing with just
 the host library staged therefore fails by design —
 
 ```text
@@ -644,8 +658,9 @@ should confirm rather than assume.
 - [ ] `Cargo.lock` is committed and current for the manifest — the version bump
       refreshes it, but a manifest edit landed by hand may not have.
 - [ ] `version.txt` and `Cargo.toml` agree (`publish_jvm_package` re-checks).
-- [ ] A rehearsal with `live-run: false` completed, under a version that is
-      *not* the one being released.
+- [ ] **Both** rehearsals completed under fresh versions that are *not* the one
+      being released: one with `maven_publish: false`, and one with publication
+      enabled — only the second exercises signing and the Central credentials.
 - [ ] The version being released is free on Maven Central (the pipeline refuses
       otherwise).
 - [ ] Generated sources are clean; Rust and Kotlin tests pass.

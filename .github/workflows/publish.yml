@@ -11,7 +11,12 @@
 # Contributors:
 #   ZettaScale Zenoh Team, <zenoh@zettascale.tech>
 #
-name: Publish (JVM)
+# Both publications are released from a *single* Gradle invocation, so both land
+# in one staging repository and are released together. Splitting them across two
+# workflows — in either order — leaves a window where one artifact is public and
+# the other never appears, and a Maven Central release cannot be withdrawn.
+#
+name: Publish
 
 on:
   workflow_call:
@@ -34,11 +39,19 @@ env:
   RUST_BACKTRACE: 1
   CARGO_TERM_COLOR: always
   # Where the cross-built libraries are collected before Gradle packages them.
-  # Kept in step with `jniLibsDir` in build.gradle.kts.
+  # Kept in step with `jniLibsDir` / `androidLibsDir` in build.gradle.kts.
   JNI_LIB_PATHS: jni-libs
+  ANDROID_LIB_PATHS: android-libs
+  # `cargo install --locked` pins the dependencies of the selected release, not
+  # which release is selected, so each build tool's exact version is pinned here.
+  # Without it, a rerun of the same release tag can build with a different
+  # compiler sysroot and produce a different artifact.
+  CROSS_VERSION: 0.2.5
+  CARGO_NDK_VERSION: 4.1.2
+  ANDROID_NDK_VERSION: r26
 
 jobs:
-  builds:
+  desktop-natives:
     name: Build for ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -69,7 +82,7 @@ jobs:
 
       - name: Install cross
         if: matrix.build-cmd == 'cross'
-        run: cargo install cross --locked
+        run: cargo install cross --locked --version ${{ env.CROSS_VERSION }}
 
       - name: Build
         run: ${{ matrix.build-cmd }} build --release --locked --target ${{ matrix.target }}
@@ -105,14 +118,15 @@ jobs:
           shasum -a 256 "${{ matrix.target }}/${{ matrix.target }}.zip" >> "$GITHUB_STEP_SUMMARY"
 
       # The glibc floor is a user-visible property of the release, so measure it
-      # rather than assume the container's.
+      # rather than assume the container's. `readelf` parses the ELF directly and
+      # is architecture-independent, unlike anything relying on a BFD backend.
       - name: Record the glibc requirement
-        if: runner.os == 'Linux' && matrix.build-cmd == 'cross'
+        if: matrix.build-cmd == 'cross'
         shell: bash
         run: |
           lib="target/${{ matrix.target }}/release/${{ matrix.lib }}"
-          floor=$(objdump -T "$lib" | grep -o 'GLIBC_[0-9.]*' | sort -uV | tail -1)
-          echo "${{ matrix.target }} requires ${floor:-none}" >> "$GITHUB_STEP_SUMMARY"
+          floor=$(readelf -V "$lib" | grep -o 'GLIBC_[0-9.]*' | sort -uV | tail -1)
+          echo "${{ matrix.target }} requires ${floor:-none} (cross ${{ env.CROSS_VERSION }})" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload packages
         uses: actions/upload-artifact@v4
@@ -121,13 +135,59 @@ jobs:
           path: ${{ env.JNI_LIB_PATHS }}
           if-no-files-found: error
 
+  android-natives:
+    name: Build the Android ABIs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - uses: nttld/setup-ndk@v1
+        id: ndk
+        with:
+          ndk-version: ${{ env.ANDROID_NDK_VERSION }}
+          add-to-path: false
+
+      # rust-toolchain.toml pins the channel; only the targets are added here.
+      - name: Install Rust toolchain
+        run: |
+          rustup show
+          rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk --locked --version ${{ env.CARGO_NDK_VERSION }}
+
+      # cargo-ndk's -o writes exactly the AAR's jni/<abi>/ layout.
+      - name: Build every advertised ABI
+        env:
+          ANDROID_NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
+        run: |
+          cargo ndk -o ${{ env.ANDROID_LIB_PATHS }} \
+            -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 \
+            build --release --locked
+
+      - name: Record the toolchain and checksums
+        run: |
+          {
+            echo "NDK ${{ env.ANDROID_NDK_VERSION }}, cargo-ndk ${{ env.CARGO_NDK_VERSION }}"
+            shasum -a 256 ${{ env.ANDROID_LIB_PATHS }}/*/libzenoh_flat_jni.so
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-natives
+          path: ${{ env.ANDROID_LIB_PATHS }}
+          if-no-files-found: error
+
   # Maven Central releases are immutable, so the candidate is consumed as a real
   # Maven dependency before it is published anywhere. The consumer resolves from
   # an isolated file repository with content filters, so it cannot silently fall
   # back to Central and pass against an older release.
   consumer-test:
     name: Consume the candidate on ${{ matrix.os }}
-    needs: builds
+    needs: desktop-natives
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -166,8 +226,8 @@ jobs:
         with:
           gradle-version: '8.5'
 
-      # Must match what publish_jvm_package will use, so the smoke test exercises
-      # the coordinates that actually get published rather than a same-content
+      # Must match what the publish job will use, so the smoke test exercises the
+      # coordinates that actually get published rather than a same-content
       # artifact under a different version.
       - name: Set pub mode env var
         shell: bash
@@ -200,9 +260,9 @@ jobs:
             -PcandidateRepository="file://$repo" \
             -PcandidateVersion="$version"
 
-  publish_jvm_package:
-    name: Publish JVM package
-    needs: consumer-test
+  publish:
+    name: Publish to Maven Central
+    needs: [desktop-natives, android-natives, consumer-test]
     permissions:
       contents: read
       packages: write
@@ -223,39 +283,44 @@ jobs:
             || { echo "::error::Cargo.toml says $cargo_version, version.txt says $version"; exit 1; }
           echo "Publishing $version" >> "$GITHUB_STEP_SUMMARY"
 
-      # Maven Central releases are immutable, so republishing existing
-      # coordinates cannot succeed — and discovering that mid-upload is a
-      # confusing way to find out. Snapshots are exempt: they live in a
-      # separate, mutable repository and may be overwritten freely.
+      # Both coordinates are checked before either is published. Central releases
+      # are immutable, so republishing cannot succeed — and an occupied *Android*
+      # coordinate must not be discovered after the JVM artifact is already
+      # public. Snapshots are exempt: they live in a mutable repository.
       - name: Refuse to overwrite an existing Maven Central release
         if: ${{ inputs.snapshot == false }}
         shell: bash
         run: |
           set -euo pipefail
           v=$(tr -d '[:space:]' < version.txt)
-          url="https://repo1.maven.org/maven2/org/eclipse/zenoh/zenoh-flat-jni/$v/zenoh-flat-jni-$v.pom"
-          if curl -sfIL -o /dev/null "$url"; then
-            echo "::error::org.eclipse.zenoh:zenoh-flat-jni:$v is already on Maven Central and cannot be replaced"
-            exit 1
-          fi
-          echo "org.eclipse.zenoh:zenoh-flat-jni:$v is free on Maven Central" >> "$GITHUB_STEP_SUMMARY"
+          for artifact in zenoh-flat-jni zenoh-flat-jni-android; do
+            url="https://repo1.maven.org/maven2/org/eclipse/zenoh/$artifact/$v/$artifact-$v.pom"
+            if curl -sfIL -o /dev/null "$url"; then
+              echo "::error::org.eclipse.zenoh:$artifact:$v is already on Maven Central and cannot be replaced"
+              exit 1
+            fi
+            echo "org.eclipse.zenoh:$artifact:$v is free on Maven Central" >> "$GITHUB_STEP_SUMMARY"
+          done
 
-      - name: Create resources destination
-        run: mkdir -p ${{ env.JNI_LIB_PATHS }}
+      - name: Create resources destinations
+        run: mkdir -p ${{ env.JNI_LIB_PATHS }} ${{ env.ANDROID_LIB_PATHS }}
 
-      - name: Download result of previous builds
+      - name: Download the desktop natives
         uses: actions/download-artifact@v4
         with:
           pattern: desktop-*
           merge-multiple: true
           path: ${{ env.JNI_LIB_PATHS }}
 
-      # The layout Gradle expects is `<target>/<target>.zip` directly under
-      # jni-libs/. Printing it makes a mismatch obvious in the log instead of
-      # only surfacing as verifyDesktopArtifact's "missing native resource".
+      - name: Download the Android natives
+        uses: actions/download-artifact@v4
+        with:
+          name: android-natives
+          path: ${{ env.ANDROID_LIB_PATHS }}
+
       - name: Show the downloaded layout
         shell: bash
-        run: find ${{ env.JNI_LIB_PATHS }} -type f | sort
+        run: find ${{ env.JNI_LIB_PATHS }} ${{ env.ANDROID_LIB_PATHS }} -type f | sort
 
       - uses: actions/setup-java@v4
         with:
@@ -264,6 +329,13 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+
+      # Both artifacts are assembled and verified before anything is uploaded,
+      # so a `maven_publish: false` rehearsal still exercises every check.
+      # verifyDesktopArtifact and verifyAndroidArtifact otherwise only run as
+      # dependencies of a publication task.
+      - name: Assemble and verify both artifacts
+        run: ./gradlew jar androidAar verifyDesktopArtifact verifyAndroidArtifact -Prelease=true
 
       - name: Set pub mode env var
         # Note: This step is intended to allow publishing snapshot packages.
@@ -278,10 +350,15 @@ jobs:
             echo "RELEASE=closeAndReleaseSonatypeStagingRepository" >> $GITHUB_ENV
           fi
 
+      # One Gradle invocation, so both publications go into the same staging
+      # repository and are released by the single closeAndRelease that follows
+      # them. Either both artifacts become public or neither does.
       - if: ${{ inputs.maven_publish == true }}
-        name: Gradle Publish JVM Package to Maven Central repository
+        name: Gradle Publish to Maven Central repository
         run: |
-          ./gradlew publishMavenPublicationToSonatypeRepository ${{ env.RELEASE }} --info -PremotePublication=true -Prelease=true ${{ env.PUB_MODE }}
+          ./gradlew publishMavenPublicationToSonatypeRepository \
+                    publishAndroidPublicationToSonatypeRepository \
+                    ${{ env.RELEASE }} --info -PremotePublication=true -Prelease=true ${{ env.PUB_MODE }}
         env:
           CENTRAL_SONATYPE_TOKEN_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
           CENTRAL_SONATYPE_TOKEN_PASSWORD: ${{ secrets.CENTRAL_SONATYPE_TOKEN_PASSWORD }}
