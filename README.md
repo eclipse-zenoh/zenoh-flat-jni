@@ -134,7 +134,7 @@ cargo fmt --check
 ### Building for Android
 
 ```bash
-./gradlew androidAar verifyAndroidArtifact
+./gradlew assembleRelease verifyAndroidArtifact
 ```
 
 That cross-compiles all four ABIs and packages the AAR. One-time prerequisites,

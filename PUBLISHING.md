@@ -376,16 +376,16 @@ jni/x86/libzenoh_flat_jni.so
 jni/x86_64/libzenoh_flat_jni.so
 ```
 
-The AAR is assembled by a plain `Zip` task, not by the Android Gradle Plugin.
-This module has no Android resources, no manifest entries beyond `minSdk`, and
-no Android-only code, so its AAR is `classes.jar` plus `jni/<abi>/` — applying
-AGP would mean installing an Android SDK in CI to zip four `.so` files. The
-`androidAar` task synthesises the mandatory `AndroidManifest.xml` and empty
-`R.txt`, and `androidClassesJar` deliberately packs `output.classesDirs` rather
-than the desktop `jar`, so the AAR does not carry the desktop native ZIPs.
+The AAR is assembled by the Android Gradle Plugin.
+`cargo ndk -o` writes `<abi>/libzenoh_flat_jni.so`, which is exactly the layout
+AGP reads from `android.sourceSets["main"].jniLibs`, so nothing is repackaged and
+the manifest is generated rather than written by hand.
 
-Switch to `com.android.library` if this module ever grows real Android
-resources or a non-trivial manifest.
+Before this became a Kotlin Multiplatform project the AAR was built by a `Zip`
+task that synthesised its own `AndroidManifest.xml` and empty `R.txt` — a slice
+of AGP reimplemented to avoid needing an Android SDK. Variant-aware publishing
+requires AGP regardless, and the SDK is preinstalled on the runners already in
+use, so that trade-off no longer holds.
 
 Downstream Android publications must resolve this AAR, not the desktop JAR.
 
@@ -529,16 +529,21 @@ Maven publications have succeeded.
 Publishing is one Gradle command, covering both publications:
 
 ```bash
-./gradlew publishMavenPublicationToSonatypeRepository \
-          publishAndroidPublicationToSonatypeRepository \
+./gradlew publishKotlinMultiplatformPublicationToSonatypeRepository \
+          publishJvmPublicationToSonatypeRepository \
+          publishAndroidReleasePublicationToSonatypeRepository \
           closeAndReleaseSonatypeStagingRepository \
           -PremotePublication=true -Prelease=true -PprebuiltAndroidLibs=true
 ```
 
-`-PprebuiltAndroidLibs=true` matters here: without it `androidAar` would schedule
+`-PprebuiltAndroidLibs=true` matters here: without it the AAR build would schedule
 `buildAndroidLibs`, which on the publishing runner fails for want of an NDK — and
 on a machine that has one would rebuild the libraries instead of publishing the
 verified ones that were downloaded.
+
+All three publications go into that one invocation, so they share a staging
+repository: the root module, the JVM artifact and the AAR become public together
+or not at all.
 
 Three steps hide in there, run by
 `io.github.gradle-nexus.publish-plugin`:
@@ -669,7 +674,8 @@ stub aarch64-apple-darwin      libzenoh_flat_jni.dylib
 stub x86_64-pc-windows-msvc    zenoh_flat_jni.dll
 stub aarch64-pc-windows-msvc   zenoh_flat_jni.dll
 
-./gradlew publishMavenPublicationToDryRunRepository -Prelease=true
+./gradlew publishKotlinMultiplatformPublicationToDryRunRepository \
+          publishJvmPublicationToDryRunRepository -Prelease=true
 find build/dry-run-repository -type f -print
 
 # the wrapper, not a system `gradle`: the consumer needs the Gradle version this
