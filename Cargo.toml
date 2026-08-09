@@ -35,7 +35,11 @@ tracing = { version = "0.1", features = ["log"] }
 
 [lib]
 name = "zenoh_flat_jni"
-crate-type = ["staticlib", "dylib"]
+# `cdylib`, not `dylib`: this library is loaded by the JVM, not linked by another
+# Rust crate. cargo-ndk rejects a `dylib` outright ("No usable artifacts produced
+# by cargo"), and on the desktop side cdylib is what a JNI library is meant to be
+# — it exports the extern "C" surface without Rust ABI metadata.
+crate-type = ["staticlib", "cdylib"]
 
 [build-dependencies]
 # Same feature set as the runtime dep so the captured `FEATURES` / cfg-gated
