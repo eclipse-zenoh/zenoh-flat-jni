@@ -65,8 +65,10 @@ Nothing is compiled at install time, so *we* must build, in advance, everything
 a user could possibly need, for every platform they might be on.
 
 **Releases are immutable.** Once `1.9.0` is published it can never be changed or
-deleted; a mistake is fixed only by releasing `1.9.1`. That is why every check
-in this pipeline runs *before* the upload — afterwards there is no undo.
+deleted; a mistake is fixed only by releasing `1.9.1`. That is why every check in
+this pipeline runs *before the release step* — note that uploading is not yet
+releasing, since artifacts first land in a private staging repository that can be
+discarded. It is the release of that repository that has no undo.
 
 ### The file set Central requires
 
@@ -267,8 +269,18 @@ built natively on ubuntu-24.04   GLIBC_2.39
 built with cross (both targets)  GLIBC_2.18
 ```
 
-`Record the glibc requirement` re-measures this on every release, so a container
-image change cannot raise the floor unnoticed.
+`Check the glibc requirement` re-measures this on every release **and fails the
+build** if a Linux artifact needs more than `SUPPORTED_GLIBC` (2.28), so a
+container image change cannot raise the floor unnoticed. The margin between the
+2.18 produced today and the 2.28 promised is deliberate: a benign image bump
+does not break a release, a consequential one does.
+
+That check is what makes the guarantee, because the toolchain pin alone does not.
+`CROSS_VERSION` pins the `cross` *executable*; the image it selects is
+`ghcr.io/cross-rs/<target>:<version>`, a mutable tag rather than a digest, so the
+sysroot can move underneath a fixed tool version. Rather than pin two image
+digests and keep them current, the release asserts the property that actually
+matters about the sysroot.
 
 The `desktopTargets` map in `build.gradle.kts` drives `verifyDesktopArtifact`,
 so a target missing from a build fails the release rather than shipping a JAR
@@ -327,8 +339,8 @@ Both publications carry:
 
 The tag, `version.txt`, `Cargo.toml`, and the Maven version must agree.
 `version.txt` is the single source of truth: `bump-and-tag.bash` writes it and
-propagates it to `Cargo.toml`, and `publish_jvm_package` re-checks that the two
-still agree before publishing. `gradle.properties` no longer carries a second
+propagates it to `Cargo.toml`, and the `publish` job re-checks that the two still
+agree before publishing. `gradle.properties` no longer carries a second
 copy.
 
 ## Release relationship
@@ -361,7 +373,9 @@ published JNI artifact can be replaced later.
 Releases are driven by
 [`.github/workflows/release.yml`](.github/workflows/release.yml), the same shape
 zenoh-java and zenoh-kotlin use. It is started manually
-(`workflow_dispatch`) and runs four jobs.
+(`workflow_dispatch`). `release.yml` itself defines three jobs — tag, publish,
+publish-github — and the `publish` job is a call into `publish.yml`, which
+contributes four of its own.
 
 ### 1. `tag` — branch, bump, tag
 
@@ -515,7 +529,8 @@ What a release does fix precisely is *what it is built from*:
 | `zenoh`, `zenoh-ext`, `zenoh-flat` | `version` + `git` + `branch` in `Cargo.toml`; the release bump re-points `branch` at `release/X.Y.Z` |
 | every transitive crate | `Cargo.lock`, committed and kept byte-aligned with Zenoh's by the shared lockfile-sync bot |
 | the Rust compiler | `rust-toolchain.toml` |
-| `cross`, `cargo-ndk`, the NDK | pinned by exact version in `publish.yml`; `cargo install --locked` pins the dependencies of the *selected* release, not which release is selected, so each needs its own version pin |
+| `cargo-ndk`, the NDK | pinned by exact version in `publish.yml`; `cargo install --locked` pins the dependencies of the *selected* release, not which release is selected, so each needs its own version pin |
+| `cross` | pinned by exact version, which fixes the executable but **not** the image: `ghcr.io/cross-rs/<target>:<version>` is a mutable tag. The glibc check bounds the consequence instead |
 
 Every release build runs `--locked`, so a lockfile that does not match the
 manifest fails the build instead of silently resolving something else.
@@ -638,14 +653,15 @@ items from the original plan are not built at all.
   [Run 31312017566](https://github.com/eclipse-zenoh/zenoh-flat-jni/actions/runs/31312017566)
   started all six JVM builds and the Android build, and every one failed on a
   stale lockfile on the release branch. #28 fixed that cause, but no run has
-  since got past this point. The two Linux targets have been built and inspected
-  locally with `cross` under Podman; the macOS and Windows targets have not been
-  built at all.
+  since got past this point. The two Linux targets have additionally been built
+  and inspected locally with `cross` under Podman. What remains untested is the
+  release *packaging* matrix as a whole and the non-host architectures —
+  ordinary CI does build release mode on macOS and Windows hosts, so those
+  compilers are exercised, but `aarch64-apple-darwin` and
+  `aarch64-pc-windows-msvc` are cross-compiled only during a release.
 - **The Central upload has never run.** A `maven_publish: false` rehearsal does
   not exercise signing or the Central credentials; only a rehearsal with
   publication enabled does.
-- **`aarch64-pc-windows-msvc` has no runner**, so it is covered by archive
-  inspection only.
 - **Downstream release suites have not been run against a Maven artifact** with
   composite substitution disabled; those changes belong in `zenoh-java` and
   `zenoh-kotlin`.
@@ -657,7 +673,7 @@ should confirm rather than assume.
 
 - [ ] `Cargo.lock` is committed and current for the manifest — the version bump
       refreshes it, but a manifest edit landed by hand may not have.
-- [ ] `version.txt` and `Cargo.toml` agree (`publish_jvm_package` re-checks).
+- [ ] `version.txt` and `Cargo.toml` agree (the `publish` job re-checks).
 - [ ] **Both** rehearsals completed under fresh versions that are *not* the one
       being released: one with `maven_publish: false`, and one with publication
       enabled — only the second exercises signing and the Central credentials.
