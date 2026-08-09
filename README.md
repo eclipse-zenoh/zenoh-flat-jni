@@ -134,8 +134,28 @@ cargo fmt --check
 ### Building for Android
 
 ```bash
-./gradlew -Pandroid=true build
+./gradlew androidAar verifyAndroidArtifact
 ```
+
+That cross-compiles all four ABIs and packages the AAR. One-time prerequisites,
+as for any cross-compilation:
+
+```bash
+rustup target add armv7-linux-androideabi aarch64-linux-android \
+                  i686-linux-android x86_64-linux-android
+cargo install cargo-ndk --locked --version 4.1.2
+export ANDROID_NDK_HOME=/path/to/android-ndk-r26
+```
+
+`verifyAndroidArtifact` fails unless the AAR carries a manifest, `classes.jar`,
+`R.txt` and all four ABI libraries. The release runs the same
+`buildAndroidLibs` task, so this is not a parallel developer-only path — see
+[PUBLISHING.md](PUBLISHING.md).
+
+The cross-compilation runs every time — Cargo decides what is actually stale, so
+a Rust change is always picked up. (The release's publish job passes
+`-PprebuiltAndroidLibs=true` to package libraries it downloaded as build
+artifacts; that is the only path that skips it.)
 
 ## Architecture
 

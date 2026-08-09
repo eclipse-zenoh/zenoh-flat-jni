@@ -239,7 +239,50 @@ val androidClassesJar by tasks.registering(Jar::class) {
     from(sourceSets["main"].output.classesDirs)
 }
 
+// Cross-compile the Android ABIs, mirroring `buildZenohFlatJni` for the desktop
+// library: one Gradle entry point, so the documented developer command and CI run
+// the same code path rather than two copies of it.
+//
+// It runs cargo-ndk every time. Cargo is the incremental build system here, and
+// it is the only one that knows whether the sources, Cargo.lock or the profile
+// moved; skipping on the mere presence of four correctly-named files would
+// happily package stale — or foreign — libraries.
+//
+// The single exception is `-PprebuiltAndroidLibs=true`, which the release's
+// publish job passes: there `android-libs/` arrives as a downloaded build
+// artifact and the runner has no NDK, so building is neither possible nor
+// wanted.
+val prebuiltAndroidLibs = project.findProperty("prebuiltAndroidLibs")?.toString()?.toBoolean() == true
+
+val buildAndroidLibs by tasks.registering {
+    description = "Cross-compile the Android ABIs into android-libs/ using cargo-ndk"
+    onlyIf {
+        if (prebuiltAndroidLibs) {
+            logger.lifecycle("-PprebuiltAndroidLibs=true: using the android-libs/ already present")
+        }
+        !prebuiltAndroidLibs
+    }
+    doLast {
+        val command = mutableListOf("cargo", "ndk", "-o", androidLibsDir.name)
+        androidAbis.forEach { command += listOf("-t", it) }
+        command += listOf("build", "--release", "--locked")
+
+        val result = project.exec {
+            commandLine(command)
+            isIgnoreExitValue = true
+        }
+        if (result.exitValue != 0) {
+            throw GradleException(
+                "cargo ndk failed (exit ${result.exitValue}). " +
+                    "Needs cargo-ndk installed, the four Android targets added, " +
+                    "and ANDROID_NDK_HOME pointing at the NDK."
+            )
+        }
+    }
+}
+
 val androidAar by tasks.registering(Zip::class) {
+    dependsOn(buildAndroidLibs)
     archiveBaseName.set("zenoh-flat-jni-android")
     archiveVersion.set(project.version.toString())
     archiveExtension.set("aar")

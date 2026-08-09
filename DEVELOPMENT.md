@@ -180,20 +180,22 @@ cargo clippy --all-targets --all-features -- -D warnings
 ## Building for Android
 
 The Android ABIs are cross-compiled with [cargo-ndk](https://github.com/bbqsrc/cargo-ndk)
-straight into the AAR's `jni/<abi>/` layout; the AAR is then assembled from
-`android-libs/` (see [PUBLISHING.md](PUBLISHING.md)). Use the cargo-ndk and NDK
-versions pinned in
-[`publish-android.yml`](.github/workflows/publish-android.yml) — a release built
-with anything else is not the artifact CI verified.
+straight into the AAR's `jni/<abi>/` layout. `androidAar` runs that
+cross-compilation itself, through the same `buildAndroidLibs` task the release
+uses (see [PUBLISHING.md](PUBLISHING.md)):
+
+```bash
+./gradlew androidAar verifyAndroidArtifact
+```
+
+One-time prerequisites — use the cargo-ndk and NDK versions pinned in
+[`publish.yml`](.github/workflows/publish.yml), since a release built with
+anything else is not the artifact CI verified:
 
 ```bash
 cargo install cargo-ndk --locked --version 4.1.2   # CARGO_NDK_VERSION
 rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android
-
-# ANDROID_NDK_HOME must point at the pinned NDK (r26)
-cargo ndk -o android-libs -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 build --release
-
-./gradlew androidAar verifyAndroidArtifact
+export ANDROID_NDK_HOME=/path/to/android-ndk-r26   # ANDROID_NDK_VERSION
 ```
 
 ## CI/CD
@@ -241,6 +243,9 @@ To rehearse a publication locally without touching Central, populate `jni-libs/`
 repository the CI consumer test uses:
 
 ```bash
+# -PprebuiltAndroidLibs=true only if android-libs/ was populated by something
+# other than this machine's cargo-ndk; otherwise leave it off and let Cargo
+# decide what is stale.
 ./gradlew publishAllPublicationsToDryRunRepository
 find build/dry-run-repository -type f
 

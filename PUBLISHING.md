@@ -422,9 +422,17 @@ publications are released together:
   Both Linux targets are built with `cross`, at a pinned `CROSS_VERSION`, and
   each records its measured glibc floor in the job summary.
 
-- **`android-natives`** builds the four ABIs with the pinned cargo-ndk and NDK.
-  `cargo ndk -o` writes exactly the AAR's `jni/<abi>/` layout, so nothing is
-  repackaged.
+- **`android-natives`** builds the four ABIs by running `./gradlew
+  buildAndroidLibs` — the same task the README gives developers, so the two
+  cannot drift — with the pinned cargo-ndk and NDK. `cargo ndk -o` writes
+  exactly the AAR's `jni/<abi>/` layout, so nothing is repackaged.
+
+  The `publish` job passes `-PprebuiltAndroidLibs=true`, which is the *only*
+  way to skip the cross-compilation: there the libraries arrive as downloaded
+  build artifacts and the runner has no NDK. Everywhere else the task runs
+  cargo-ndk unconditionally and lets Cargo decide what is up to date, since a
+  directory holding four correctly-named files says nothing about whether they
+  are current — or even the right architecture.
 
 - **`consumer-test`** assembles the JVM publication, publishes it to an isolated
   file repository under `build/dry-run-repository`, and runs
@@ -472,8 +480,13 @@ Publishing is one Gradle command, covering both publications:
 ./gradlew publishMavenPublicationToSonatypeRepository \
           publishAndroidPublicationToSonatypeRepository \
           closeAndReleaseSonatypeStagingRepository \
-          -PremotePublication=true -Prelease=true
+          -PremotePublication=true -Prelease=true -PprebuiltAndroidLibs=true
 ```
+
+`-PprebuiltAndroidLibs=true` matters here: without it `androidAar` would schedule
+`buildAndroidLibs`, which on the publishing runner fails for want of an NDK — and
+on a machine that has one would rebuild the libraries instead of publishing the
+verified ones that were downloaded.
 
 Three steps hide in there, run by
 `io.github.gradle-nexus.publish-plugin`:
@@ -639,6 +652,12 @@ Two properties are easy to confuse:
   it, as the recipe does, and the dry run produces the same multi-platform JAR a
   release would — without it the build falls back to the developer layout, with
   the host library at the JAR root, which is *not* the published artifact.
+- **`-PprebuiltAndroidLibs=true`** tells `buildAndroidLibs` that `android-libs/`
+  is already the artifact to package, rather than something to rebuild. Pass it
+  whenever the libraries came from somewhere other than this machine's cargo-ndk
+  — the release does, because they arrive as downloaded build artifacts on a
+  runner with no NDK. Leave it off and Cargo decides what is stale, which is what
+  you want while developing.
 
 ## Required secrets
 
@@ -679,18 +698,34 @@ downstream release suites.
   and an emulator job. Until then the Android publication is unproven at
   runtime, and the `CARGO_NDK_VERSION` pin is a current-stable choice rather
   than a validated one.
-- **`aarch64-pc-windows-msvc` has no runner**, so it is covered by archive
-  inspection only.
-- **The cross-build matrix has not yet completed in CI.**
-  [Run 31312017566](https://github.com/eclipse-zenoh/zenoh-flat-jni/actions/runs/31312017566)
-  started all six JVM builds and the Android build, and every one failed on a
-  stale lockfile on the release branch. #28 fixed that cause, but no run has
-  since got past this point. The two Linux targets have additionally been built
-  and inspected locally with `cross` under Podman. What remains untested is the
-  release *packaging* matrix as a whole and the non-host architectures —
-  ordinary CI does build release mode on macOS and Windows hosts, so those
-  compilers are exercised, but `aarch64-apple-darwin` and
-  `aarch64-pc-windows-msvc` are cross-compiled only during a release.
+- **`aarch64-pc-windows-msvc` is cross-compiled and archive-inspected, never
+  loaded.** Nothing technical prevents it any more, and both halves were checked
+  by running jobs rather than reading documentation:
+
+  - a GitHub-hosted Windows ARM64 runner is available to this repository
+    (`windows-11-arm`);
+  - **Java 11 is available there** — `distribution: microsoft` installs
+    `microsoft-jdk-11.0.31-windows-aarch64` natively. Only Temurin is missing
+    (`Could not find satisfied version for SemVer '11'`), which is a
+    distribution gap, not a platform one.
+
+  So an ARM64 consumer job could run on the project's Java 11 toolchain. It is
+  simply not written yet; adding it would close this gap.
+- **The cross-build matrix has not yet completed in CI.** Two rehearsals have
+  run. The first
+  ([31312017566](https://github.com/eclipse-zenoh/zenoh-flat-jni/actions/runs/31312017566))
+  failed every job on a stale lockfile, fixed by #28. The second
+  ([31320816585](https://github.com/eclipse-zenoh/zenoh-flat-jni/actions/runs/31320816585))
+  got much further: **all six desktop targets compiled**, including
+  `aarch64-apple-darwin` and `aarch64-pc-windows-msvc`, and all four Android
+  ABIs compiled. It still failed — the Windows jobs on a missing checksum tool
+  after packaging had succeeded, and Android on the crate type — both fixed
+  here.
+
+  What remains unexercised is the matrix *completing*, and every produced
+  library except the host one being **loaded** rather than compiled and
+  inspected. `consumer-test`, the publication and the Central upload have never
+  run.
 - **The Central upload has never run.** A `maven_publish: false` rehearsal does
   not exercise signing or the Central credentials; only a rehearsal with
   publication enabled does.
