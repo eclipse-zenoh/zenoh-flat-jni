@@ -46,7 +46,8 @@ env:
   # which release is selected, so each build tool's exact version is pinned here.
   # Note this pins the *executable*, not the sysroot: cross resolves its image as
   # `ghcr.io/cross-rs/<target>:<version>`, a mutable tag rather than a digest. The
-  # glibc check below asserts the property that actually matters instead.
+  # glibc check below enforces the compatibility bound we promise; it does not
+  # otherwise fix the image.
   CROSS_VERSION: 0.2.5
   # The oldest glibc a release promises to run on. Currently the cross images
   # produce 2.18; the margin is deliberate, so a benign image bump does not fail

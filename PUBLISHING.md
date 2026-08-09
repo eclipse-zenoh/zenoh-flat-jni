@@ -258,7 +258,7 @@ Each ZIP holds exactly the release native library for that target:
 - macOS: `libzenoh_flat_jni.dylib`
 - Windows: `zenoh_flat_jni.dll`
 
-**Linux runtime requirement: glibc 2.18 or newer.** The two Linux targets are
+**Linux runtime requirement: glibc 2.28 or newer; currently measured at 2.18.** The two Linux targets are
 built with `cross`, inside a container whose glibc is far older than the CI
 runner's, because a native `ubuntu-latest` (24.04) build requires `GLIBC_2.39`
 and would refuse to load on Ubuntu 22.04, Debian 12 or RHEL 9. Both floors were
@@ -269,18 +269,24 @@ built natively on ubuntu-24.04   GLIBC_2.39
 built with cross (both targets)  GLIBC_2.18
 ```
 
-`Check the glibc requirement` re-measures this on every release **and fails the
-build** if a Linux artifact needs more than `SUPPORTED_GLIBC` (2.28), so a
-container image change cannot raise the floor unnoticed. The margin between the
-2.18 produced today and the 2.28 promised is deliberate: a benign image bump
-does not break a release, a consequential one does.
+Those are two different numbers on purpose. **2.28 is the compatibility
+contract** — what a consumer may rely on. **2.18 is what today's `cross` images
+happen to produce**, and it is reported in every release's job summary.
 
-That check is what makes the guarantee, because the toolchain pin alone does not.
-`CROSS_VERSION` pins the `cross` *executable*; the image it selects is
+`Check the glibc requirement` re-measures on every release and **fails the build**
+above `SUPPORTED_GLIBC` (2.28). So a floor that rises *within* that range — say a
+future image producing 2.25 — is reported but not rejected: it stays inside the
+contract, and consumers on 2.28 or newer are unaffected. Only a rise past 2.28
+stops the release. If you need the stricter promise, set `SUPPORTED_GLIBC` to
+`2.18` and every image drift becomes a release failure to be reviewed by hand.
+
+That check is what bounds glibc compatibility, because the toolchain pin does
+not. `CROSS_VERSION` pins the `cross` *executable*; the image it selects is
 `ghcr.io/cross-rs/<target>:<version>`, a mutable tag rather than a digest, so the
 sysroot can move underneath a fixed tool version. Rather than pin two image
-digests and keep them current, the release asserts the property that actually
-matters about the sysroot.
+digests and keep them current, the release enforces the one compatibility
+property it is prepared to promise. It bounds *that* property and nothing else —
+a changed image can still alter the artifact in other ways.
 
 The `desktopTargets` map in `build.gradle.kts` drives `verifyDesktopArtifact`,
 so a target missing from a build fails the release rather than shipping a JAR
@@ -522,7 +528,7 @@ Normalizing the nested archives too (a fixed mtime before zipping) would close
 the gap, but nothing currently depends on it: the post-release hash comparison
 that once justified the claim is no longer part of the pipeline.
 
-What a release does fix precisely is *what it is built from*:
+These inputs are pinned:
 
 | Input | How it is fixed |
 | --- | --- |
@@ -530,10 +536,24 @@ What a release does fix precisely is *what it is built from*:
 | every transitive crate | `Cargo.lock`, committed and kept byte-aligned with Zenoh's by the shared lockfile-sync bot |
 | the Rust compiler | `rust-toolchain.toml` |
 | `cargo-ndk`, the NDK | pinned by exact version in `publish.yml`; `cargo install --locked` pins the dependencies of the *selected* release, not which release is selected, so each needs its own version pin |
-| `cross` | pinned by exact version, which fixes the executable but **not** the image: `ghcr.io/cross-rs/<target>:<version>` is a mutable tag. The glibc check bounds the consequence instead |
+| `cross` | the *executable*, by exact version — see below for its image |
 
 Every release build runs `--locked`, so a lockfile that does not match the
 manifest fails the build instead of silently resolving something else.
+
+These do **not** pin, and a release is not bit-for-bit reproducible across time
+because of them:
+
+| Floating input | Consequence |
+| --- | --- |
+| the `cross` images (`ghcr.io/cross-rs/<target>:<version>`) | a mutable tag, not a digest, so the Linux sysroot can change under a fixed tool version. The glibc check bounds *that* consequence and no other |
+| the macOS and Windows runner images (`*-latest`) | host SDK and linker versions move with GitHub's images |
+| the workflow actions (`@v4`, `@v1`) | major-version tags, so action behaviour can change |
+
+Pinning all of these would mean carrying image digests and action SHAs and
+keeping them current. That maintenance has not been taken on; what the release
+does guarantee is the dependency graph (`Cargo.lock`), the compiler
+(`rust-toolchain.toml`) and the glibc bound.
 
 ## Building and inspecting artifacts locally
 
@@ -639,8 +659,9 @@ Before releasing `zenoh-java` or `zenoh-kotlin`:
 
 ## Known gaps
 
-The pipeline is implemented but parts of it have not been executed, and two
-items from the original plan are not built at all.
+The workflow is implemented; what follows has not been exercised. In short: the
+full release matrix, the Android runtime path, the Central upload, and the
+downstream release suites.
 
 - **The Android artifact has no runtime test.** The AAR's contents are verified
   by archive inspection; nothing loads it. This needs an Android consumer app
