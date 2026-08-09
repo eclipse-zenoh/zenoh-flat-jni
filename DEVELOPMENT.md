@@ -4,7 +4,7 @@ This document describes how to set up zenoh-flat-jni for local development.
 
 ## Prerequisites
 
-- Rust 1.70+ (install via [rustup](https://rustup.rs/))
+- Rust — pinned by `rust-toolchain.toml` (currently 1.97.1); [rustup](https://rustup.rs/) installs that exact toolchain automatically, and CI and releases use the same one
 - JDK 11+ (Gradle comes from the committed wrapper — use `./gradlew`)
 
 ## Standard Setup (Maven Central)
@@ -102,25 +102,35 @@ sed -i 's|// includeBuild|includeBuild|' settings.gradle.kts
 
 ## Dependency Management
 
-### Path Dependencies (Internal Build Only)
+### Where the dependencies come from
 
-The `Cargo.toml` in zenoh-flat-jni uses path dependencies for zenoh-flat and prebindgen:
+Nothing needs to sit next to this repository. The generator is a published
+crate, and the zenoh side is declared the way every zenoh binding declares it:
 
 ```toml
-zenoh-flat = { version = "1.9.0", path = "../zenoh-flat", features = ["unstable"] }
-prebindgen = { path = "../prebindgen/prebindgen" }
+# [dependencies] and [build-dependencies]
+zenoh-flat = { version = "1.9.0", git = "https://github.com/eclipse-zenoh/zenoh-flat.git", branch = "main", features = ["unstable"] }
+prebindgen-jni = "0.5"          # build-dependency, from crates.io
+prebindgen-registry = "0.5"     # build-dependency, from crates.io
+prebindgen-jni-runtime = "0.5"  # runtime, from crates.io
 ```
 
-To use these for local development:
+### Building against a local checkout
 
-```bash
-# Ensure the PREBINDGEN workspace is checked out as a sibling
-cd ~/workspace
-git clone https://github.com/milyin/prebindgen.git
-cd prebindgen/zenoh-flat
-# zenoh-flat is inside the prebindgen workspace
+Do not edit this repository's manifest for that — a modified `Cargo.toml`
+invalidates the committed `Cargo.lock`, which release builds consume with
+`--locked`. Override the source from outside instead, e.g. in a
+workspace-level `.cargo/config.toml` that sits above every repository you have
+checked out:
 
-# Or manually adjust Cargo.toml to point to your local zenoh-flat
+```toml
+[patch."https://github.com/eclipse-zenoh/zenoh-flat.git"]
+zenoh-flat = { path = "zenoh-flat" }
+
+[patch.crates-io]
+prebindgen-jni = { path = "prebindgen/prebindgen-jni" }
+prebindgen-registry = { path = "prebindgen/prebindgen-registry" }
+prebindgen-jni-runtime = { path = "prebindgen/prebindgen-jni-runtime" }
 ```
 
 ### Published Versions (CI/Release)

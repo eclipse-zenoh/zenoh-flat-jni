@@ -76,7 +76,7 @@ documented in [PUBLISHING.md](PUBLISHING.md).
 
 ### Prerequisites
 
-- Rust 1.70+ with JNI support
+- Rust — the version is pinned by `rust-toolchain.toml` (currently 1.97.1) and rustup installs it automatically
 - JDK 11+ (Gradle comes from the committed wrapper)
 - Android NDK r26 and `cargo-ndk` (for Android builds)
 
@@ -108,9 +108,11 @@ git clone https://github.com/eclipse-zenoh/zenoh-flat-jni.git
 
 cd zenoh-flat-jni
 
-# Adjust paths in Cargo.toml (temporarily):
-# zenoh-flat = { version = "1.9.0", path = "../../PREBINDGEN/zenoh-flat", ... }
-# prebindgen = { path = "../../PREBINDGEN/prebindgen/prebindgen" }
+# To build against a local checkout instead of the published/Git sources,
+# point Cargo at it without editing this repository's manifest — e.g. in a
+# workspace-level .cargo/config.toml:
+# [patch."https://github.com/eclipse-zenoh/zenoh-flat.git"]
+# zenoh-flat = { path = "../zenoh-flat" }
 
 cargo build --release
 ```
@@ -141,7 +143,7 @@ The generated bindings are created via `prebindgen` in the build process:
 
 1. **Rust source** (`zenoh-flat`) marked with `#[prebindgen]` annotations
 2. **Proc-macro** captures annotated items to JSONL format
-3. **`prebindgen::lang::JniGen`** reads JSONL and generates:
+3. **`prebindgen_jni::JniGen`** reads JSONL and generates:
    - Rust JNI wrapper functions
    - Kotlin data classes and enums
 4. **Gradle** packages Rust dylib + Kotlin sources into a JAR

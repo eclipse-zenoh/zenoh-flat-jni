@@ -277,11 +277,17 @@ unzip -l build/distributions/zenoh-flat-jni-android-*.aar
 gpg --verify path/to/artifact.asc path/to/artifact
 ```
 
-`-PremotePublication=true` is omitted above because it also switches on GPG
-signing. It fails fast unless `jni-libs/` or `android-libs/` is present, so a
-*remote* publication cannot silently ship the publishing runner's own host
-library; the artifact layout itself is selected by `jni-libs/` being there, so a
-local dry run without it still produces the multi-platform JAR.
+Two properties are easy to confuse:
+
+- **`-PremotePublication=true`** switches on GPG signing and makes the build
+  fail fast unless `jni-libs/` or `android-libs/` is populated, so a *remote*
+  publication cannot silently ship the publishing runner's own host library. It
+  is omitted from the recipe above only because a local dry run has no signing
+  keys.
+- **`jni-libs/` existing** is what selects the multi-platform layout. Populate
+  it, as the recipe does, and the dry run produces the same multi-platform JAR a
+  release would — without it the build falls back to the developer layout, with
+  the host library at the JAR root, which is *not* the published artifact.
 
 ## Required secrets
 

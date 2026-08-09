@@ -152,12 +152,22 @@ jobs:
         with:
           gradle-version: '8.5'
 
+      # Must match what publish_jvm_package will use, so the smoke test exercises
+      # the coordinates that actually get published rather than a same-content
+      # artifact under a different version.
+      - name: Set pub mode env var
+        shell: bash
+        run: |
+          if [[ "${{ inputs.snapshot }}" == "true" ]]; then
+            echo "PUB_MODE=-PSNAPSHOT" >> $GITHUB_ENV
+          fi
+
       # No `-PremotePublication=true` here: that switches on signing, and this
       # job has no GPG secrets. The JAR is the same multi-platform artifact
       # either way — `jni-libs/` being present is what selects that layout — and
       # verifyDesktopArtifact still runs.
       - name: Publish the candidate to an isolated file repository
-        run: ./gradlew publishMavenPublicationToDryRunRepository -Prelease=true --no-daemon
+        run: ./gradlew publishMavenPublicationToDryRunRepository -Prelease=true ${{ env.PUB_MODE }} --no-daemon
 
       # Resolved through the file repository, with `--refresh-dependencies` so a
       # cached artifact of the same coordinates cannot stand in for it.
@@ -168,6 +178,10 @@ jobs:
           set -euo pipefail
           repo="$GITHUB_WORKSPACE/build/dry-run-repository"
           version=$(tr -d '[:space:]' < "$GITHUB_WORKSPACE/version.txt")
+          if [[ "${{ inputs.snapshot }}" == "true" ]]; then
+            version="$version-SNAPSHOT"
+          fi
+          echo "Consuming org.eclipse.zenoh:zenoh-flat-jni:$version"
           gradle run --no-daemon --refresh-dependencies \
             -PcandidateRepository="file://$repo" \
             -PcandidateVersion="$version"
