@@ -263,6 +263,13 @@ val javadocJar by tasks.registering(Jar::class) {
 // wanted.
 val prebuiltAndroidLibs = project.findProperty("prebuiltAndroidLibs")?.toString()?.toBoolean() == true
 
+// AGP packages whatever is in the jniLibs directory, so the cross-compilation
+// has to run before it looks. Without this a clean build assembles an AAR with
+// no libraries in it — or silently packages a stale directory.
+tasks.matching { it.name == "preBuild" }.configureEach {
+    dependsOn("buildAndroidLibs")
+}
+
 val buildAndroidLibs by tasks.registering {
     description = "Cross-compile the Android ABIs into android-libs/ using cargo-ndk"
     onlyIf {
@@ -357,10 +364,14 @@ val verifyAndroidArtifact by tasks.registering {
 
 // A remote publication that silently ships the publishing runner's own library
 // is the failure mode this whole pipeline exists to prevent.
-if (isRemotePublication && !isMultiPlatform && !isAndroidBuild) {
+// One invocation publishes the root, JVM and Android modules together, so a
+// remote publication needs *both* sets of natives — `or` would ship an artifact
+// missing the libraries for one platform.
+if (isRemotePublication && !(isMultiPlatform && isAndroidBuild)) {
     throw GradleException(
-        "-PremotePublication=true requires cross-built natives in `jni-libs/` (desktop) " +
-            "or `android-libs/` (Android); see PUBLISHING.md."
+        "-PremotePublication=true requires cross-built natives in both `jni-libs/` (desktop) " +
+            "and `android-libs/` (Android), because the JVM and Android modules are " +
+            "published together; see PUBLISHING.md."
     )
 }
 
@@ -456,6 +467,12 @@ signing {
 
 tasks.withType<PublishToMavenRepository>().configureEach {
     dependsOn(tasks.withType<Sign>())
-    if (isMultiPlatform) dependsOn(verifyDesktopArtifact)
-    if (isAndroidBuild) dependsOn(verifyAndroidArtifact)
+    // Both verifiers, not whichever directory happens to exist: a remote
+    // publication carries both artifacts, so both must be checked.
+    if (isRemotePublication) {
+        dependsOn(verifyDesktopArtifact, verifyAndroidArtifact)
+    } else {
+        if (isMultiPlatform) dependsOn(verifyDesktopArtifact)
+        if (isAndroidBuild) dependsOn(verifyAndroidArtifact)
+    }
 }

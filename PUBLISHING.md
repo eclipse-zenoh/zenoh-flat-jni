@@ -78,7 +78,7 @@ discarded. It is the release of that repository that has no undo.
 | `...-sources.jar` | the source code, so IDEs can show it |
 | `...-javadoc.jar` | API documentation, generated here by **Dokka** (Kotlin's doc tool) |
 | `...pom` | metadata: coordinates, licence, developers, SCM URL, and the library's own dependencies |
-| `...module` | Gradle's richer equivalent of the POM — *optional*, and only produced for the JVM publication |
+| `...module` | Gradle module metadata — for a KMP library it is **required**, not optional: it is what maps the root coordinate onto the JVM and Android variants |
 | `.md5`, `.sha1`, … | checksums for each of the above |
 | `.asc` | a **GPG signature** for each — Central rejects unsigned releases |
 
@@ -291,8 +291,11 @@ org.eclipse.zenoh:zenoh-flat-jni-jvm:<version>      the JVM artifact
 org.eclipse.zenoh:zenoh-flat-jni-android:<version>  the Android artifact
 ```
 
-This is a **Kotlin Multiplatform** library, so a consumer declares the *root*
-coordinate once and Gradle resolves the variant matching its target. That is what
+This is a **Kotlin Multiplatform** library, so a *Gradle* consumer declares the
+root coordinate once and Gradle resolves the variant matching its target. **Maven
+consumers must name a platform module** (`-jvm` or `-android`) directly: Maven
+does not read Gradle module metadata, and the root artifact carries metadata
+only. That is what
 makes it structurally impossible to build an Android app against the desktop
 libraries — and it lets a consumer publish its own JVM and Android artifacts from
 a single Gradle invocation, which is what allows an atomic release downstream.
@@ -387,15 +390,17 @@ of AGP reimplemented to avoid needing an Android SDK. Variant-aware publishing
 requires AGP regardless, and the SDK is preinstalled on the runners already in
 use, so that trade-off no longer holds.
 
-Downstream Android publications must resolve this AAR, not the desktop JAR.
+A Gradle consumer reaches this through the root coordinate; a Maven consumer must
+name `zenoh-flat-jni-android` directly.
 
 ### Maven Central contents
 
-Both publications carry:
+All three publications carry:
 
 - The primary JAR or AAR.
-- A sources JAR (`sourcesJar`: Kotlin sources, the Rust `src/`, `build.rs`,
-  `Cargo.toml`).
+- A sources JAR, generated per publication by the Kotlin plugin. It carries the
+  Kotlin sources of that target — not the Rust `src/`, `build.rs` or
+  `Cargo.toml`, which the hand-rolled archive used to include.
 - A Dokka-generated Javadoc JAR (`javadocJar`).
 - A POM with name, description, URL, license, developers, and SCM information.
   The Android POM is built from `artifact()` entries, so its single runtime
@@ -695,7 +700,7 @@ Inspect the archives and signatures directly:
 
 ```bash
 unzip -l build/libs/zenoh-flat-jni-*.jar
-unzip -l build/distributions/zenoh-flat-jni-android-*.aar
+unzip -l build/outputs/aar/zenoh-flat-jni-release.aar
 gpg --verify path/to/artifact.asc path/to/artifact
 ```
 

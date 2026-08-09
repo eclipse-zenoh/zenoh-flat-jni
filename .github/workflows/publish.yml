@@ -310,7 +310,7 @@ jobs:
             || { echo "::error::Cargo.toml says $cargo_version, version.txt says $version"; exit 1; }
           echo "Publishing $version" >> "$GITHUB_STEP_SUMMARY"
 
-      # Both coordinates are checked before either is published. Central releases
+      # All three coordinates are checked before any is published. Central releases
       # are immutable, so republishing cannot succeed — and an occupied *Android*
       # coordinate must not be discovered after the JVM artifact is already
       # public. Snapshots are exempt: they live in a mutable repository.
@@ -320,7 +320,7 @@ jobs:
         run: |
           set -euo pipefail
           v=$(tr -d '[:space:]' < version.txt)
-          for artifact in zenoh-flat-jni zenoh-flat-jni-android; do
+          for artifact in zenoh-flat-jni zenoh-flat-jni-jvm zenoh-flat-jni-android; do
             url="https://repo1.maven.org/maven2/org/eclipse/zenoh/$artifact/$v/$artifact-$v.pom"
             if curl -sfIL -o /dev/null "$url"; then
               echo "::error::org.eclipse.zenoh:$artifact:$v is already on Maven Central and cannot be replaced"

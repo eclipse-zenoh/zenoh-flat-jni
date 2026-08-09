@@ -41,10 +41,16 @@ Or in `pom.xml`:
 ```xml
 <dependency>
     <groupId>org.eclipse.zenoh</groupId>
-    <artifactId>zenoh-flat-jni</artifactId>
+    <artifactId>zenoh-flat-jni-jvm</artifactId>
     <version>1.9.0</version>
 </dependency>
 ```
+
+Note the `-jvm` suffix. Gradle consumers depend on the plain `zenoh-flat-jni`
+coordinate and are redirected to the right variant by Gradle module metadata;
+**Maven ignores that metadata**, so a Maven build must name the platform module
+directly — the root artifact carries metadata only, not the classes or the
+native libraries.
 
 ## Usage
 
