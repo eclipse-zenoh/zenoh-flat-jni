@@ -189,7 +189,10 @@ workflow:
   It runs on Linux, macOS and Windows.
 
 - **`publish_jvm_package`** checks that `version.txt` and `Cargo.toml` agree,
-  then publishes. `verifyDesktopArtifact` runs as a publication dependency and
+  refuses to proceed if those coordinates are already on Maven Central —
+  releases are immutable, so republishing cannot succeed, and finding that out
+  mid-upload is a confusing way to learn it; snapshots are exempt, living in a
+  mutable repository — then publishes. `verifyDesktopArtifact` runs as a publication dependency and
   fails the build on a missing target ZIP, a ZIP whose contents are not exactly
   the one expected library, or a stray native at the JAR root that would shadow
   the per-target resources.
@@ -250,6 +253,18 @@ released coordinates untouched. Snapshot success does not replace release
 validation — snapshots skip Central's staging validation entirely.
 
 Passing `maven_publish: false` runs everything except the upload.
+
+Two things to know before the first rehearsal:
+
+- **Pass an explicit `version`.** Without one, `create-release-branch` derives it
+  from `git describe`, which fails outright in a repository with no tags.
+- **Do not pass the version you intend to release.** `bump-and-tag.bash` tags and
+  pushes whatever version it is given, on rehearsals too — deliberately, since
+  dry-run branches and tags are throwaway names. Passing `1.9.0` to a rehearsal
+  leaves a `1.9.0` tag pointing at a dry-run commit. Use something obviously
+  provisional, such as `1.9.0-rc1`, which publishes `1.9.0-rc1-SNAPSHOT`.
+
+A stray Git tag can be deleted. A Maven Central release cannot.
 
 ### Locally
 
