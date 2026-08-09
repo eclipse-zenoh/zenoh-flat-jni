@@ -4,9 +4,8 @@ This document describes how to set up zenoh-flat-jni for local development.
 
 ## Prerequisites
 
-- Rust 1.70+ (install via [rustup](https://rustup.rs/))
-- JDK 11+ (for Gradle builds)
-- Gradle 7.0+
+- Rust — pinned by `rust-toolchain.toml` (currently 1.97.1); [rustup](https://rustup.rs/) installs that exact toolchain automatically, and CI and releases use the same one
+- JDK 11+ (Gradle comes from the committed wrapper — use `./gradlew`)
 
 ## Standard Setup (Maven Central)
 
@@ -103,30 +102,48 @@ sed -i 's|// includeBuild|includeBuild|' settings.gradle.kts
 
 ## Dependency Management
 
-### Path Dependencies (Internal Build Only)
+### Where the dependencies come from
 
-The `Cargo.toml` in zenoh-flat-jni uses path dependencies for zenoh-flat and prebindgen:
+Nothing needs to sit next to this repository. The generator is a published
+crate, and the zenoh side is declared the way every zenoh binding declares it:
 
 ```toml
-zenoh-flat = { version = "1.9.0", path = "../zenoh-flat", features = ["unstable"] }
-prebindgen = { path = "../prebindgen/prebindgen" }
+# [dependencies] and [build-dependencies]
+zenoh-flat = { version = "1.9.0", git = "https://github.com/eclipse-zenoh/zenoh-flat.git", branch = "main", features = ["unstable"] }
+prebindgen-jni = "0.5"          # build-dependency, from crates.io
+prebindgen-registry = "0.5"     # build-dependency, from crates.io
+prebindgen-jni-runtime = "0.5"  # runtime, from crates.io
 ```
 
-To use these for local development:
+### Building against a local checkout
 
-```bash
-# Ensure the PREBINDGEN workspace is checked out as a sibling
-cd ~/workspace
-git clone https://github.com/milyin/prebindgen.git
-cd prebindgen/zenoh-flat
-# zenoh-flat is inside the prebindgen workspace
+Do not edit this repository's manifest for that — a modified `Cargo.toml`
+invalidates the committed `Cargo.lock`, which release builds consume with
+`--locked`. Override the source from outside instead, e.g. in a
+workspace-level `.cargo/config.toml` that sits above every repository you have
+checked out:
 
-# Or manually adjust Cargo.toml to point to your local zenoh-flat
+```toml
+[patch."https://github.com/eclipse-zenoh/zenoh-flat.git"]
+zenoh-flat = { path = "zenoh-flat" }
+
+[patch.crates-io]
+prebindgen-jni = { path = "prebindgen/prebindgen-jni" }
+prebindgen-registry = { path = "prebindgen/prebindgen-registry" }
+prebindgen-jni-runtime = { path = "prebindgen/prebindgen-jni-runtime" }
 ```
 
 ### Published Versions (CI/Release)
 
-In the CI/CD pipeline (GitHub Actions), zenoh-flat and prebindgen are fetched via git, and eventually will be published to crates.io. The path dependencies are temporary for local development.
+Nothing has to sit next to this repository any more. `prebindgen-*` comes from
+crates.io as a version constraint, and `zenoh`, `zenoh-ext` and `zenoh-flat` are
+Git dependencies on `branch = "main"` — the shape every zenoh binding uses. A
+bare clone therefore builds.
+
+Which commit of each of those a build actually resolves is fixed by the
+committed `Cargo.lock`, which the shared lockfile-sync bot keeps aligned with
+Zenoh's own. Release builds run `--locked`, so a lockfile that no longer matches
+the manifest fails the build rather than resolving something else.
 
 ## Testing
 
@@ -162,12 +179,21 @@ cargo clippy --all-targets --all-features -- -D warnings
 
 ## Building for Android
 
-```bash
-# Build native library for Android
-./gradlew -Pandroid=true build
+The Android ABIs are cross-compiled with [cargo-ndk](https://github.com/bbqsrc/cargo-ndk)
+straight into the AAR's `jni/<abi>/` layout; the AAR is then assembled from
+`android-libs/` (see [PUBLISHING.md](PUBLISHING.md)). Use the cargo-ndk and NDK
+versions pinned in
+[`publish-android.yml`](.github/workflows/publish-android.yml) — a release built
+with anything else is not the artifact CI verified.
 
-# Run Android tests
-./gradlew -Pandroid=true androidTest
+```bash
+cargo install cargo-ndk --locked --version 4.1.2   # CARGO_NDK_VERSION
+rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android
+
+# ANDROID_NDK_HOME must point at the pinned NDK (r26)
+cargo ndk -o android-libs -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 build --release
+
+./gradlew androidAar verifyAndroidArtifact
 ```
 
 ## CI/CD
@@ -204,15 +230,27 @@ cargo build --release
 
 Then try tests again.
 
-## Publishing to Maven Central
+## Releasing
 
-This is typically done via the GitHub Actions CI/CD pipeline on release tags. To publish manually:
+The Maven Central release pipeline, the artifact layouts it produces, its
+verification gates, the required secrets, and the known gaps are documented in
+[PUBLISHING.md](PUBLISHING.md).
 
-1. Ensure you have GPG keys configured
-2. Have OSSRH credentials
-3. Run: `./gradlew publish -DremotePublication=true`
+To rehearse a publication locally without touching Central, populate `jni-libs/`
+(and optionally `android-libs/`) and publish to the same isolated file-based
+repository the CI consumer test uses:
 
-See the `.github/workflows/publish.yml` for details.
+```bash
+./gradlew publishAllPublicationsToDryRunRepository
+find build/dry-run-repository -type f
+
+cd ci/consumer-smoke-test
+gradle run -PcandidateRepository="file://$PWD/../../build/dry-run-repository" \
+           -PcandidateVersion="$(cat ../../version.txt)"
+```
+
+Do not use `mavenLocal()` for this: it can serve leftovers from earlier builds,
+which makes it impossible to prove which repository supplied an artifact.
 
 ## Documentation
 

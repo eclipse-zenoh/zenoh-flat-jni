@@ -1,0 +1,291 @@
+#
+# Copyright (c) 2026 ZettaScale Technology
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License 2.0 which is available at
+# http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+# which is available at https://www.apache.org/licenses/LICENSE-2.0.
+#
+# SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+#
+# Contributors:
+#   ZettaScale Zenoh Team, <zenoh@zettascale.tech>
+#
+name: Publish (JVM)
+
+on:
+  workflow_call:
+    inputs:
+      snapshot:
+        description: "If the publication is for a snapshot version."
+        type: boolean
+        required: true
+        default: false
+      branch:
+        description: Target branch
+        type: string
+        required: false
+      maven_publish:
+        type: boolean
+        required: false
+        default: true
+
+env:
+  RUST_BACKTRACE: 1
+  CARGO_TERM_COLOR: always
+  # Where the cross-built libraries are collected before Gradle packages them.
+  # Kept in step with `jniLibsDir` in build.gradle.kts.
+  JNI_LIB_PATHS: jni-libs
+
+jobs:
+  builds:
+    name: Build for ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { target: x86_64-unknown-linux-gnu,  os: ubuntu-latest,  lib: libzenoh_flat_jni.so }
+          - { target: aarch64-unknown-linux-gnu, os: ubuntu-latest,  lib: libzenoh_flat_jni.so }
+          - { target: x86_64-apple-darwin,       os: macos-latest,   lib: libzenoh_flat_jni.dylib }
+          - { target: aarch64-apple-darwin,      os: macos-latest,   lib: libzenoh_flat_jni.dylib }
+          - { target: x86_64-pc-windows-msvc,    os: windows-latest, lib: zenoh_flat_jni.dll }
+          - { target: aarch64-pc-windows-msvc,   os: windows-latest, lib: zenoh_flat_jni.dll }
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      # No toolchain is named here on purpose: rust-toolchain.toml pins it, and
+      # the release must use the same compiler CI and the lockfile sync use.
+      - name: Install Rust toolchain
+        run: |
+          rustup show
+          rustup target add ${{ matrix.target }}
+
+      - name: Install the aarch64 Linux cross toolchain
+        if: matrix.target == 'aarch64-unknown-linux-gnu'
+        shell: bash
+        run: |
+          sudo apt-get -y update
+          sudo apt-get -y install gcc-aarch64-linux-gnu
+          {
+            echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc"
+            echo "CC_aarch64_unknown_linux_gnu=aarch64-linux-gnu-gcc"
+          } >> "$GITHUB_ENV"
+
+      - name: Build
+        run: cargo build --release --locked --target ${{ matrix.target }}
+
+      # build.rs rewrites the committed bindings on every build. A diff means the
+      # release would ship generated sources nobody reviewed. Checked once, on
+      # the host target, since the output does not vary per target.
+      - name: Fail on generated-source drift
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        shell: bash
+        run: |
+          git add -A -- src/generated_bindings.rs kotlin/generated kotlin/REPORT.md
+          git diff --cached --exit-code || {
+            echo "::error::Generated artifacts are stale. Run 'cargo build' and commit the result."
+            exit 1
+          }
+
+      # The JAR resource layout NativeLibrary.determineTarget() resolves:
+      # <target>/<target>.zip holding exactly the one library.
+      - name: Packaging
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$GITHUB_WORKSPACE/${{ env.JNI_LIB_PATHS }}/${{ matrix.target }}"
+          mkdir -p "$out"
+          cd "target/${{ matrix.target }}/release"
+          if command -v zip >/dev/null; then
+            zip -j "$out/${{ matrix.target }}.zip" "${{ matrix.lib }}"
+          else
+            7z -y a "$out/${{ matrix.target }}.zip" "${{ matrix.lib }}"
+          fi
+          cd "$GITHUB_WORKSPACE/${{ env.JNI_LIB_PATHS }}"
+          shasum -a 256 "${{ matrix.target }}/${{ matrix.target }}.zip" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.target }}
+          path: ${{ env.JNI_LIB_PATHS }}
+          if-no-files-found: error
+
+  # Maven Central releases are immutable, so the candidate is consumed as a real
+  # Maven dependency before it is published anywhere. The consumer resolves from
+  # an isolated file repository with content filters, so it cannot silently fall
+  # back to Central and pass against an older release.
+  consumer-test:
+    name: Consume the candidate on ${{ matrix.os }}
+    needs: builds
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Create resources destination
+        shell: bash
+        run: mkdir -p ${{ env.JNI_LIB_PATHS }}
+
+      - name: Download result of previous builds
+        uses: actions/download-artifact@v4
+        with:
+          pattern: desktop-*
+          merge-multiple: true
+          path: ${{ env.JNI_LIB_PATHS }}
+
+      # The layout Gradle expects is `<target>/<target>.zip` directly under
+      # jni-libs/. Printing it makes a mismatch obvious in the log instead of
+      # only surfacing as verifyDesktopArtifact's "missing native resource".
+      - name: Show the downloaded layout
+        shell: bash
+        run: find ${{ env.JNI_LIB_PATHS }} -type f | sort
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 11
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.5'
+
+      # Must match what publish_jvm_package will use, so the smoke test exercises
+      # the coordinates that actually get published rather than a same-content
+      # artifact under a different version.
+      - name: Set pub mode env var
+        shell: bash
+        run: |
+          if [[ "${{ inputs.snapshot }}" == "true" ]]; then
+            echo "PUB_MODE=-PSNAPSHOT" >> $GITHUB_ENV
+          fi
+
+      # No `-PremotePublication=true` here: that switches on signing, and this
+      # job has no GPG secrets. The JAR is the same multi-platform artifact
+      # either way — `jni-libs/` being present is what selects that layout — and
+      # verifyDesktopArtifact still runs.
+      - name: Publish the candidate to an isolated file repository
+        run: ./gradlew publishMavenPublicationToDryRunRepository -Prelease=true ${{ env.PUB_MODE }} --no-daemon
+
+      # Resolved through the file repository, with `--refresh-dependencies` so a
+      # cached artifact of the same coordinates cannot stand in for it.
+      - name: Smoke-test the candidate as an external consumer
+        working-directory: ci/consumer-smoke-test
+        shell: bash
+        run: |
+          set -euo pipefail
+          repo="$GITHUB_WORKSPACE/build/dry-run-repository"
+          version=$(tr -d '[:space:]' < "$GITHUB_WORKSPACE/version.txt")
+          if [[ "${{ inputs.snapshot }}" == "true" ]]; then
+            version="$version-SNAPSHOT"
+          fi
+          echo "Consuming org.eclipse.zenoh:zenoh-flat-jni:$version"
+          gradle run --no-daemon --refresh-dependencies \
+            -PcandidateRepository="file://$repo" \
+            -PcandidateVersion="$version"
+
+  publish_jvm_package:
+    name: Publish JVM package
+    needs: consumer-test
+    permissions:
+      contents: read
+      packages: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Check that every version declaration agrees
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=$(tr -d '[:space:]' < version.txt)
+          cargo_version=$(sed -n '/^\[package\]/,/^\[/p' Cargo.toml \
+            | sed -n 's/^version = "\(.*\)"$/\1/p' | head -1)
+          test "$cargo_version" = "$version" \
+            || { echo "::error::Cargo.toml says $cargo_version, version.txt says $version"; exit 1; }
+          echo "Publishing $version" >> "$GITHUB_STEP_SUMMARY"
+
+      # Maven Central releases are immutable, so republishing existing
+      # coordinates cannot succeed — and discovering that mid-upload is a
+      # confusing way to find out. Snapshots are exempt: they live in a
+      # separate, mutable repository and may be overwritten freely.
+      - name: Refuse to overwrite an existing Maven Central release
+        if: ${{ inputs.snapshot == false }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          v=$(tr -d '[:space:]' < version.txt)
+          url="https://repo1.maven.org/maven2/org/eclipse/zenoh/zenoh-flat-jni/$v/zenoh-flat-jni-$v.pom"
+          if curl -sfIL -o /dev/null "$url"; then
+            echo "::error::org.eclipse.zenoh:zenoh-flat-jni:$v is already on Maven Central and cannot be replaced"
+            exit 1
+          fi
+          echo "org.eclipse.zenoh:zenoh-flat-jni:$v is free on Maven Central" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Create resources destination
+        run: mkdir -p ${{ env.JNI_LIB_PATHS }}
+
+      - name: Download result of previous builds
+        uses: actions/download-artifact@v4
+        with:
+          pattern: desktop-*
+          merge-multiple: true
+          path: ${{ env.JNI_LIB_PATHS }}
+
+      # The layout Gradle expects is `<target>/<target>.zip` directly under
+      # jni-libs/. Printing it makes a mismatch obvious in the log instead of
+      # only surfacing as verifyDesktopArtifact's "missing native resource".
+      - name: Show the downloaded layout
+        shell: bash
+        run: find ${{ env.JNI_LIB_PATHS }} -type f | sort
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 11
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set pub mode env var
+        # Note: This step is intended to allow publishing snapshot packages.
+        # It allows to optionally append the property -PSNAPSHOT to the gradle
+        # publication task on the next step, resulting in the package version
+        # following the convention '<version>-SNAPSHOT'. Snapshots go to a
+        # separate repository that is not staged, so they are not closed either.
+        run: |
+          if [[ "${{ inputs.snapshot }}" == "true" ]]; then
+            echo "PUB_MODE=-PSNAPSHOT" >> $GITHUB_ENV
+          else
+            echo "RELEASE=closeAndReleaseSonatypeStagingRepository" >> $GITHUB_ENV
+          fi
+
+      - if: ${{ inputs.maven_publish == true }}
+        name: Gradle Publish JVM Package to Maven Central repository
+        run: |
+          ./gradlew publishMavenPublicationToSonatypeRepository ${{ env.RELEASE }} --info -PremotePublication=true -Prelease=true ${{ env.PUB_MODE }}
+        env:
+          CENTRAL_SONATYPE_TOKEN_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
+          CENTRAL_SONATYPE_TOKEN_PASSWORD: ${{ secrets.CENTRAL_SONATYPE_TOKEN_PASSWORD }}
+          ORG_GPG_KEY_ID: ${{ secrets.ORG_GPG_KEY_ID }}
+          ORG_GPG_SUBKEY_ID: ${{ secrets.ORG_GPG_SUBKEY_ID }}
+          ORG_GPG_PRIVATE_KEY: ${{ secrets.ORG_GPG_PRIVATE_KEY }}
+          ORG_GPG_PASSPHRASE: ${{ secrets.ORG_GPG_PASSPHRASE }}
+
+      - name: Upload gradle problems report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: problem-reports-${{ github.job }}.zip
+          path: ${{ github.workspace }}/build/reports/problems/

@@ -70,16 +70,15 @@ fun main() {
 
 ## Development
 
-The Maven Central release process, current publishing blockers, required
-multi-platform artifact layout, and dry-run procedure are documented in
-[PUBLISHING.md](PUBLISHING.md).
+Local setup is documented in [DEVELOPMENT.md](DEVELOPMENT.md); the Maven Central
+release pipeline, artifact layouts, verification gates and dry-run procedure are
+documented in [PUBLISHING.md](PUBLISHING.md).
 
 ### Prerequisites
 
-- Rust 1.70+ with JNI support
-- Gradle 7.0+
-- JDK 11+
-- Android SDK (for Android builds)
+- Rust — the version is pinned by `rust-toolchain.toml` (currently 1.97.1) and rustup installs it automatically
+- JDK 11+ (Gradle comes from the committed wrapper)
+- Android NDK r26 and `cargo-ndk` (for Android builds)
 
 ### Build from Source
 
@@ -109,12 +108,11 @@ git clone https://github.com/eclipse-zenoh/zenoh-flat-jni.git
 
 cd zenoh-flat-jni
 
-# Adjust paths in Cargo.toml (temporarily):
-# zenoh-flat = { version = "1.9.0", path = "../../PREBINDGEN/zenoh-flat", ... }
-# prebindgen-jni-runtime = { path = "../../PREBINDGEN/prebindgen/prebindgen-jni-runtime" }
-# [build-dependencies]
-# prebindgen-jni      = { path = "../../PREBINDGEN/prebindgen/prebindgen-jni" }
-# prebindgen-registry = { path = "../../PREBINDGEN/prebindgen/prebindgen-registry" }
+# To build against a local checkout instead of the published/Git sources,
+# point Cargo at it without editing this repository's manifest — e.g. in a
+# workspace-level .cargo/config.toml:
+# [patch."https://github.com/eclipse-zenoh/zenoh-flat.git"]
+# zenoh-flat = { path = "../zenoh-flat" }
 
 cargo build --release
 ```

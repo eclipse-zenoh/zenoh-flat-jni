@@ -32,6 +32,11 @@ on:
         type: string
         description: Release branch
         required: false
+      maven_publish:
+        type: boolean
+        description: Publish the package to Maven Central
+        required: false
+        default: true
 
 jobs:
   tag:
@@ -69,8 +74,34 @@ jobs:
           GIT_USER_NAME: eclipse-zenoh-bot
           GIT_USER_EMAIL: eclipse-zenoh-bot@users.noreply.github.com
 
-  publish-github:
+  publish-jvm:
+    name: Publish JVM package
     needs: tag
+    uses: ./.github/workflows/publish-jvm.yml
+    with:
+      snapshot: ${{ !(inputs.live-run || false) }}
+      branch: ${{ needs.tag.outputs.branch }}
+      maven_publish: ${{ !contains(inputs.maven_publish, 'false') }}
+    permissions:
+      contents: read
+      packages: write
+    secrets: inherit
+
+  publish-android:
+    name: Publish Android package
+    needs: tag
+    uses: ./.github/workflows/publish-android.yml
+    with:
+      snapshot: ${{ !(inputs.live-run || false) }}
+      branch: ${{ needs.tag.outputs.branch }}
+      maven_publish: ${{ !contains(inputs.maven_publish, 'false') }}
+    permissions:
+      contents: read
+      packages: write
+    secrets: inherit
+
+  publish-github:
+    needs: [tag, publish-jvm, publish-android]
     runs-on: ubuntu-latest
     steps:
       - uses: eclipse-zenoh/ci/publish-crates-github@main
