@@ -48,9 +48,16 @@ printf '%s' "$version" > version.txt
 # Propagate version change to the crate
 toml_set_in_place Cargo.toml "package.version" "$version"
 
+# Cargo.lock records the crate's *own* version, so it goes stale the instant the
+# manifest is bumped — and every release build runs `--locked`, which then
+# refuses to build at all. `cargo metadata` re-resolves and rewrites the lockfile
+# minimally (one line) without compiling; a `cargo check` here would also run
+# build.rs and rewrite the committed generated sources as a side effect.
+cargo metadata --format-version 1 > /dev/null
+
 # Show the changes to be committed
-git diff version.txt Cargo.toml
-git commit version.txt Cargo.toml -m "chore: Bump version to \`$version\`"
+git diff version.txt Cargo.toml Cargo.lock
+git commit version.txt Cargo.toml Cargo.lock -m "chore: Bump version to \`$version\`"
 
 # Select all dependencies that match $bump_deps_pattern and bump them to $bump_deps_version.
 #
