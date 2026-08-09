@@ -359,7 +359,7 @@ jobs:
       # verifyDesktopArtifact and verifyAndroidArtifact otherwise only run as
       # dependencies of a publication task.
       - name: Assemble and verify both artifacts
-        run: ./gradlew jar androidAar verifyDesktopArtifact verifyAndroidArtifact -Prelease=true
+        run: ./gradlew jar androidAar verifyDesktopArtifact verifyAndroidArtifact -Prelease=true -PprebuiltAndroidLibs=true
 
       - name: Set pub mode env var
         # Note: This step is intended to allow publishing snapshot packages.
@@ -382,7 +382,8 @@ jobs:
         run: |
           ./gradlew publishMavenPublicationToSonatypeRepository \
                     publishAndroidPublicationToSonatypeRepository \
-                    ${{ env.RELEASE }} --info -PremotePublication=true -Prelease=true ${{ env.PUB_MODE }}
+                    ${{ env.RELEASE }} --info -PremotePublication=true -Prelease=true \
+                    -PprebuiltAndroidLibs=true ${{ env.PUB_MODE }}
         env:
           CENTRAL_SONATYPE_TOKEN_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
           CENTRAL_SONATYPE_TOKEN_PASSWORD: ${{ secrets.CENTRAL_SONATYPE_TOKEN_PASSWORD }}

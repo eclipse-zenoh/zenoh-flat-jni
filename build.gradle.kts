@@ -243,20 +243,24 @@ val androidClassesJar by tasks.registering(Jar::class) {
 // library: one Gradle entry point, so the documented developer command and CI run
 // the same code path rather than two copies of it.
 //
-// Skipped when android-libs/ already holds every ABI — the release's publish job
-// downloads them as build artifacts and has no NDK installed. Delete the
-// directory to force a rebuild.
+// It runs cargo-ndk every time. Cargo is the incremental build system here, and
+// it is the only one that knows whether the sources, Cargo.lock or the profile
+// moved; skipping on the mere presence of four correctly-named files would
+// happily package stale — or foreign — libraries.
+//
+// The single exception is `-PprebuiltAndroidLibs=true`, which the release's
+// publish job passes: there `android-libs/` arrives as a downloaded build
+// artifact and the runner has no NDK, so building is neither possible nor
+// wanted.
+val prebuiltAndroidLibs = project.findProperty("prebuiltAndroidLibs")?.toString()?.toBoolean() == true
+
 val buildAndroidLibs by tasks.registering {
     description = "Cross-compile the Android ABIs into android-libs/ using cargo-ndk"
-    outputs.dir(androidLibsDir)
     onlyIf {
-        val missing = androidAbis.filterNot {
-            File(androidLibsDir, "$it/libzenoh_flat_jni.so").exists()
+        if (prebuiltAndroidLibs) {
+            logger.lifecycle("-PprebuiltAndroidLibs=true: using the android-libs/ already present")
         }
-        if (missing.isEmpty()) {
-            logger.lifecycle("android-libs/ already carries all ${androidAbis.size} ABIs; skipping cargo-ndk")
-        }
-        missing.isNotEmpty()
+        !prebuiltAndroidLibs
     }
     doLast {
         val command = mutableListOf("cargo", "ndk", "-o", androidLibsDir.name)

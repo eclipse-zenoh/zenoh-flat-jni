@@ -152,8 +152,10 @@ export ANDROID_NDK_HOME=/path/to/android-ndk-r26
 `buildAndroidLibs` task, so this is not a parallel developer-only path — see
 [PUBLISHING.md](PUBLISHING.md).
 
-The cross-compilation is skipped when `android-libs/` already holds every ABI;
-delete it to force a rebuild.
+The cross-compilation runs every time — Cargo decides what is actually stale, so
+a Rust change is always picked up. (The release's publish job passes
+`-PprebuiltAndroidLibs=true` to package libraries it downloaded as build
+artifacts; that is the only path that skips it.)
 
 ## Architecture
 
