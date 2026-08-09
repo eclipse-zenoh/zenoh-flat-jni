@@ -134,11 +134,39 @@ branch, bumps the version, tags it, builds, verifies and publishes.
 | `branch` | empty |
 | `maven_publish` | checked — or uncheck for the very first run |
 
-Unchecking `live-run` flips `snapshot` on, which does three things: the version
-gains a `-SNAPSHOT` suffix, publication goes to the **mutable** snapshot
-repository instead of the release one, and `closeAndReleaseSonatypeStagingRepository`
-is not run. The immutable release coordinates are never touched, so a rehearsal
-can be repeated as often as needed.
+#### What the two switches actually control
+
+They are independent, and neither is "do nothing". `live-run` decides *where* a
+publication lands; `maven_publish` decides *whether* one happens at all.
+
+| | `live-run` **unchecked** | `live-run` **checked** |
+| --- | --- | --- |
+| version | `<version>-SNAPSHOT` | `<version>` |
+| repository | `central.sonatype.com/repository/maven-snapshots/` — **mutable** | staging, then the release repository — **immutable** |
+| `closeAndReleaseSonatypeStagingRepository` | not run | run |
+| coordinate guards | skipped — they are gated on `snapshot == false` | run |
+| branch and tag | `release/dry-run/<version>` | `release/<version>` |
+| GitHub release | not created | created |
+| reversible | yes — overwrite or ignore the snapshot | **no** |
+
+So **`live-run` unchecked with `maven_publish` checked still performs a real
+upload.** It authenticates to Sonatype with the real tokens, signs with the real
+GPG key, and transfers the artifacts — into the snapshot repository, under a
+`-SNAPSHOT` version. Nothing is staged, nothing is released, and
+`org.eclipse.zenoh:zenoh-flat-jni:<version>` is untouched. Snapshots may be
+overwritten freely, so a bad one costs nothing.
+
+That is precisely why it is worth doing: **it is the only configuration that
+exercises the credentials and the signing key.** With `maven_publish` unchecked
+the Gradle publish step is skipped outright, so nothing reaches Sonatype and
+nothing is learned about whether `CENTRAL_SONATYPE_TOKEN_*` and `ORG_GPG_*`
+work. Ranked by what each proves:
+
+1. `live-run` off, `maven_publish` **off** — builds, artifact verification,
+   consumer test. Nothing reaches Maven.
+2. `live-run` off, `maven_publish` **on** — all of that, **plus** signing,
+   credentials and a genuine upload. Reversible.
+3. `live-run` **on** — all of that, then closes and releases. **Not reversible.**
 
 **Do not give a rehearsal the version you intend to release.**
 `bump-and-tag.bash` tags and pushes whatever version it is handed, dry runs
@@ -146,18 +174,15 @@ included — deliberately, because dry-run branches and tags are throwaway names
 Passing `1.9.0` would leave a `1.9.0` tag pointing at a dry-run commit. A stray
 Git tag can be deleted; a Maven Central release cannot.
 
-Budget for **two** rehearsals, each with its own fresh version.
+#### Budget for two rehearsals
 
-**First, with `maven_publish` unchecked.** The six-target cross-build, the
-desktop artifact verification, the AAR assembly and verification, and the
-external consumer test on three platforms all run, and **nothing reaches
-Maven**. (The run still pushes the release branch and tag and uploads its
-build products as Actions artifacts — "nothing uploaded" would be too strong.) This separates "does it build and verify" from "do the credentials
-work", which makes a first failure far easier to read.
+Each with its own fresh version — level 1 then level 2 above. Splitting them
+separates "does it build and verify" from "do the credentials work", which makes
+a first failure far easier to read.
 
-**Then, with `maven_publish` checked.** Only this exercises signing, the Central
-credentials and the upload itself. A rehearsal that never uploads proves nothing
-about them.
+Note that even level 1 is not inert: it pushes the release branch and tag, and
+uploads the built libraries as Actions artifacts. What it does not do is reach
+Maven.
 
 What to look at in the run:
 
