@@ -24,9 +24,6 @@ plugins {
     signing
 }
 
-// Keep in step with the `kotlin("jvm")` plugin version above — it is the stdlib
-// version written into the hand-built Android POM.
-val kotlinVersion = "1.9.0"
 
 group = "org.eclipse.zenoh"
 
@@ -241,12 +238,11 @@ val javadocJar by tasks.registering(Jar::class) {
 
 // ── Android AAR ─────────────────────────────────────────────────────────────
 //
-// ponytail: the AAR is assembled as a plain Zip rather than by the Android
-// Gradle Plugin. This module has no Android resources, no manifest entries and
-// no Android-only code — an AAR here is literally `classes.jar` plus
-// `jni/<abi>/`, so applying AGP would mean an Android SDK install in CI to zip
-// four .so files. Switch to `com.android.library` if this ever grows real
-// Android resources or a non-trivial manifest.
+// Assembled by the Android Gradle Plugin, which also gives this project the
+// Gradle module metadata that maps the root coordinate onto the JVM and Android
+// variants. It previously used a hand-rolled Zip to avoid needing an Android
+// SDK; variant-aware publishing needs AGP regardless, and the SDK is
+// preinstalled on the runners already in use.
 
 // Cross-compile the Android ABIs, mirroring `buildZenohFlatJni` for the desktop
 // library: one Gradle entry point, so the documented developer command and CI run

@@ -11,10 +11,11 @@
 # Contributors:
 #   ZettaScale Zenoh Team, <zenoh@zettascale.tech>
 #
-# Both publications are released from a *single* Gradle invocation, so both land
-# in one staging repository and are released together. Splitting them across two
-# workflows — in either order — leaves a window where one artifact is public and
-# the other never appears, and a Maven Central release cannot be withdrawn.
+# All three publications — the root module, the JVM artifact and the AAR — are
+# released from a *single* Gradle invocation, so they land in one staging
+# repository and are released together. Splitting them leaves a window where one
+# artifact is public and the others never appear, and a Maven Central release
+# cannot be withdrawn.
 #
 name: Publish
 
@@ -377,9 +378,9 @@ jobs:
             echo "RELEASE=closeAndReleaseSonatypeStagingRepository" >> $GITHUB_ENV
           fi
 
-      # One Gradle invocation, so both publications go into the same staging
+      # One Gradle invocation, so all three publications go into the same staging
       # repository and are released by the single closeAndRelease that follows
-      # them. Either both artifacts become public or neither does.
+      # them. Either every artifact becomes public or none does.
       - if: ${{ inputs.maven_publish == true }}
         name: Gradle Publish to Maven Central repository
         run: |
