@@ -3911,7 +3911,7 @@ dependencies = [
 
 [[package]]
 name = "zenoh-flat-jni"
-version = "1.9.0"
+version = "1.9.0-rc2"
 dependencies = [
  "jni 0.21.1",
  "konst 0.3.17",
