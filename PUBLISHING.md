@@ -144,10 +144,29 @@ publication lands; `maven_publish` decides *whether* one happens at all.
 | version | `<version>-SNAPSHOT` | `<version>` |
 | repository | `central.sonatype.com/repository/maven-snapshots/` — **mutable** | staging, then the release repository — **immutable** |
 | `closeAndReleaseSonatypeStagingRepository` | not run | run |
-| coordinate guards | skipped — they are gated on `snapshot == false` | run |
+| coordinate guards (below) | skipped — gated on `snapshot == false` | run |
 | branch and tag | `release/dry-run/<version>` | `release/<version>` |
 | GitHub release | not created | created |
 | reversible | yes — overwrite or ignore the snapshot | **no** |
+
+The **coordinate guards** are two checks in the `publish` job. Before anything is
+uploaded, each asks Maven Central whether the version being released already
+exists — once for `org.eclipse.zenoh:zenoh-flat-jni`, once for
+`org.eclipse.zenoh:zenoh-flat-jni-android`:
+
+```text
+https://repo1.maven.org/maven2/org/eclipse/zenoh/<artifact>/<version>/<artifact>-<version>.pom
+```
+
+If either responds, the release stops. A published version can never be replaced
+([Coordinates, and why they are permanent](#coordinates-and-why-they-are-permanent)),
+so republishing cannot succeed — and discovering that part-way through an upload
+is a confusing way to find out. Both are checked before either is published,
+because an occupied *Android* coordinate found after the JVM artifact went public
+would have burned a version number.
+
+A rehearsal skips them because it does not publish under those coordinates at
+all: a `-SNAPSHOT` version lives in a different, mutable repository.
 
 So **`live-run` unchecked with `maven_publish` checked still performs a real
 upload.** It authenticates to Sonatype with the real tokens, signs with the real
@@ -194,8 +213,9 @@ What to look at in the run:
   Linux artifact.
 
 The "coordinates are still free on Maven Central" line does *not* appear in a
-rehearsal: both coordinate guards are gated on `snapshot == false`, and every
-rehearsal is a snapshot. Its absence is correct, not a fault.
+rehearsal — the coordinate guards described above are gated on
+`snapshot == false`, and every rehearsal is a snapshot. Its absence is correct,
+not a fault.
 
 ### The real release
 
