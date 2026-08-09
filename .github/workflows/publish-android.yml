@@ -103,6 +103,23 @@ jobs:
         with:
           ref: ${{ inputs.branch }}
 
+      # Maven Central releases are immutable, so republishing existing
+      # coordinates cannot succeed — and discovering that mid-upload is a
+      # confusing way to find out. Snapshots are exempt: they live in a
+      # separate, mutable repository and may be overwritten freely.
+      - name: Refuse to overwrite an existing Maven Central release
+        if: ${{ inputs.snapshot == false }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          v=$(tr -d '[:space:]' < version.txt)
+          url="https://repo1.maven.org/maven2/org/eclipse/zenoh/zenoh-flat-jni-android/$v/zenoh-flat-jni-android-$v.pom"
+          if curl -sfIL -o /dev/null "$url"; then
+            echo "::error::org.eclipse.zenoh:zenoh-flat-jni-android:$v is already on Maven Central and cannot be replaced"
+            exit 1
+          fi
+          echo "org.eclipse.zenoh:zenoh-flat-jni-android:$v is free on Maven Central" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Create resources destination
         run: mkdir -p ${{ env.ANDROID_LIB_PATHS }}
 
