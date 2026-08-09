@@ -31,7 +31,7 @@ If Maven Central is unfamiliar, read
 - [Release relationship](#release-relationship)
 - [How the pipeline works](#how-the-pipeline-works)
   - [1. `tag` — branch, bump, tag](#1-tag--branch-bump-tag)
-  - [2. `publish` — both artifacts, one staging repository](#2-publish--both-artifacts-one-staging-repository)
+  - [2. `publish` — all three publications, one staging repository](#2-publish--all-three-publications-one-staging-repository)
   - [3. `publish-github`](#3-publish-github)
 - [How a publication reaches Maven Central](#how-a-publication-reaches-maven-central)
 - [Reproducibility](#reproducibility)
@@ -74,7 +74,9 @@ discarded. It is the release of that repository that has no undo.
 
 | File | What it is |
 | --- | --- |
-| `zenoh-flat-jni-1.9.0.jar` | for `-jvm`/`-android`, the library; for the root coordinate, a metadata-only artifact |
+| `zenoh-flat-jni-1.9.0.jar` | the **root** artifact — metadata only, no classes |
+| `zenoh-flat-jni-jvm-1.9.0.jar` | the JVM library, with the desktop natives |
+| `zenoh-flat-jni-android-1.9.0.aar` | the Android library (`<packaging>aar</packaging>`), with `jni/<abi>/` |
 | `...-sources.jar` | the source code, so IDEs can show it |
 | `...-javadoc.jar` | API documentation, generated here by **Dokka** (Kotlin's doc tool) |
 | `...pom` | metadata: coordinates, licence, developers, SCM URL, and the library's own dependencies |
@@ -233,7 +235,7 @@ against whatever the manifest already declares.
 The irreversible moment is the single `closeAndReleaseSonatypeStagingRepository`
 at the end of the `publish` job. All three publications are uploaded by one Gradle
 invocation, so they share one staging repository and are released by that one
-call: either both artifacts become public or neither does.
+call: either all three publications become public or none does.
 
 This is why the two publish workflows were merged into one. Run as separate
 workflows — in either order — whichever released first would already be public
@@ -250,11 +252,13 @@ coordinates already exist on Central, since republishing cannot succeed.
 
 ### After a release
 
-- Confirm **both** coordinates resolve — releasing them together is the whole
-  point of the single staging repository, so verifying one proves half of it:
+- Confirm **all three** coordinates resolve — releasing them together is the
+  whole point of the single staging repository, so verifying one proves a third
+  of it:
 
   ```text
   https://repo1.maven.org/maven2/org/eclipse/zenoh/zenoh-flat-jni/<version>/
+  https://repo1.maven.org/maven2/org/eclipse/zenoh/zenoh-flat-jni-jvm/<version>/
   https://repo1.maven.org/maven2/org/eclipse/zenoh/zenoh-flat-jni-android/<version>/
   ```
 
@@ -462,10 +466,10 @@ becomes `release/dry-run/<version>`, and the version comes from `git describe`
 if — and only if — no `version` input was supplied.
 That is the dry run.
 
-### 2. `publish` — both artifacts, one staging repository
+### 2. `publish` — all three publications, one staging repository
 
 [`publish.yml`](.github/workflows/publish.yml), called as a reusable workflow.
-Everything is built and checked before anything is uploaded, and both
+Everything is built and checked before anything is uploaded, and all three
 publications are released together:
 
 - **`desktop-natives`** cross-compiles the six declared targets with `--locked`
@@ -509,12 +513,13 @@ publications are released together:
   It runs on Linux, macOS and Windows.
 
 - **`publish`** checks that `version.txt` and `Cargo.toml` agree, then checks
-  **both** coordinates — `zenoh-flat-jni` and `zenoh-flat-jni-android` — against
-  Maven Central and refuses to proceed if either is taken. Doing both before
+  **all three** coordinates — `zenoh-flat-jni`, `-jvm` and `-android` — against
+  Maven Central and refuses to proceed if any is taken. Doing all of them before
   either is published is the point: an occupied Android coordinate discovered
   after the JVM release would have burned a version number.
 
-  It then assembles and verifies both artifacts, unconditionally, so a
+  It then assembles and verifies the two native-bearing artifacts — the JVM JAR
+  and the AAR; the root module carries no libraries — unconditionally, so a
   `maven_publish: false` rehearsal still exercises every check.
   `verifyDesktopArtifact` fails on a missing target ZIP, a ZIP whose contents
   are not exactly the one expected library, or a stray native at the JAR root
@@ -526,8 +531,8 @@ publications are released together:
 
 ### 3. `publish-github`
 
-`eclipse-zenoh/ci/publish-crates-github` creates the GitHub release, after both
-Maven publications have succeeded.
+`eclipse-zenoh/ci/publish-crates-github` creates the GitHub release, after all
+three Maven publications have succeeded.
 
 ## How a publication reaches Maven Central
 

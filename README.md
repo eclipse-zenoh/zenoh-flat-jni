@@ -173,7 +173,9 @@ The generated bindings are created via `prebindgen` in the build process:
    - Rust JNI wrapper functions
    - Kotlin data classes and enums
 4. **Gradle** packages Rust dylib + Kotlin sources into a JAR
-5. **Maven Central** publishes the multi-platform JAR
+5. **Maven Central** publishes three modules: the root `zenoh-flat-jni`
+   (Gradle module metadata), `zenoh-flat-jni-jvm` (the desktop natives) and
+   `zenoh-flat-jni-android` (the AAR)
 
 ## Integration with zenoh-java
 
