@@ -480,8 +480,13 @@ Publishing is one Gradle command, covering both publications:
 ./gradlew publishMavenPublicationToSonatypeRepository \
           publishAndroidPublicationToSonatypeRepository \
           closeAndReleaseSonatypeStagingRepository \
-          -PremotePublication=true -Prelease=true
+          -PremotePublication=true -Prelease=true -PprebuiltAndroidLibs=true
 ```
+
+`-PprebuiltAndroidLibs=true` matters here: without it `androidAar` would schedule
+`buildAndroidLibs`, which on the publishing runner fails for want of an NDK — and
+on a machine that has one would rebuild the libraries instead of publishing the
+verified ones that were downloaded.
 
 Three steps hide in there, run by
 `io.github.gradle-nexus.publish-plugin`:
@@ -647,6 +652,12 @@ Two properties are easy to confuse:
   it, as the recipe does, and the dry run produces the same multi-platform JAR a
   release would — without it the build falls back to the developer layout, with
   the host library at the JAR root, which is *not* the published artifact.
+- **`-PprebuiltAndroidLibs=true`** tells `buildAndroidLibs` that `android-libs/`
+  is already the artifact to package, rather than something to rebuild. Pass it
+  whenever the libraries came from somewhere other than this machine's cargo-ndk
+  — the release does, because they arrive as downloaded build artifacts on a
+  runner with no NDK. Leave it off and Cargo decides what is stale, which is what
+  you want while developing.
 
 ## Required secrets
 
