@@ -422,9 +422,12 @@ publications are released together:
   Both Linux targets are built with `cross`, at a pinned `CROSS_VERSION`, and
   each records its measured glibc floor in the job summary.
 
-- **`android-natives`** builds the four ABIs with the pinned cargo-ndk and NDK.
-  `cargo ndk -o` writes exactly the AAR's `jni/<abi>/` layout, so nothing is
-  repackaged.
+- **`android-natives`** builds the four ABIs by running `./gradlew
+  buildAndroidLibs` — the same task the README gives developers, so the two
+  cannot drift — with the pinned cargo-ndk and NDK. `cargo ndk -o` writes
+  exactly the AAR's `jni/<abi>/` layout, so nothing is repackaged. The task is
+  a no-op when `android-libs/` is already populated, which is how the `publish`
+  job packages the downloaded artifacts without an NDK.
 
 - **`consumer-test`** assembles the JVM publication, publishes it to an isolated
   file repository under `build/dry-run-repository`, and runs

@@ -177,14 +177,19 @@ jobs:
       - name: Install cargo-ndk
         run: cargo install cargo-ndk --locked --version ${{ env.CARGO_NDK_VERSION }}
 
-      # cargo-ndk's -o writes exactly the AAR's jni/<abi>/ layout.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 11
+
+      # Through the Gradle task, not a copy of its command line: `buildAndroidLibs`
+      # is what the README tells a developer to run, so CI exercising the same
+      # entry point is what keeps the two from drifting. cargo-ndk's -o writes
+      # exactly the AAR's jni/<abi>/ layout, so nothing is repackaged.
       - name: Build every advertised ABI
         env:
           ANDROID_NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
-        run: |
-          cargo ndk -o ${{ env.ANDROID_LIB_PATHS }} \
-            -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 \
-            build --release --locked
+        run: ./gradlew buildAndroidLibs
 
       - name: Record the toolchain and checksums
         run: |

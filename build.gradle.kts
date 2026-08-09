@@ -239,7 +239,46 @@ val androidClassesJar by tasks.registering(Jar::class) {
     from(sourceSets["main"].output.classesDirs)
 }
 
+// Cross-compile the Android ABIs, mirroring `buildZenohFlatJni` for the desktop
+// library: one Gradle entry point, so the documented developer command and CI run
+// the same code path rather than two copies of it.
+//
+// Skipped when android-libs/ already holds every ABI — the release's publish job
+// downloads them as build artifacts and has no NDK installed. Delete the
+// directory to force a rebuild.
+val buildAndroidLibs by tasks.registering {
+    description = "Cross-compile the Android ABIs into android-libs/ using cargo-ndk"
+    outputs.dir(androidLibsDir)
+    onlyIf {
+        val missing = androidAbis.filterNot {
+            File(androidLibsDir, "$it/libzenoh_flat_jni.so").exists()
+        }
+        if (missing.isEmpty()) {
+            logger.lifecycle("android-libs/ already carries all ${androidAbis.size} ABIs; skipping cargo-ndk")
+        }
+        missing.isNotEmpty()
+    }
+    doLast {
+        val command = mutableListOf("cargo", "ndk", "-o", androidLibsDir.name)
+        androidAbis.forEach { command += listOf("-t", it) }
+        command += listOf("build", "--release", "--locked")
+
+        val result = project.exec {
+            commandLine(command)
+            isIgnoreExitValue = true
+        }
+        if (result.exitValue != 0) {
+            throw GradleException(
+                "cargo ndk failed (exit ${result.exitValue}). " +
+                    "Needs cargo-ndk installed, the four Android targets added, " +
+                    "and ANDROID_NDK_HOME pointing at the NDK."
+            )
+        }
+    }
+}
+
 val androidAar by tasks.registering(Zip::class) {
+    dependsOn(buildAndroidLibs)
     archiveBaseName.set("zenoh-flat-jni-android")
     archiveVersion.set(project.version.toString())
     archiveExtension.set("aar")
