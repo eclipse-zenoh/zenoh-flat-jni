@@ -11,7 +11,12 @@
 # Contributors:
 #   ZettaScale Zenoh Team, <zenoh@zettascale.tech>
 #
-name: Publish (JVM)
+# Both publications are released from a *single* Gradle invocation, so both land
+# in one staging repository and are released together. Splitting them across two
+# workflows — in either order — leaves a window where one artifact is public and
+# the other never appears, and a Maven Central release cannot be withdrawn.
+#
+name: Publish
 
 on:
   workflow_call:
@@ -34,23 +39,41 @@ env:
   RUST_BACKTRACE: 1
   CARGO_TERM_COLOR: always
   # Where the cross-built libraries are collected before Gradle packages them.
-  # Kept in step with `jniLibsDir` in build.gradle.kts.
+  # Kept in step with `jniLibsDir` / `androidLibsDir` in build.gradle.kts.
   JNI_LIB_PATHS: jni-libs
+  ANDROID_LIB_PATHS: android-libs
+  # `cargo install --locked` pins the dependencies of the selected release, not
+  # which release is selected, so each build tool's exact version is pinned here.
+  # Note this pins the *executable*, not the sysroot: cross resolves its image as
+  # `ghcr.io/cross-rs/<target>:<version>`, a mutable tag rather than a digest. The
+  # glibc check below enforces the compatibility bound we promise; it does not
+  # otherwise fix the image.
+  CROSS_VERSION: 0.2.5
+  # The oldest glibc a release promises to run on. Currently the cross images
+  # produce 2.18; the margin is deliberate, so a benign image bump does not fail
+  # a release while a consequential one still does.
+  SUPPORTED_GLIBC: "2.28"
+  CARGO_NDK_VERSION: 4.1.2
+  ANDROID_NDK_VERSION: r26
 
 jobs:
-  builds:
+  desktop-natives:
     name: Build for ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { target: x86_64-unknown-linux-gnu,  os: ubuntu-latest,  lib: libzenoh_flat_jni.so }
-          - { target: aarch64-unknown-linux-gnu, os: ubuntu-latest,  lib: libzenoh_flat_jni.so }
-          - { target: x86_64-apple-darwin,       os: macos-latest,   lib: libzenoh_flat_jni.dylib }
-          - { target: aarch64-apple-darwin,      os: macos-latest,   lib: libzenoh_flat_jni.dylib }
-          - { target: x86_64-pc-windows-msvc,    os: windows-latest, lib: zenoh_flat_jni.dll }
-          - { target: aarch64-pc-windows-msvc,   os: windows-latest, lib: zenoh_flat_jni.dll }
+          # Linux builds go through `cross`, which compiles inside a container
+          # with a much older glibc. Built natively on ubuntu-latest (24.04) the
+          # library requires GLIBC_2.39 and will not load on Ubuntu 22.04,
+          # Debian 12 or RHEL 9 — a floor most users would hit before us.
+          - { target: x86_64-unknown-linux-gnu,  os: ubuntu-latest,  lib: libzenoh_flat_jni.so,    build-cmd: cross }
+          - { target: aarch64-unknown-linux-gnu, os: ubuntu-latest,  lib: libzenoh_flat_jni.so,    build-cmd: cross }
+          - { target: x86_64-apple-darwin,       os: macos-latest,   lib: libzenoh_flat_jni.dylib, build-cmd: cargo }
+          - { target: aarch64-apple-darwin,      os: macos-latest,   lib: libzenoh_flat_jni.dylib, build-cmd: cargo }
+          - { target: x86_64-pc-windows-msvc,    os: windows-latest, lib: zenoh_flat_jni.dll,      build-cmd: cargo }
+          - { target: aarch64-pc-windows-msvc,   os: windows-latest, lib: zenoh_flat_jni.dll,      build-cmd: cargo }
     steps:
       - uses: actions/checkout@v4
         with:
@@ -63,19 +86,12 @@ jobs:
           rustup show
           rustup target add ${{ matrix.target }}
 
-      - name: Install the aarch64 Linux cross toolchain
-        if: matrix.target == 'aarch64-unknown-linux-gnu'
-        shell: bash
-        run: |
-          sudo apt-get -y update
-          sudo apt-get -y install gcc-aarch64-linux-gnu
-          {
-            echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc"
-            echo "CC_aarch64_unknown_linux_gnu=aarch64-linux-gnu-gcc"
-          } >> "$GITHUB_ENV"
+      - name: Install cross
+        if: matrix.build-cmd == 'cross'
+        run: cargo install cross --locked --version ${{ env.CROSS_VERSION }}
 
       - name: Build
-        run: cargo build --release --locked --target ${{ matrix.target }}
+        run: ${{ matrix.build-cmd }} build --release --locked --target ${{ matrix.target }}
 
       # build.rs rewrites the committed bindings on every build. A diff means the
       # release would ship generated sources nobody reviewed. Checked once, on
@@ -107,11 +123,75 @@ jobs:
           cd "$GITHUB_WORKSPACE/${{ env.JNI_LIB_PATHS }}"
           shasum -a 256 "${{ matrix.target }}/${{ matrix.target }}.zip" >> "$GITHUB_STEP_SUMMARY"
 
+      # The glibc floor is a user-visible property of the release, so measure it
+      # and fail on it — a number in a job summary that nobody reads is not a
+      # guarantee. `readelf` parses the ELF directly and is architecture-
+      # independent, unlike anything relying on a BFD backend.
+      - name: Check the glibc requirement
+        if: matrix.build-cmd == 'cross'
+        shell: bash
+        run: |
+          lib="target/${{ matrix.target }}/release/${{ matrix.lib }}"
+          floor=$(readelf -V "$lib" | grep -o 'GLIBC_[0-9.]*' | sed 's/GLIBC_//' | sort -uV | tail -1)
+          echo "${{ matrix.target }} requires glibc ${floor:-none} (cross ${{ env.CROSS_VERSION }})" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$(printf '%s\n%s\n' "$floor" "$SUPPORTED_GLIBC" | sort -V | tail -1)" != "$SUPPORTED_GLIBC" ]; then
+            echo "::error::${{ matrix.target }} requires glibc $floor, above the supported $SUPPORTED_GLIBC"
+            exit 1
+          fi
+        env:
+          SUPPORTED_GLIBC: ${{ env.SUPPORTED_GLIBC }}
+
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
           name: desktop-${{ matrix.target }}
           path: ${{ env.JNI_LIB_PATHS }}
+          if-no-files-found: error
+
+  android-natives:
+    name: Build the Android ABIs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - uses: nttld/setup-ndk@v1
+        id: ndk
+        with:
+          ndk-version: ${{ env.ANDROID_NDK_VERSION }}
+          add-to-path: false
+
+      # rust-toolchain.toml pins the channel; only the targets are added here.
+      - name: Install Rust toolchain
+        run: |
+          rustup show
+          rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk --locked --version ${{ env.CARGO_NDK_VERSION }}
+
+      # cargo-ndk's -o writes exactly the AAR's jni/<abi>/ layout.
+      - name: Build every advertised ABI
+        env:
+          ANDROID_NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
+        run: |
+          cargo ndk -o ${{ env.ANDROID_LIB_PATHS }} \
+            -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 \
+            build --release --locked
+
+      - name: Record the toolchain and checksums
+        run: |
+          {
+            echo "NDK ${{ env.ANDROID_NDK_VERSION }}, cargo-ndk ${{ env.CARGO_NDK_VERSION }}"
+            shasum -a 256 ${{ env.ANDROID_LIB_PATHS }}/*/libzenoh_flat_jni.so
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-natives
+          path: ${{ env.ANDROID_LIB_PATHS }}
           if-no-files-found: error
 
   # Maven Central releases are immutable, so the candidate is consumed as a real
@@ -120,7 +200,7 @@ jobs:
   # back to Central and pass against an older release.
   consumer-test:
     name: Consume the candidate on ${{ matrix.os }}
-    needs: builds
+    needs: desktop-natives
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -159,8 +239,8 @@ jobs:
         with:
           gradle-version: '8.5'
 
-      # Must match what publish_jvm_package will use, so the smoke test exercises
-      # the coordinates that actually get published rather than a same-content
+      # Must match what the publish job will use, so the smoke test exercises the
+      # coordinates that actually get published rather than a same-content
       # artifact under a different version.
       - name: Set pub mode env var
         shell: bash
@@ -193,9 +273,9 @@ jobs:
             -PcandidateRepository="file://$repo" \
             -PcandidateVersion="$version"
 
-  publish_jvm_package:
-    name: Publish JVM package
-    needs: consumer-test
+  publish:
+    name: Publish to Maven Central
+    needs: [desktop-natives, android-natives, consumer-test]
     permissions:
       contents: read
       packages: write
@@ -216,39 +296,44 @@ jobs:
             || { echo "::error::Cargo.toml says $cargo_version, version.txt says $version"; exit 1; }
           echo "Publishing $version" >> "$GITHUB_STEP_SUMMARY"
 
-      # Maven Central releases are immutable, so republishing existing
-      # coordinates cannot succeed — and discovering that mid-upload is a
-      # confusing way to find out. Snapshots are exempt: they live in a
-      # separate, mutable repository and may be overwritten freely.
+      # Both coordinates are checked before either is published. Central releases
+      # are immutable, so republishing cannot succeed — and an occupied *Android*
+      # coordinate must not be discovered after the JVM artifact is already
+      # public. Snapshots are exempt: they live in a mutable repository.
       - name: Refuse to overwrite an existing Maven Central release
         if: ${{ inputs.snapshot == false }}
         shell: bash
         run: |
           set -euo pipefail
           v=$(tr -d '[:space:]' < version.txt)
-          url="https://repo1.maven.org/maven2/org/eclipse/zenoh/zenoh-flat-jni/$v/zenoh-flat-jni-$v.pom"
-          if curl -sfIL -o /dev/null "$url"; then
-            echo "::error::org.eclipse.zenoh:zenoh-flat-jni:$v is already on Maven Central and cannot be replaced"
-            exit 1
-          fi
-          echo "org.eclipse.zenoh:zenoh-flat-jni:$v is free on Maven Central" >> "$GITHUB_STEP_SUMMARY"
+          for artifact in zenoh-flat-jni zenoh-flat-jni-android; do
+            url="https://repo1.maven.org/maven2/org/eclipse/zenoh/$artifact/$v/$artifact-$v.pom"
+            if curl -sfIL -o /dev/null "$url"; then
+              echo "::error::org.eclipse.zenoh:$artifact:$v is already on Maven Central and cannot be replaced"
+              exit 1
+            fi
+            echo "org.eclipse.zenoh:$artifact:$v is free on Maven Central" >> "$GITHUB_STEP_SUMMARY"
+          done
 
-      - name: Create resources destination
-        run: mkdir -p ${{ env.JNI_LIB_PATHS }}
+      - name: Create resources destinations
+        run: mkdir -p ${{ env.JNI_LIB_PATHS }} ${{ env.ANDROID_LIB_PATHS }}
 
-      - name: Download result of previous builds
+      - name: Download the desktop natives
         uses: actions/download-artifact@v4
         with:
           pattern: desktop-*
           merge-multiple: true
           path: ${{ env.JNI_LIB_PATHS }}
 
-      # The layout Gradle expects is `<target>/<target>.zip` directly under
-      # jni-libs/. Printing it makes a mismatch obvious in the log instead of
-      # only surfacing as verifyDesktopArtifact's "missing native resource".
+      - name: Download the Android natives
+        uses: actions/download-artifact@v4
+        with:
+          name: android-natives
+          path: ${{ env.ANDROID_LIB_PATHS }}
+
       - name: Show the downloaded layout
         shell: bash
-        run: find ${{ env.JNI_LIB_PATHS }} -type f | sort
+        run: find ${{ env.JNI_LIB_PATHS }} ${{ env.ANDROID_LIB_PATHS }} -type f | sort
 
       - uses: actions/setup-java@v4
         with:
@@ -257,6 +342,13 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+
+      # Both artifacts are assembled and verified before anything is uploaded,
+      # so a `maven_publish: false` rehearsal still exercises every check.
+      # verifyDesktopArtifact and verifyAndroidArtifact otherwise only run as
+      # dependencies of a publication task.
+      - name: Assemble and verify both artifacts
+        run: ./gradlew jar androidAar verifyDesktopArtifact verifyAndroidArtifact -Prelease=true
 
       - name: Set pub mode env var
         # Note: This step is intended to allow publishing snapshot packages.
@@ -271,10 +363,15 @@ jobs:
             echo "RELEASE=closeAndReleaseSonatypeStagingRepository" >> $GITHUB_ENV
           fi
 
+      # One Gradle invocation, so both publications go into the same staging
+      # repository and are released by the single closeAndRelease that follows
+      # them. Either both artifacts become public or neither does.
       - if: ${{ inputs.maven_publish == true }}
-        name: Gradle Publish JVM Package to Maven Central repository
+        name: Gradle Publish to Maven Central repository
         run: |
-          ./gradlew publishMavenPublicationToSonatypeRepository ${{ env.RELEASE }} --info -PremotePublication=true -Prelease=true ${{ env.PUB_MODE }}
+          ./gradlew publishMavenPublicationToSonatypeRepository \
+                    publishAndroidPublicationToSonatypeRepository \
+                    ${{ env.RELEASE }} --info -PremotePublication=true -Prelease=true ${{ env.PUB_MODE }}
         env:
           CENTRAL_SONATYPE_TOKEN_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
           CENTRAL_SONATYPE_TOKEN_PASSWORD: ${{ secrets.CENTRAL_SONATYPE_TOKEN_PASSWORD }}
