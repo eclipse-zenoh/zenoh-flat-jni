@@ -8,6 +8,68 @@ It describes the pipeline as it exists in this repository. Where something is
 not yet implemented or not yet exercised, it is listed under
 [Known gaps](#known-gaps) rather than described as if it worked.
 
+## Background, if you do not work in the JVM ecosystem
+
+Skip this section if Maven Central is familiar.
+
+### Coordinates, and why they are permanent
+
+**Maven Central** is the JVM world's crates.io: one public repository that
+essentially every Java/Kotlin build downloads dependencies from. A library is
+identified by three fields, its *coordinates*:
+
+```text
+org.eclipse.zenoh : zenoh-flat-jni : 1.9.0
+     groupId          artifactId     version
+```
+
+Two differences from crates.io shape everything below.
+
+**Central serves compiled artifacts, not sources.** Cargo downloads a crate's
+source and compiles it on your machine; Maven Central serves a **JAR** — a zip
+of already-compiled `.class` files plus whatever else the author put inside.
+Nothing is compiled at install time, so *we* must build, in advance, everything
+a user could possibly need, for every platform they might be on.
+
+**Releases are immutable.** Once `1.9.0` is published it can never be changed or
+deleted; a mistake is fixed only by releasing `1.9.1`. That is why every check
+in this pipeline runs *before* the upload — afterwards there is no undo.
+
+### The file set Central requires
+
+| File | What it is |
+| --- | --- |
+| `zenoh-flat-jni-1.9.0.jar` | the library itself |
+| `...-sources.jar` | the source code, so IDEs can show it |
+| `...-javadoc.jar` | API documentation, generated here by **Dokka** (Kotlin's doc tool) |
+| `...pom` | metadata: coordinates, licence, developers, SCM URL, and the library's own dependencies |
+| `...module` | Gradle's richer equivalent of the POM |
+| `.md5`, `.sha1`, … | checksums for each of the above |
+| `.asc` | a **GPG signature** for each — Central rejects unsigned releases |
+
+**Gradle** is the build tool (`./gradlew`). It compiles the Kotlin, assembles
+the JAR, generates the POM, signs everything and uploads. `./gradlew` is the
+*wrapper*: a small script plus `gradle-wrapper.jar` that fetches the exact
+Gradle version this project expects, so every machine builds with the same one.
+
+### Why this library is not an ordinary JAR
+
+A normal Kotlin library is pure bytecode and runs anywhere the JVM does. This
+one binds to Rust: the implementation is a native library —
+`libzenoh_flat_jni.so` on Linux, `.dylib` on macOS, `.dll` on Windows — reached
+through **JNI** (Java Native Interface, the JVM's FFI).
+
+Native code is not portable, so the published JAR carries **six** of them, and
+at startup the Kotlin code detects the current platform, extracts the matching
+library from the JAR to a temp directory, and loads it. A release therefore has
+to cross-compile Rust for six targets across three operating systems and collect
+the results before Gradle can build a single JAR — which is why the pipeline is
+a matrix of build jobs feeding one publish job.
+
+Android is a second, separate artifact: an **AAR** (Android's library format — a
+zip holding `classes.jar`, a manifest and `jni/<abi>/` native libraries) built
+for four CPU ABIs.
+
 ## Release relationship
 
 `zenoh-flat-jni` owns the generated Kotlin/JNI boundary and the native
@@ -17,7 +79,7 @@ build or package their own copies of the JNI library.
 The release order is:
 
 ```text
-pinned prebindgen, zenoh-flat, and Zenoh revisions
+prebindgen from crates.io, zenoh-flat and Zenoh pinned by Cargo.lock
                          |
                          v
              publish zenoh-flat-jni
@@ -112,9 +174,11 @@ Both publications carry:
   `-PremotePublication=true`).
 - Checksums, generated during publication.
 
-The tag, `version.txt`, `Cargo.toml`, and the Maven version must agree;
-`version.txt` is the single source of truth and the `validate` job enforces the
-rest. `gradle.properties` no longer carries a second copy.
+The tag, `version.txt`, `Cargo.toml`, and the Maven version must agree.
+`version.txt` is the single source of truth: `bump-and-tag.bash` writes it and
+propagates it to `Cargo.toml`, and `publish_jvm_package` re-checks that the two
+still agree before publishing. `gradle.properties` no longer carries a second
+copy.
 ## Reproducibility
 
 Every archive task sets `isPreserveFileTimestamps = false` and
@@ -220,12 +284,33 @@ Both publish workflows end in one Gradle command:
           -PremotePublication=true -Prelease=true
 ```
 
-`io.github.gradle-nexus.publish-plugin` uploads the signed artifacts to a
-staging repository on the Central Publisher Portal's OSSRH Staging API, then
-*closes* it — at which point Central validates signatures, checksums and POM
-completeness — and only then *releases* it. Nothing is public until the release
-step, and a failed validation leaves a staging repository that is simply
-dropped.
+Three steps hide in there, run by
+`io.github.gradle-nexus.publish-plugin`:
+
+1. **Upload to a staging repository.** Not public — a private holding area on
+   Sonatype's Central Portal.
+2. **Close it.** Central now validates: are all signatures present and valid, do
+   the checksums match, does the POM carry a name, description, licence,
+   developer and SCM URL? Failure here is harmless — the staging repository is
+   simply dropped.
+3. **Release it.** *This is the irreversible step.* The artifacts go public and
+   can never be changed.
+
+Every gate described above exists to run before step 3.
+
+Two mechanical details are worth knowing, because both previously made a release
+impossible in this repository:
+
+- **Gradle properties are passed with `-P`, not `-D`.** The build reads
+  `remotePublication` and `release` through `project.findProperty`, but the old
+  workflow passed them as `-D` system properties. They were therefore always
+  absent, so a tag build quietly selected the *debug* library and published to
+  the runner's own machine instead of Central.
+- **Where the credentials come from.** Nothing is stored in this repository.
+  `CENTRAL_SONATYPE_TOKEN_*` and `ORG_GPG_*` are organization-level secrets on
+  `eclipse-zenoh`, inherited automatically — which is why using the same secret
+  names as zenoh-java matters. A reusable workflow does *not* receive them
+  unless the caller says `secrets: inherit`, which `release.yml` does.
 
 ```text
 nexusUrl               https://ossrh-staging-api.central.sonatype.com/service/local/
@@ -235,10 +320,12 @@ snapshotRepositoryUrl  https://central.sonatype.com/repository/maven-snapshots/
 The legacy `s01.oss.sonatype.org` endpoint is retired and its OSSRH credentials
 no longer work; the credentials are Central Portal tokens.
 
-For a dry run the workflows pass `-PSNAPSHOT` instead and omit
-`closeAndReleaseSonatypeStagingRepository`: the version becomes
-`<version>-SNAPSHOT` and goes to the snapshot repository, which is mutable and
-never staged.
+**Snapshots are the exception to immutability.** For a dry run the workflows
+pass `-PSNAPSHOT` and omit `closeAndReleaseSonatypeStagingRepository`: the
+version becomes `<version>-SNAPSHOT` and goes to the snapshot repository, which
+is *mutable*, may be overwritten freely, and skips staging validation entirely.
+Useful for repeated integration testing — but a snapshot passing proves nothing
+about whether a real release would survive Central's validation.
 
 ## Dry run
 
