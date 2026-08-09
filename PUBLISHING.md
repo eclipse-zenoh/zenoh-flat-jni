@@ -151,8 +151,7 @@ publication lands; `maven_publish` decides *whether* one happens at all.
 
 The **coordinate guards** are two checks in the `publish` job. Before anything is
 uploaded, each asks Maven Central whether the version being released already
-exists — once for `org.eclipse.zenoh:zenoh-flat-jni`, once for
-`org.eclipse.zenoh:zenoh-flat-jni-android`:
+exists — for `org.eclipse.zenoh:zenoh-flat-jni`, `…-jvm` and `…-android`:
 
 ```text
 https://repo1.maven.org/maven2/org/eclipse/zenoh/<artifact>/<version>/<artifact>-<version>.pom
@@ -287,8 +286,16 @@ relying on as a record. `1.9.0-rc1` is already taken by the first rehearsal;
 ### Desktop JVM
 
 ```text
-org.eclipse.zenoh:zenoh-flat-jni:<version>
+org.eclipse.zenoh:zenoh-flat-jni:<version>          root — Gradle module metadata
+org.eclipse.zenoh:zenoh-flat-jni-jvm:<version>      the JVM artifact
+org.eclipse.zenoh:zenoh-flat-jni-android:<version>  the Android artifact
 ```
+
+This is a **Kotlin Multiplatform** library, so a consumer declares the *root*
+coordinate once and Gradle resolves the variant matching its target. That is what
+makes it structurally impossible to build an Android app against the desktop
+libraries — and it lets a consumer publish its own JVM and Android artifacts from
+a single Gradle invocation, which is what allows an atomic release downstream.
 
 A universal JVM JAR: the Kotlin/JVM classes plus one native library per
 supported desktop target. `NativeLibrary.kt` resolves them from this layout,

@@ -265,7 +265,10 @@ jobs:
       # either way — `jni-libs/` being present is what selects that layout — and
       # verifyDesktopArtifact still runs.
       - name: Publish the candidate to an isolated file repository
-        run: ./gradlew publishMavenPublicationToDryRunRepository -Prelease=true ${{ env.PUB_MODE }} --no-daemon
+        run: |
+          ./gradlew publishKotlinMultiplatformPublicationToDryRunRepository \
+                    publishJvmPublicationToDryRunRepository \
+                    -Prelease=true ${{ env.PUB_MODE }} --no-daemon
 
       # Resolved through the file repository, with `--refresh-dependencies` so a
       # cached artifact of the same coordinates cannot stand in for it.
@@ -359,7 +362,7 @@ jobs:
       # verifyDesktopArtifact and verifyAndroidArtifact otherwise only run as
       # dependencies of a publication task.
       - name: Assemble and verify both artifacts
-        run: ./gradlew jar androidAar verifyDesktopArtifact verifyAndroidArtifact -Prelease=true -PprebuiltAndroidLibs=true
+        run: ./gradlew jvmJar assembleRelease verifyDesktopArtifact verifyAndroidArtifact -Prelease=true -PprebuiltAndroidLibs=true
 
       - name: Set pub mode env var
         # Note: This step is intended to allow publishing snapshot packages.
@@ -380,8 +383,9 @@ jobs:
       - if: ${{ inputs.maven_publish == true }}
         name: Gradle Publish to Maven Central repository
         run: |
-          ./gradlew publishMavenPublicationToSonatypeRepository \
-                    publishAndroidPublicationToSonatypeRepository \
+          ./gradlew publishKotlinMultiplatformPublicationToSonatypeRepository \
+                    publishJvmPublicationToSonatypeRepository \
+                    publishAndroidReleasePublicationToSonatypeRepository \
                     ${{ env.RELEASE }} --info -PremotePublication=true -Prelease=true \
                     -PprebuiltAndroidLibs=true ${{ env.PUB_MODE }}
         env:
