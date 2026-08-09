@@ -252,6 +252,20 @@ Each ZIP holds exactly the release native library for that target:
 - macOS: `libzenoh_flat_jni.dylib`
 - Windows: `zenoh_flat_jni.dll`
 
+**Linux runtime requirement: glibc 2.18 or newer.** The two Linux targets are
+built with `cross`, inside a container whose glibc is far older than the CI
+runner's, because a native `ubuntu-latest` (24.04) build requires `GLIBC_2.39`
+and would refuse to load on Ubuntu 22.04, Debian 12 or RHEL 9. Both floors were
+measured with `objdump -T`:
+
+```text
+built natively on ubuntu-24.04   GLIBC_2.39
+built with cross (both targets)  GLIBC_2.18
+```
+
+`Record the glibc requirement` re-measures this on every release, so a container
+image change cannot raise the floor unnoticed.
+
 The `desktopTargets` map in `build.gradle.kts` drives `verifyDesktopArtifact`,
 so a target missing from a build fails the release rather than shipping a JAR
 that silently lacks it. It does **not** drive the build: the same six targets are
@@ -606,19 +620,18 @@ items from the original plan are not built at all.
   than a validated one.
 - **`aarch64-pc-windows-msvc` has no runner**, so it is covered by archive
   inspection only.
-- **The cross-build matrix has been attempted once and failed; the fix is not
-  yet validated.** [Run 31312017566](https://github.com/eclipse-zenoh/zenoh-flat-jni/actions/runs/31312017566)
+- **The cross-build matrix has not yet completed in CI.**
+  [Run 31312017566](https://github.com/eclipse-zenoh/zenoh-flat-jni/actions/runs/31312017566)
   started all six JVM builds and the Android build, and every one failed on a
   stale lockfile on the release branch. #28 fixed that cause, but no run has
-  since got past this point.
+  since got past this point. The two Linux targets have been built and inspected
+  locally with `cross` under Podman; the macOS and Windows targets have not been
+  built at all.
 - **The Central upload has never run.** A `maven_publish: false` rehearsal does
   not exercise signing or the Central credentials; only a rehearsal with
   publication enabled does.
-- **The Linux glibc floor is not yet measured.** The targets moved to `cross`
-  precisely because a native `ubuntu-latest` build required `GLIBC_2.39` — too
-  new for Ubuntu 22.04, Debian 12 or RHEL 9 — but the replacement floor will
-  only be known from the `Record the glibc requirement` step of the first
-  successful run. Until then, treat Linux compatibility as unverified.
+- **`aarch64-pc-windows-msvc` has no runner**, so it is covered by archive
+  inspection only.
 - **Downstream release suites have not been run against a Maven artifact** with
   composite substitution disabled; those changes belong in `zenoh-java` and
   `zenoh-kotlin`.
