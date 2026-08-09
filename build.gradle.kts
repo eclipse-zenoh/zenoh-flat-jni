@@ -100,6 +100,20 @@ kotlin {
             // Empty/absent in a developer build, so this is a no-op there.
             resources.srcDir(jniLibsDir)
         }
+        val jvmTest by getting {
+            // The correspondence tests predate the multiplatform layout and live
+            // in the JVM plugin's `src/test/kotlin`. Wiring them here keeps them
+            // running: KMP looks in `src/jvmTest/kotlin`, so without this they
+            // are silently NO-SOURCE.
+            kotlin.srcDir("src/test/kotlin")
+            dependencies {
+                implementation(kotlin("test"))
+                implementation("org.junit.jupiter:junit-jupiter:5.10.0")
+                runtimeOnly("org.junit.platform:junit-platform-launcher")
+                // Guava TypeToken — the java.lang.reflect.Type serialization path.
+                implementation("com.google.guava:guava:33.3.1-jre")
+            }
+        }
     }
 }
 
@@ -119,17 +133,11 @@ android {
     // AGP expects here — so the AAR is assembled by the plugin rather than by the
     // hand-rolled Zip task this replaces.
     sourceSets["main"].jniLibs.srcDir(androidLibsDir)
-}
-
-dependencies {
-    // Self-verification: the correspondence tests compare this crate's pure-Kotlin
-    // implementations against the native oracle it also ships (io.zenoh.jni.test).
-    // kotlin("test") with useJUnitPlatform() selects the JUnit5 integration.
-    testImplementation(kotlin("test"))
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    // Guava TypeToken — the java.lang.reflect.Type serialization path.
-    testImplementation("com.google.guava:guava:33.3.1-jre")
+    // ...and AGP must not claim `src/test` as its unit tests. Those tests load
+    // the desktop native library through java.library.path, so they are JVM-only;
+    // left to AGP they fail to compile for Android.
+    sourceSets["test"].java.setSrcDirs(emptyList<String>())
+    sourceSets["test"].kotlin.setSrcDirs(emptyList<String>())
 }
 
 tasks.named<Test>("jvmTest") {
