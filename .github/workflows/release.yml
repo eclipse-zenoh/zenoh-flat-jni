@@ -87,9 +87,15 @@ jobs:
       packages: write
     secrets: inherit
 
+  # Serialized behind publish-jvm rather than run alongside it: each publish
+  # workflow calls closeAndReleaseSonatypeStagingRepository independently, and a
+  # Central release cannot be withdrawn. Run in parallel, an Android success
+  # followed by a JVM failure would leave zenoh-flat-jni-android public forever
+  # with no matching zenoh-flat-jni. This costs release wall-clock time and
+  # diverges from zenoh-java, deliberately.
   publish-android:
     name: Publish Android package
-    needs: tag
+    needs: [tag, publish-jvm]
     uses: ./.github/workflows/publish-android.yml
     with:
       snapshot: ${{ !(inputs.live-run || false) }}

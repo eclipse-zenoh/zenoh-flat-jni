@@ -77,7 +77,7 @@ in this pipeline runs *before* the upload — afterwards there is no undo.
 | `...-sources.jar` | the source code, so IDEs can show it |
 | `...-javadoc.jar` | API documentation, generated here by **Dokka** (Kotlin's doc tool) |
 | `...pom` | metadata: coordinates, licence, developers, SCM URL, and the library's own dependencies |
-| `...module` | Gradle's richer equivalent of the POM |
+| `...module` | Gradle's richer equivalent of the POM — *optional*, and only produced for the JVM publication |
 | `.md5`, `.sha1`, … | checksums for each of the above |
 | `.asc` | a **GPG signature** for each — Central rejects unsigned releases |
 
@@ -117,8 +117,10 @@ branch, bumps the version, tags it, builds, verifies and publishes.
   repository automatically. Nothing is stored here, and nothing needs
   configuring. See [Required secrets](#required-secrets).
 - **Always supply `version`.** Without it, `create-release-branch` falls back to
-  `git describe`, and this repository has no tags, so the run aborts on its
-  first step.
+  `git describe`, and no tag is reachable from `main`, so the run aborts on its
+  first step. (`1.9.0-rc1` exists, but it sits on a dry-run branch.) The
+  fallback applies whenever `version` is omitted — it has nothing to do with
+  `live-run`.
 
 ### Rehearsal (dry run)
 
@@ -143,11 +145,17 @@ included — deliberately, because dry-run branches and tags are throwaway names
 Passing `1.9.0` would leave a `1.9.0` tag pointing at a dry-run commit. A stray
 Git tag can be deleted; a Maven Central release cannot.
 
-For the very first run, also **uncheck `maven_publish`**. Everything still runs
-— the six-target cross-build, artifact verification, and the external consumer
-test on three platforms — but nothing is uploaded anywhere. It separates "does
-this build and verify" from "do the credentials work", which makes a first
-failure much easier to read.
+Budget for **two** rehearsals, each with its own fresh version.
+
+**First, with `maven_publish` unchecked.** The six-target cross-build, the
+desktop artifact verification, the AAR assembly and verification, and the
+external consumer test on three platforms all run; nothing is uploaded
+anywhere. This separates "does it build and verify" from "do the credentials
+work", which makes a first failure far easier to read.
+
+**Then, with `maven_publish` checked.** Only this exercises signing, the Central
+credentials and the upload itself. A rehearsal that never uploads proves nothing
+about them.
 
 What to look at in the run:
 
@@ -155,8 +163,12 @@ What to look at in the run:
   the likeliest thing to be wrong the first time a matrix runs.
 - **`Smoke-test the candidate as an external consumer`** — expect
   `zenoh-flat-jni smoke test OK on <platform>` on Linux, macOS and Windows.
-- **The job summary** — per-target SHA-256s, and a line confirming the
-  coordinates are still free on Maven Central.
+- **The job summary** — per-target SHA-256s and the measured glibc floor of each
+  Linux artifact.
+
+The "coordinates are still free on Maven Central" line does *not* appear in a
+rehearsal: both coordinate guards are gated on `snapshot == false`, and every
+rehearsal is a snapshot. Its absence is correct, not a fault.
 
 ### The real release
 
@@ -172,12 +184,22 @@ Supplying `zenoh-version` additionally re-points every `zenoh.*` dependency at
 `release/<zenoh-version>` and refreshes `Cargo.lock`; leaving it empty releases
 against whatever the manifest already declares.
 
-The irreversible moment is `closeAndReleaseSonatypeStagingRepository` inside
-`publish-jvm`. Everything before it — cross-build, verification, consumer test,
-staging upload, Central's own validation — is reversible, and a staging
-repository that fails validation is simply dropped. Before that point the job
-also refuses to continue if the coordinates already exist on Central, since
-republishing cannot succeed.
+There are **two** irreversible moments, not one:
+`closeAndReleaseSonatypeStagingRepository` runs in `publish-jvm` and again in
+`publish-android`, each releasing its own artifact. `publish-android` is
+deliberately serialized behind `publish-jvm` (`needs: [tag, publish-jvm]`), so
+the AAR can only go public after the JVM artifact — the one with the consumer
+smoke test in front of it — already has. Were they parallel, an Android success
+followed by a JVM failure would leave `zenoh-flat-jni-android:<version>` public
+forever with no matching `zenoh-flat-jni:<version>`.
+
+Everything before the first of them — cross-build, verification, consumer test,
+staging upload, Central's own validation — is reversible, but *not*
+self-cleaning: a staging repository that fails validation is **left in place**.
+The Nexus plugin throws when the repository does not reach the expected state
+and never issues a drop, so the operator has to inspect and drop it in the
+Central Portal. Before that point the job also refuses to continue if the
+coordinates already exist on Central, since republishing cannot succeed.
 
 ### After a release
 
@@ -230,9 +252,12 @@ Each ZIP holds exactly the release native library for that target:
 - macOS: `libzenoh_flat_jni.dylib`
 - Windows: `zenoh_flat_jni.dll`
 
-The `desktopTargets` map in `build.gradle.kts` is the single declaration of this
-set: it drives the release build matrix and `verifyDesktopArtifact`. A target
-that is not built is not advertised.
+The `desktopTargets` map in `build.gradle.kts` drives `verifyDesktopArtifact`,
+so a target missing from a build fails the release rather than shipping a JAR
+that silently lacks it. It does **not** drive the build: the same six targets are
+listed again in the matrix in `publish-jvm.yml`, and the two must be kept in
+step by hand. Adding a target means editing both — the verifier is what makes
+forgetting the second one loud instead of silent.
 
 A developer build produces a different JAR — the host library alone, at the JAR
 root (`NativeLibrary`'s second loading strategy). The two layouts are mutually
@@ -329,7 +354,8 @@ dependency at the Zenoh release branch, refreshes `Cargo.lock`, commits and
 tags.
 
 With `live-run: false` the release is not skipped but *redirected*: the branch
-becomes `release/dry-run/<version>` and the version comes from `git describe`.
+becomes `release/dry-run/<version>`, and the version comes from `git describe`
+if — and only if — no `version` input was supplied.
 That is the dry run.
 
 ### 2. `publish-jvm` — the desktop JVM artifact
@@ -405,12 +431,17 @@ Three steps hide in there, run by
    Sonatype's Central Portal.
 2. **Close it.** Central now validates: are all signatures present and valid, do
    the checksums match, does the POM carry a name, description, licence,
-   developer and SCM URL? Failure here is harmless — the staging repository is
-   simply dropped.
+   developer and SCM URL? Nothing is public yet, so a failure here publishes
+   nothing — but it is not self-cleaning either. The plugin throws
+   `RepositoryTransitionException` when the repository does not reach the
+   expected state and never issues a drop, so the staging repository is left for
+   the operator to inspect and drop in the Central Portal.
 3. **Release it.** *This is the irreversible step.* The artifacts go public and
    can never be changed.
 
-Every gate described above exists to run before step 3.
+Every gate described above exists to run before step 3 — and step 3 happens
+twice per release, once for the JVM artifact and once for the AAR, which is why
+`publish-android` is serialized behind `publish-jvm`.
 
 Two mechanical details are worth knowing, because both previously made a release
 impossible in this repository:
@@ -444,12 +475,17 @@ about whether a real release would survive Central's validation.
 ## Reproducibility
 
 Every archive task sets `isPreserveFileTimestamps = false` and
-`isReproducibleFileOrder = true`. Two clean builds of the same inputs therefore
-produce a byte-identical JAR, so a hash comparison against what Maven Central
-serves is meaningful.
+`isReproducibleFileOrder = true`, so the JAR's *own* entries are normalized.
 
-What a release resolves from is fixed by the same mechanisms every zenoh binding
-uses, not by a file of its own:
+That does **not** make the JAR byte-identical between builds. The native
+libraries are wrapped with plain `zip -j` in the workflow, which records each
+file's modification time, and those ZIP bytes are embedded in the JAR unchanged
+— so two builds of identical native code still produce different JAR hashes.
+Normalizing the nested archives too (a fixed mtime before zipping) would close
+the gap, but nothing currently depends on it: the post-release hash comparison
+that once justified the claim is no longer part of the pipeline.
+
+What a release does fix precisely is *what it is built from*:
 
 | Input | How it is fixed |
 | --- | --- |
@@ -463,21 +499,52 @@ manifest fails the build instead of silently resolving something else.
 
 ## Building and inspecting artifacts locally
 
-Populate `jni-libs/` — and optionally `android-libs/` — then publish to the same
-isolated repository the CI consumer test uses:
+Publishing locally goes to the same isolated repository the CI consumer test
+uses. One thing to know first: **`verifyDesktopArtifact` demands all six
+targets**, and a developer machine can only build its own. Publishing with just
+the host library staged therefore fails by design —
+
+```text
+missing native resource `aarch64-apple-darwin/aarch64-apple-darwin.zip`
+missing native resource `x86_64-pc-windows-msvc/x86_64-pc-windows-msvc.zip`
+…
+```
+
+— which is the verifier doing its job. To exercise the rest of the path, stage
+the host library for real and stand in placeholders for the other five. The
+placeholder names must match what the verifier expects per target, since it
+checks each archive holds exactly its one library:
 
 ```bash
 cargo build --release --locked
+
+# the host target, for real
 mkdir -p jni-libs/x86_64-unknown-linux-gnu
 (cd target/release && zip -j ../../jni-libs/x86_64-unknown-linux-gnu/x86_64-unknown-linux-gnu.zip libzenoh_flat_jni.so)
+
+# the other five, so the verifier is satisfied and the JAR is assembled
+stub() { mkdir -p "jni-libs/$1"; : > "$2"; zip -jq "jni-libs/$1/$1.zip" "$2"; rm -f "$2"; }
+stub aarch64-unknown-linux-gnu libzenoh_flat_jni.so
+stub x86_64-apple-darwin       libzenoh_flat_jni.dylib
+stub aarch64-apple-darwin      libzenoh_flat_jni.dylib
+stub x86_64-pc-windows-msvc    zenoh_flat_jni.dll
+stub aarch64-pc-windows-msvc   zenoh_flat_jni.dll
 
 ./gradlew publishMavenPublicationToDryRunRepository -Prelease=true
 find build/dry-run-repository -type f -print
 
-cd ci/consumer-smoke-test
-gradle run -PcandidateRepository="file://$PWD/../../build/dry-run-repository" \
-           -PcandidateVersion="$(cat ../../version.txt)"
+# the wrapper, not a system `gradle`: the consumer needs the Gradle version this
+# project pins
+./gradlew --project-dir ci/consumer-smoke-test run --refresh-dependencies \
+  -PcandidateRepository="file://$PWD/build/dry-run-repository" \
+  -PcandidateVersion="$(cat version.txt)"
 ```
+
+The smoke test loads the *host* library out of the JAR, so the placeholders never
+get loaded — it exercises the real extraction and JNI path on this machine while
+the other five entries only satisfy the layout check. Delete `jni-libs/`
+afterwards; it is gitignored, but leaving it changes what a subsequent local
+build produces.
 
 Inspect the archives and signatures directly:
 
@@ -508,6 +575,7 @@ Two properties are easy to confuse:
 | `ORG_GPG_SUBKEY_ID` | signing |
 | `ORG_GPG_PRIVATE_KEY` | signing |
 | `ORG_GPG_PASSPHRASE` | signing |
+| `BOT_TOKEN_WORKFLOW` | creating and pushing the release branch and tag, and creating the GitHub release |
 
 ## Downstream release requirements
 
@@ -538,9 +606,19 @@ items from the original plan are not built at all.
   than a validated one.
 - **`aarch64-pc-windows-msvc` has no runner**, so it is covered by archive
   inspection only.
-- **The cross-build matrix and the Central upload have never run.** Both need
-  repository secrets and CI runners. Run a `live-run: false` dry run before
-  attempting a production release.
+- **The cross-build matrix has been attempted once and failed; the fix is not
+  yet validated.** [Run 31312017566](https://github.com/eclipse-zenoh/zenoh-flat-jni/actions/runs/31312017566)
+  started all six JVM builds and the Android build, and every one failed on a
+  stale lockfile on the release branch. #28 fixed that cause, but no run has
+  since got past this point.
+- **The Central upload has never run.** A `maven_publish: false` rehearsal does
+  not exercise signing or the Central credentials; only a rehearsal with
+  publication enabled does.
+- **The Linux glibc floor is not yet measured.** The targets moved to `cross`
+  precisely because a native `ubuntu-latest` build required `GLIBC_2.39` — too
+  new for Ubuntu 22.04, Debian 12 or RHEL 9 — but the replacement floor will
+  only be known from the `Record the glibc requirement` step of the first
+  successful run. Until then, treat Linux compatibility as unverified.
 - **Downstream release suites have not been run against a Maven artifact** with
   composite substitution disabled; those changes belong in `zenoh-java` and
   `zenoh-kotlin`.

@@ -150,6 +150,13 @@ jobs:
             echo "RELEASE=closeAndReleaseSonatypeStagingRepository" >> $GITHUB_ENV
           fi
 
+      # verifyAndroidArtifact is only reached through PublishToMavenRepository,
+      # so without this the AAR is neither assembled nor checked on a
+      # `maven_publish: false` run — exactly the rehearsal meant to catch a bad
+      # artifact before anything is uploaded.
+      - name: Assemble and verify the AAR
+        run: ./gradlew androidAar verifyAndroidArtifact -Prelease=true
+
       - if: ${{ inputs.maven_publish == true }}
         name: Gradle Publish Android Package to Maven Central repository
         run: |
