@@ -142,6 +142,13 @@ jobs:
           merge-multiple: true
           path: ${{ env.JNI_LIB_PATHS }}
 
+      # The layout Gradle expects is `<target>/<target>.zip` directly under
+      # jni-libs/. Printing it makes a mismatch obvious in the log instead of
+      # only surfacing as verifyDesktopArtifact's "missing native resource".
+      - name: Show the downloaded layout
+        shell: bash
+        run: find ${{ env.JNI_LIB_PATHS }} -type f | sort
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -235,6 +242,13 @@ jobs:
           pattern: desktop-*
           merge-multiple: true
           path: ${{ env.JNI_LIB_PATHS }}
+
+      # The layout Gradle expects is `<target>/<target>.zip` directly under
+      # jni-libs/. Printing it makes a mismatch obvious in the log instead of
+      # only surfacing as verifyDesktopArtifact's "missing native resource".
+      - name: Show the downloaded layout
+        shell: bash
+        run: find ${{ env.JNI_LIB_PATHS }} -type f | sort
 
       - uses: actions/setup-java@v4
         with:
