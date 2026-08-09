@@ -121,7 +121,17 @@ jobs:
             7z -y a "$out/${{ matrix.target }}.zip" "${{ matrix.lib }}"
           fi
           cd "$GITHUB_WORKSPACE/${{ env.JNI_LIB_PATHS }}"
-          shasum -a 256 "${{ matrix.target }}/${{ matrix.target }}.zip" >> "$GITHUB_STEP_SUMMARY"
+          # Informational only, so it must never fail the build — a release once
+          # died here on exit 127. Git Bash on the Windows runners has sha256sum
+          # but no shasum; macOS has shasum but no sha256sum.
+          archive="${{ matrix.target }}/${{ matrix.target }}.zip"
+          if command -v shasum >/dev/null; then
+            shasum -a 256 "$archive"
+          elif command -v sha256sum >/dev/null; then
+            sha256sum "$archive"
+          else
+            echo "$archive (no checksum tool on this runner)"
+          fi >> "$GITHUB_STEP_SUMMARY"
 
       # The glibc floor is a user-visible property of the release, so measure it
       # and fail on it — a number in a job summary that nobody reads is not a
