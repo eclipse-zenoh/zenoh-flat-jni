@@ -125,13 +125,9 @@ jobs:
           # died here on exit 127. Git Bash on the Windows runners has sha256sum
           # but no shasum; macOS has shasum but no sha256sum.
           archive="${{ matrix.target }}/${{ matrix.target }}.zip"
-          if command -v shasum >/dev/null; then
-            shasum -a 256 "$archive"
-          elif command -v sha256sum >/dev/null; then
-            sha256sum "$archive"
-          else
-            echo "$archive (no checksum tool on this runner)"
-          fi >> "$GITHUB_STEP_SUMMARY"
+          { shasum -a 256 "$archive" 2>/dev/null \
+            || sha256sum "$archive" 2>/dev/null \
+            || echo "$archive (checksum unavailable)"; } >> "$GITHUB_STEP_SUMMARY"
 
       # The glibc floor is a user-visible property of the release, so measure it
       # and fail on it — a number in a job summary that nobody reads is not a

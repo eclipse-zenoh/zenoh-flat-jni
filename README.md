@@ -133,9 +133,25 @@ cargo fmt --check
 
 ### Building for Android
 
+There is no `-Pandroid` flag — Android mode is detected from an `android-libs/`
+directory existing, so the native libraries are cross-compiled first and Gradle
+then packages them:
+
 ```bash
-./gradlew -Pandroid=true build
+rustup target add armv7-linux-androideabi aarch64-linux-android \
+                  i686-linux-android x86_64-linux-android
+cargo install cargo-ndk --locked --version 4.1.2
+
+# ANDROID_NDK_HOME must point at NDK r26; -o writes the AAR's jni/<abi>/ layout
+cargo ndk -o android-libs -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 \
+    build --release --locked
+
+./gradlew androidAar verifyAndroidArtifact
 ```
+
+`verifyAndroidArtifact` fails unless the AAR carries a manifest, `classes.jar`,
+`R.txt` and all four ABI libraries. See [PUBLISHING.md](PUBLISHING.md) for how
+the release does the same thing.
 
 ## Architecture
 

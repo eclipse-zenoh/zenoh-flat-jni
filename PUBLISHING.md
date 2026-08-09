@@ -679,8 +679,14 @@ downstream release suites.
   and an emulator job. Until then the Android publication is unproven at
   runtime, and the `CARGO_NDK_VERSION` pin is a current-stable choice rather
   than a validated one.
-- **`aarch64-pc-windows-msvc` has no runner**, so it is covered by archive
-  inspection only.
+- **`aarch64-pc-windows-msvc` is cross-compiled and archive-inspected, never
+  loaded.** A GitHub-hosted Windows ARM64 runner *is* available to this
+  repository — `windows-11-arm`, verified by running a job on one. What blocks a
+  consumer test there is the JDK: `actions/setup-java` has no Temurin 11 for
+  Windows ARM64 (`Could not find satisfied version for SemVer '11'`), while
+  Temurin **21** installs natively. An ARM64 Windows consumer job is therefore
+  possible, but only on a different JDK than the other three run, which is why
+  it has not been added.
 - **The cross-build matrix has not yet completed in CI.**
   [Run 31312017566](https://github.com/eclipse-zenoh/zenoh-flat-jni/actions/runs/31312017566)
   started all six JVM builds and the Android build, and every one failed on a
