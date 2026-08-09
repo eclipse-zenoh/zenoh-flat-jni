@@ -16,7 +16,8 @@ import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
 
 plugins {
-    kotlin("jvm") version "1.9.0"
+    kotlin("multiplatform") version "1.9.0"
+    id("com.android.library") version "7.4.2"
     id("org.jetbrains.dokka-javadoc") version "2.0.0"
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
     `maven-publish`
@@ -35,6 +36,7 @@ val baseVersion = file("version.txt").readText().trim()
 version = if (project.hasProperty("SNAPSHOT")) "$baseVersion-SNAPSHOT" else baseVersion
 
 repositories {
+    google()   // AGP's own artifacts (lint, build tools)
     mavenCentral()
 }
 
@@ -78,13 +80,45 @@ val isAndroidBuild = androidLibsDir.isDirectory
 
 kotlin {
     jvmToolchain(11)
+
+    // Two JVM-flavoured targets, which is what lets `commonMain` use the JDK and
+    // JNI directly. Publishing them from one project is the whole point: Gradle
+    // module metadata then ties `zenoh-flat-jni`, `-jvm` and `-android` together,
+    // so a consumer declares the dependency once and Gradle picks the variant
+    // carrying the right native libraries.
+    jvm()
+    androidTarget {
+        publishLibraryVariants("release")
+    }
+
     sourceSets {
-        main {
+        val commonMain by getting {
             kotlin.srcDirs("kotlin", "generated-kotlin")
+        }
+        val jvmMain by getting {
+            // The desktop natives, as <target>/<target>.zip resources.
             // Empty/absent in a developer build, so this is a no-op there.
             resources.srcDir(jniLibsDir)
         }
     }
+}
+
+android {
+    namespace = "io.zenoh.jni"
+    compileSdk = 30
+    defaultConfig {
+        minSdk = 21
+    }
+    // AGP defaults its Java compilation to 1.8 while `jvmToolchain(11)` puts
+    // Kotlin on 11; the two must agree or the Android compilation fails.
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    // cargo-ndk writes `<abi>/libzenoh_flat_jni.so`, which is exactly the layout
+    // AGP expects here — so the AAR is assembled by the plugin rather than by the
+    // hand-rolled Zip task this replaces.
+    sourceSets["main"].jniLibs.srcDir(androidLibsDir)
 }
 
 dependencies {
@@ -98,7 +132,7 @@ dependencies {
     testImplementation("com.google.guava:guava:33.3.1-jre")
 }
 
-tasks.test {
+tasks.named<Test>("jvmTest") {
     useJUnitPlatform()
     // The native lib must exist and be loadable. `NativeLibrary.ensureLoaded()`
     // tries `System.loadLibrary("zenoh_flat_jni")` first, so point
@@ -167,7 +201,7 @@ val hostDylibName = when {
 // library from `jni-libs` as a resource, so it must NOT also bundle a host
 // library — a stray extra copy is exactly what `verifyDesktopArtifact` rejects.
 if (!isMultiPlatform) {
-    tasks.named<Jar>("jar") {
+    tasks.named<Jar>("jvmJar") {
         dependsOn("buildZenohFlatJni")
         from(jarTarget) {
             include(hostDylibName)
@@ -187,15 +221,6 @@ tasks.withType<AbstractArchiveTask>().configureEach {
     isReproducibleFileOrder = true
 }
 
-val sourcesJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("sources")
-    from("kotlin")
-    from("generated-kotlin")
-    from("src")
-    from("build.rs")
-    from("Cargo.toml")
-}
-
 // Maven Central requires a documentation artifact for every publication.
 val javadocJar by tasks.registering(Jar::class) {
     dependsOn("dokkaGeneratePublicationJavadoc")
@@ -211,33 +236,6 @@ val javadocJar by tasks.registering(Jar::class) {
 // `jni/<abi>/`, so applying AGP would mean an Android SDK install in CI to zip
 // four .so files. Switch to `com.android.library` if this ever grows real
 // Android resources or a non-trivial manifest.
-val androidStubsDir = layout.buildDirectory.dir("android")
-
-// AndroidManifest.xml and R.txt are mandatory in the AAR layout; this module
-// declares no Android resources, so R.txt is empty.
-val androidStubs by tasks.registering {
-    outputs.dir(androidStubsDir)
-    doLast {
-        val dir = androidStubsDir.get().asFile.apply { mkdirs() }
-        dir.resolve("AndroidManifest.xml").writeText(
-            """
-            <?xml version="1.0" encoding="utf-8"?>
-            <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-                package="io.zenoh.jni">
-                <uses-sdk android:minSdkVersion="21" />
-            </manifest>
-            """.trimIndent() + "\n"
-        )
-        dir.resolve("R.txt").writeText("")
-    }
-}
-
-// The Android classes.jar must not carry the desktop native zips, hence
-// `output.classesDirs` instead of the `jar` task.
-val androidClassesJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("android-classes")
-    from(sourceSets["main"].output.classesDirs)
-}
 
 // Cross-compile the Android ABIs, mirroring `buildZenohFlatJni` for the desktop
 // library: one Gradle entry point, so the documented developer command and CI run
@@ -281,16 +279,6 @@ val buildAndroidLibs by tasks.registering {
     }
 }
 
-val androidAar by tasks.registering(Zip::class) {
-    dependsOn(buildAndroidLibs)
-    archiveBaseName.set("zenoh-flat-jni-android")
-    archiveVersion.set(project.version.toString())
-    archiveExtension.set("aar")
-    from(androidStubs)
-    from(androidClassesJar) { rename { "classes.jar" } }
-    from(androidLibsDir) { into("jni") }
-}
-
 // ============================================================================
 // Artifact verification
 // ============================================================================
@@ -302,9 +290,9 @@ private fun ZipFile.nestedEntryNames(name: String): List<String> =
 
 val verifyDesktopArtifact by tasks.registering {
     description = "Fail unless the JVM JAR carries exactly one native library per advertised desktop target"
-    dependsOn(tasks.jar)
+    dependsOn(tasks.named("jvmJar"))
     doLast {
-        val jarFile = tasks.jar.get().archiveFile.get().asFile
+        val jarFile = tasks.named<Jar>("jvmJar").get().archiveFile.get().asFile
         val problems = mutableListOf<String>()
         ZipFile(jarFile).use { jar ->
             val names = jar.entries().toList().map { it.name }
@@ -334,9 +322,10 @@ val verifyDesktopArtifact by tasks.registering {
 
 val verifyAndroidArtifact by tasks.registering {
     description = "Fail unless the AAR carries a native library for every advertised Android ABI"
-    dependsOn(androidAar)
+    dependsOn("assembleRelease")
     doLast {
-        val aarFile = androidAar.get().archiveFile.get().asFile
+        // AGP's output, not a hand-built archive any more.
+        val aarFile = layout.buildDirectory.file("outputs/aar/${project.name}-release.aar").get().asFile
         val problems = mutableListOf<String>()
         ZipFile(aarFile).use { aar ->
             listOf("AndroidManifest.xml", "classes.jar", "R.txt").forEach {
@@ -421,41 +410,16 @@ publishing {
         // `sonatype` is contributed by the nexus-publish plugin above.
     }
 
-    publications {
-        register<MavenPublication>("maven") {
-            artifactId = "zenoh-flat-jni"
-
-            from(components["java"])
-            artifact(sourcesJar)
-            artifact(javadocJar)
-
-            pom { describe(artifactId) }
-        }
-
-        if (isAndroidBuild) {
-            register<MavenPublication>("android") {
-                artifactId = "zenoh-flat-jni-android"
-
-                artifact(androidAar)
-                artifact(sourcesJar)
-                artifact(javadocJar)
-
-                pom {
-                    packaging = "aar"
-                    describe(artifactId)
-                    // `artifact()` publications carry no dependencies of their
-                    // own; the Kotlin plugin's implicit stdlib is the only one.
-                    withXml {
-                        asNode().appendNode("dependencies").appendNode("dependency").apply {
-                            appendNode("groupId", "org.jetbrains.kotlin")
-                            appendNode("artifactId", "kotlin-stdlib")
-                            appendNode("version", kotlinVersion)
-                            appendNode("scope", "runtime")
-                        }
-                    }
-                }
-            }
-        }
+    // The publications are created by the Kotlin Multiplatform plugin, not here:
+    // `kotlinMultiplatform` (the root `zenoh-flat-jni`, carrying Gradle module
+    // metadata), `jvm` (`zenoh-flat-jni-jvm`) and `androidRelease`
+    // (`zenoh-flat-jni-android`). A consumer depends on the root coordinate once
+    // and Gradle resolves the variant whose native libraries match its target —
+    // which is what makes it impossible to ship an Android app against the
+    // desktop libraries.
+    publications.withType<MavenPublication>().configureEach {
+        artifact(javadocJar)
+        pom { describe(artifactId) }
     }
 }
 
