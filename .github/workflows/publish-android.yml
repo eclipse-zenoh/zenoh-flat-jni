@@ -129,6 +129,11 @@ jobs:
           name: android-natives
           path: ${{ env.ANDROID_LIB_PATHS }}
 
+      # Expected: android-libs/<abi>/libzenoh_flat_jni.so
+      - name: Show the downloaded layout
+        shell: bash
+        run: find ${{ env.ANDROID_LIB_PATHS }} -type f | sort
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
