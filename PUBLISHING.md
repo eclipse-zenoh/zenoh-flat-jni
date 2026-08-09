@@ -1,4 +1,4 @@
-# Publishing and Release Readiness
+# Publishing zenoh-flat-jni
 
 This document describes how `zenoh-flat-jni` is built, verified, and published
 so that `zenoh-java` and `zenoh-kotlin` can depend on it as an ordinary Maven
@@ -7,6 +7,40 @@ artifact.
 It describes the pipeline as it exists in this repository. Where something is
 not yet implemented or not yet exercised, it is listed under
 [Known gaps](#known-gaps) rather than described as if it worked.
+
+If you just need to run a release, go to [Running a release](#running-a-release).
+If Maven Central is unfamiliar, read
+[Background](#background-if-you-do-not-work-in-the-jvm-ecosystem) first.
+
+## Contents
+
+- [Background, if you do not work in the JVM ecosystem](#background-if-you-do-not-work-in-the-jvm-ecosystem)
+  - [Coordinates, and why they are permanent](#coordinates-and-why-they-are-permanent)
+  - [The file set Central requires](#the-file-set-central-requires)
+  - [Why this library is not an ordinary JAR](#why-this-library-is-not-an-ordinary-jar)
+- [Running a release](#running-a-release)
+  - [Before the first run](#before-the-first-run)
+  - [Rehearsal (dry run)](#rehearsal-dry-run)
+  - [The real release](#the-real-release)
+  - [After a release](#after-a-release)
+  - [Cleaning up after a rehearsal](#cleaning-up-after-a-rehearsal)
+- [What gets published](#what-gets-published)
+  - [Desktop JVM](#desktop-jvm)
+  - [Android](#android)
+  - [Maven Central contents](#maven-central-contents)
+- [Release relationship](#release-relationship)
+- [How the pipeline works](#how-the-pipeline-works)
+  - [1. `tag` — branch, bump, tag](#1-tag--branch-bump-tag)
+  - [2. `publish-jvm` — the desktop JVM artifact](#2-publish-jvm--the-desktop-jvm-artifact)
+  - [3. `publish-android` — the Android artifact](#3-publish-android--the-android-artifact)
+  - [4. `publish-github`](#4-publish-github)
+- [How a publication reaches Maven Central](#how-a-publication-reaches-maven-central)
+- [Reproducibility](#reproducibility)
+- [Building and inspecting artifacts locally](#building-and-inspecting-artifacts-locally)
+- [Required secrets](#required-secrets)
+- [Downstream release requirements](#downstream-release-requirements)
+- [Known gaps](#known-gaps)
+- [Release checklist](#release-checklist)
 
 ## Background, if you do not work in the JVM ecosystem
 
@@ -70,32 +104,106 @@ Android is a second, separate artifact: an **AAR** (Android's library format —
 zip holding `classes.jar`, a manifest and `jni/<abi>/` native libraries) built
 for four CPU ABIs.
 
-## Release relationship
+## Running a release
 
-`zenoh-flat-jni` owns the generated Kotlin/JNI boundary and the native
-libraries. `zenoh-java` and `zenoh-kotlin` are downstream wrappers and must not
-build or package their own copies of the JNI library.
+Everything is driven from **Actions → Release → Run workflow** on `main`. There
+is no tag to push and no local command to run: the workflow creates the release
+branch, bumps the version, tags it, builds, verifies and publishes.
 
-The release order is:
+### Before the first run
 
-```text
-prebindgen from crates.io, zenoh-flat and Zenoh pinned by Cargo.lock
-                         |
-                         v
-             publish zenoh-flat-jni
-                         |
-                         v
-        verify it resolves from Maven Central
-                    /           \
-                   v             v
-          release zenoh-java  release zenoh-kotlin
+- **Secrets are already in place.** `CENTRAL_SONATYPE_TOKEN_*` and `ORG_GPG_*`
+  are organization-level secrets on `eclipse-zenoh`, inherited by this
+  repository automatically. Nothing is stored here, and nothing needs
+  configuring. See [Required secrets](#required-secrets).
+- **Always supply `version`.** Without it, `create-release-branch` falls back to
+  `git describe`, and this repository has no tags, so the run aborts on its
+  first step.
+
+### Rehearsal (dry run)
+
+| Field | Value |
+| --- | --- |
+| Use workflow from | `main` |
+| `live-run` | **unchecked** |
+| `version` | a provisional number, e.g. `1.9.0-rc1` |
+| `zenoh-version` | empty, unless the Zenoh dependency is being moved |
+| `branch` | empty |
+| `maven_publish` | checked — or uncheck for the very first run |
+
+Unchecking `live-run` flips `snapshot` on, which does three things: the version
+gains a `-SNAPSHOT` suffix, publication goes to the **mutable** snapshot
+repository instead of the release one, and `closeAndReleaseSonatypeStagingRepository`
+is not run. The immutable release coordinates are never touched, so a rehearsal
+can be repeated as often as needed.
+
+**Do not give a rehearsal the version you intend to release.**
+`bump-and-tag.bash` tags and pushes whatever version it is handed, dry runs
+included — deliberately, because dry-run branches and tags are throwaway names.
+Passing `1.9.0` would leave a `1.9.0` tag pointing at a dry-run commit. A stray
+Git tag can be deleted; a Maven Central release cannot.
+
+For the very first run, also **uncheck `maven_publish`**. Everything still runs
+— the six-target cross-build, artifact verification, and the external consumer
+test on three platforms — but nothing is uploaded anywhere. It separates "does
+this build and verify" from "do the credentials work", which makes a first
+failure much easier to read.
+
+What to look at in the run:
+
+- **`Show the downloaded layout`** — the collected natives. Artifact layout is
+  the likeliest thing to be wrong the first time a matrix runs.
+- **`Smoke-test the candidate as an external consumer`** — expect
+  `zenoh-flat-jni smoke test OK on <platform>` on Linux, macOS and Windows.
+- **The job summary** — per-target SHA-256s, and a line confirming the
+  coordinates are still free on Maven Central.
+
+### The real release
+
+| Field | Value |
+| --- | --- |
+| Use workflow from | `main` |
+| `live-run` | **checked** |
+| `version` | the release number, e.g. `1.9.0` |
+| `zenoh-version` | the Zenoh release, if this release follows one |
+| `maven_publish` | checked |
+
+Supplying `zenoh-version` additionally re-points every `zenoh.*` dependency at
+`release/<zenoh-version>` and refreshes `Cargo.lock`; leaving it empty releases
+against whatever the manifest already declares.
+
+The irreversible moment is `closeAndReleaseSonatypeStagingRepository` inside
+`publish-jvm`. Everything before it — cross-build, verification, consumer test,
+staging upload, Central's own validation — is reversible, and a staging
+repository that fails validation is simply dropped. Before that point the job
+also refuses to continue if the coordinates already exist on Central, since
+republishing cannot succeed.
+
+### After a release
+
+- Confirm the coordinates resolve:
+  `https://repo1.maven.org/maven2/org/eclipse/zenoh/zenoh-flat-jni/<version>/`.
+  Central can take some minutes to index a new release.
+- Only then release `zenoh-java` and `zenoh-kotlin` against it, per
+  [Release relationship](#release-relationship) and
+  [Downstream release requirements](#downstream-release-requirements).
+
+### Cleaning up after a rehearsal
+
+A rehearsal leaves a `release/dry-run/<version>` branch, a tag of the same
+version, and a snapshot. The branches are pruned automatically — the last few
+are kept — and the snapshot is mutable, so both can be left alone. Delete the
+tag and branch if you would rather not keep them:
+
+```bash
+git push origin --delete release/dry-run/1.9.0-rc1
+git push origin --delete 1.9.0-rc1
 ```
 
-Maven Central releases are immutable. A downstream release must therefore never
-depend on an unpublished `zenoh-flat-jni` version or assume that an already
-published JNI artifact can be replaced later.
+Use a fresh version for the next rehearsal rather than re-running an existing
+one, so no tag has to be force-moved.
 
-## Artifacts
+## What gets published
 
 ### Desktop JVM
 
@@ -179,27 +287,33 @@ The tag, `version.txt`, `Cargo.toml`, and the Maven version must agree.
 propagates it to `Cargo.toml`, and `publish_jvm_package` re-checks that the two
 still agree before publishing. `gradle.properties` no longer carries a second
 copy.
-## Reproducibility
 
-Every archive task sets `isPreserveFileTimestamps = false` and
-`isReproducibleFileOrder = true`. Two clean builds of the same inputs therefore
-produce a byte-identical JAR, so a hash comparison against what Maven Central
-serves is meaningful.
+## Release relationship
 
-What a release resolves from is fixed by the same mechanisms every zenoh binding
-uses, not by a file of its own:
+`zenoh-flat-jni` owns the generated Kotlin/JNI boundary and the native
+libraries. `zenoh-java` and `zenoh-kotlin` are downstream wrappers and must not
+build or package their own copies of the JNI library.
 
-| Input | How it is fixed |
-| --- | --- |
-| `zenoh`, `zenoh-ext`, `zenoh-flat` | `version` + `git` + `branch` in `Cargo.toml`; the release bump re-points `branch` at `release/X.Y.Z` |
-| every transitive crate | `Cargo.lock`, committed and kept byte-aligned with Zenoh's by the shared lockfile-sync bot |
-| the Rust compiler | `rust-toolchain.toml` |
-| `cargo-ndk`, the NDK | pinned in `publish-android.yml`; `cargo install --locked` pins the dependencies of the *selected* release, not which release is selected |
+The release order is:
 
-Every release build runs `--locked`, so a lockfile that does not match the
-manifest fails the build instead of silently resolving something else.
+```text
+prebindgen from crates.io, zenoh-flat and Zenoh pinned by Cargo.lock
+                         |
+                         v
+             publish zenoh-flat-jni
+                         |
+                         v
+        verify it resolves from Maven Central
+                    /           \
+                   v             v
+          release zenoh-java  release zenoh-kotlin
+```
 
-## Release pipeline
+Maven Central releases are immutable. A downstream release must therefore never
+depend on an unpublished `zenoh-flat-jni` version or assume that an already
+published JNI artifact can be replaced later.
+
+## How the pipeline works
 
 Releases are driven by
 [`.github/workflows/release.yml`](.github/workflows/release.yml), the same shape
@@ -327,33 +441,27 @@ is *mutable*, may be overwritten freely, and skips staging validation entirely.
 Useful for repeated integration testing — but a snapshot passing proves nothing
 about whether a real release would survive Central's validation.
 
-## Dry run
+## Reproducibility
 
-Gradle's `--dry-run` only shows task selection; it does not generate or validate
-publishable artifacts. Use it only as a task-wiring check.
+Every archive task sets `isPreserveFileTimestamps = false` and
+`isReproducibleFileOrder = true`. Two clean builds of the same inputs therefore
+produce a byte-identical JAR, so a hash comparison against what Maven Central
+serves is meaningful.
 
-### Through the release workflow
+What a release resolves from is fixed by the same mechanisms every zenoh binding
+uses, not by a file of its own:
 
-Run `release.yml` with `live-run: false`. It branches to
-`release/dry-run/<version>`, publishes `-SNAPSHOT` artifacts, and leaves the
-released coordinates untouched. Snapshot success does not replace release
-validation — snapshots skip Central's staging validation entirely.
+| Input | How it is fixed |
+| --- | --- |
+| `zenoh`, `zenoh-ext`, `zenoh-flat` | `version` + `git` + `branch` in `Cargo.toml`; the release bump re-points `branch` at `release/X.Y.Z` |
+| every transitive crate | `Cargo.lock`, committed and kept byte-aligned with Zenoh's by the shared lockfile-sync bot |
+| the Rust compiler | `rust-toolchain.toml` |
+| `cargo-ndk`, the NDK | pinned in `publish-android.yml`; `cargo install --locked` pins the dependencies of the *selected* release, not which release is selected |
 
-Passing `maven_publish: false` runs everything except the upload.
+Every release build runs `--locked`, so a lockfile that does not match the
+manifest fails the build instead of silently resolving something else.
 
-Two things to know before the first rehearsal:
-
-- **Pass an explicit `version`.** Without one, `create-release-branch` derives it
-  from `git describe`, which fails outright in a repository with no tags.
-- **Do not pass the version you intend to release.** `bump-and-tag.bash` tags and
-  pushes whatever version it is given, on rehearsals too — deliberately, since
-  dry-run branches and tags are throwaway names. Passing `1.9.0` to a rehearsal
-  leaves a `1.9.0` tag pointing at a dry-run commit. Use something obviously
-  provisional, such as `1.9.0-rc1`, which publishes `1.9.0-rc1-SNAPSHOT`.
-
-A stray Git tag can be deleted. A Maven Central release cannot.
-
-### Locally
+## Building and inspecting artifacts locally
 
 Populate `jni-libs/` — and optionally `android-libs/` — then publish to the same
 isolated repository the CI consumer test uses:
@@ -439,10 +547,16 @@ items from the original plan are not built at all.
 
 ## Release checklist
 
-- [ ] `Cargo.lock` is committed and current for the manifest.
-- [ ] `version.txt`, `Cargo.toml`, and the tag agree.
-- [ ] Central Portal token and GPG secrets are configured.
-- [ ] A `live-run: false` dry run completed and its snapshot resolved.
+Most of this is enforced by the pipeline; the list is what a release owner
+should confirm rather than assume.
+
+- [ ] `Cargo.lock` is committed and current for the manifest — the version bump
+      refreshes it, but a manifest edit landed by hand may not have.
+- [ ] `version.txt` and `Cargo.toml` agree (`publish_jvm_package` re-checks).
+- [ ] A rehearsal with `live-run: false` completed, under a version that is
+      *not* the one being released.
+- [ ] The version being released is free on Maven Central (the pipeline refuses
+      otherwise).
 - [ ] Generated sources are clean; Rust and Kotlin tests pass.
 - [ ] All declared desktop targets are in the JAR and all ABIs in the AAR.
 - [ ] Sources, Javadoc, POM, signatures, and checksums pass inspection.
