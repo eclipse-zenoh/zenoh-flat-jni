@@ -100,6 +100,13 @@ kotlin {
             // Empty/absent in a developer build, so this is a no-op there.
             resources.srcDir(jniLibsDir)
         }
+        // `src/test` is AGP's unit-test convention as well, and emptying it on
+        // the AGP side is not enough: this Kotlin source set carries its own
+        // directories. The correspondence tests load the desktop native library
+        // through java.library.path, so they only make sense on the JVM.
+        val androidUnitTest by getting {
+            kotlin.setSrcDirs(emptyList<String>())
+        }
         val jvmTest by getting {
             // The correspondence tests predate the multiplatform layout and live
             // in the JVM plugin's `src/test/kotlin`. Wiring them here keeps them
@@ -133,11 +140,7 @@ android {
     // AGP expects here — so the AAR is assembled by the plugin rather than by the
     // hand-rolled Zip task this replaces.
     sourceSets["main"].jniLibs.srcDir(androidLibsDir)
-    // ...and AGP must not claim `src/test` as its unit tests. Those tests load
-    // the desktop native library through java.library.path, so they are JVM-only;
-    // left to AGP they fail to compile for Android.
     sourceSets["test"].java.setSrcDirs(emptyList<String>())
-    sourceSets["test"].kotlin.setSrcDirs(emptyList<String>())
 }
 
 tasks.named<Test>("jvmTest") {
