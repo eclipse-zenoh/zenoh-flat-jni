@@ -206,8 +206,14 @@ coordinates already exist on Central, since republishing cannot succeed.
 
 ### After a release
 
-- Confirm the coordinates resolve:
-  `https://repo1.maven.org/maven2/org/eclipse/zenoh/zenoh-flat-jni/<version>/`.
+- Confirm **both** coordinates resolve — releasing them together is the whole
+  point of the single staging repository, so verifying one proves half of it:
+
+  ```text
+  https://repo1.maven.org/maven2/org/eclipse/zenoh/zenoh-flat-jni/<version>/
+  https://repo1.maven.org/maven2/org/eclipse/zenoh/zenoh-flat-jni-android/<version>/
+  ```
+
   Central can take some minutes to index a new release.
 - Only then release `zenoh-java` and `zenoh-kotlin` against it, per
   [Release relationship](#release-relationship) and
@@ -278,7 +284,10 @@ above `SUPPORTED_GLIBC` (2.28). So a floor that rises *within* that range — sa
 future image producing 2.25 — is reported but not rejected: it stays inside the
 contract, and consumers on 2.28 or newer are unaffected. Only a rise past 2.28
 stops the release. If you need the stricter promise, set `SUPPORTED_GLIBC` to
-`2.18` and every image drift becomes a release failure to be reviewed by hand.
+`2.18` and every *upward drift in the measured glibc requirement* becomes a
+release failure to be reviewed by hand. Note that is all it catches: an image can
+change its digest, compiler and sysroot contents, or the output bytes, while the
+highest glibc symbol the library needs stays where it was.
 
 That check is what bounds glibc compatibility, because the toolchain pin does
 not. `CROSS_VERSION` pins the `cross` *executable*; the image it selects is
@@ -546,9 +555,11 @@ because of them:
 
 | Floating input | Consequence |
 | --- | --- |
-| the `cross` images (`ghcr.io/cross-rs/<target>:<version>`) | a mutable tag, not a digest, so the Linux sysroot can change under a fixed tool version. The glibc check bounds *that* consequence and no other |
-| the macOS and Windows runner images (`*-latest`) | host SDK and linker versions move with GitHub's images |
+| the `cross` images (`ghcr.io/cross-rs/<target>:<version>`) | a mutable tag, not a digest, so the Linux sysroot can change under a fixed tool version. The glibc check bounds only the *glibc-floor effect* of such a change |
+| every runner image (`ubuntu-latest`, `macos-latest`, `windows-latest`) | host toolchains, SDKs and linkers move with GitHub's images — `ubuntu-latest` runs the Linux, Android, tag and publication jobs, so it reaches the Android and Kotlin artifacts too |
+| the JDK (`java-version: 11`) | a major version, not a patch release, so the compiler that builds the Kotlin classes can change |
 | the workflow actions (`@v4`, `@v1`) | major-version tags, so action behaviour can change |
+| `eclipse-zenoh/ci/create-release-branch@main`, `…/publish-crates-github@main` | a moving branch, not even a tag: the tagging and GitHub-release steps track whatever `main` holds at run time |
 
 Pinning all of these would mean carrying image digests and action SHAs and
 keeping them current. That maintenance has not been taken on; what the release
