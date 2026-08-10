@@ -269,6 +269,10 @@ jobs:
       # either way — `jni-libs/` being present is what selects that layout — and
       # verifyDesktopArtifact still runs.
       - name: Publish the candidate to an isolated file repository
+        # Explicit shell: this job runs on the Windows matrix too, where the
+        # default is PowerShell and `\` is not a line continuation — the
+        # invocation below would be split and the properties silently dropped.
+        shell: bash
         run: |
           ./gradlew publishKotlinMultiplatformPublicationToDryRunRepository \
                     publishJvmPublicationToDryRunRepository \
