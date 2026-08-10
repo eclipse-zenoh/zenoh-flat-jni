@@ -11,10 +11,11 @@
 # Contributors:
 #   ZettaScale Zenoh Team, <zenoh@zettascale.tech>
 #
-# Both publications are released from a *single* Gradle invocation, so both land
-# in one staging repository and are released together. Splitting them across two
-# workflows — in either order — leaves a window where one artifact is public and
-# the other never appears, and a Maven Central release cannot be withdrawn.
+# All three publications — the root module, the JVM artifact and the AAR — are
+# released from a *single* Gradle invocation, so they land in one staging
+# repository and are released together. Splitting them leaves a window where one
+# artifact is public and the others never appear, and a Maven Central release
+# cannot be withdrawn.
 #
 name: Publish
 
@@ -265,7 +266,10 @@ jobs:
       # either way — `jni-libs/` being present is what selects that layout — and
       # verifyDesktopArtifact still runs.
       - name: Publish the candidate to an isolated file repository
-        run: ./gradlew publishMavenPublicationToDryRunRepository -Prelease=true ${{ env.PUB_MODE }} --no-daemon
+        run: |
+          ./gradlew publishKotlinMultiplatformPublicationToDryRunRepository \
+                    publishJvmPublicationToDryRunRepository \
+                    -Prelease=true ${{ env.PUB_MODE }} --no-daemon
 
       # Resolved through the file repository, with `--refresh-dependencies` so a
       # cached artifact of the same coordinates cannot stand in for it.
@@ -307,7 +311,7 @@ jobs:
             || { echo "::error::Cargo.toml says $cargo_version, version.txt says $version"; exit 1; }
           echo "Publishing $version" >> "$GITHUB_STEP_SUMMARY"
 
-      # Both coordinates are checked before either is published. Central releases
+      # All three coordinates are checked before any is published. Central releases
       # are immutable, so republishing cannot succeed — and an occupied *Android*
       # coordinate must not be discovered after the JVM artifact is already
       # public. Snapshots are exempt: they live in a mutable repository.
@@ -317,7 +321,7 @@ jobs:
         run: |
           set -euo pipefail
           v=$(tr -d '[:space:]' < version.txt)
-          for artifact in zenoh-flat-jni zenoh-flat-jni-android; do
+          for artifact in zenoh-flat-jni zenoh-flat-jni-jvm zenoh-flat-jni-android; do
             url="https://repo1.maven.org/maven2/org/eclipse/zenoh/$artifact/$v/$artifact-$v.pom"
             if curl -sfIL -o /dev/null "$url"; then
               echo "::error::org.eclipse.zenoh:$artifact:$v is already on Maven Central and cannot be replaced"
@@ -358,8 +362,8 @@ jobs:
       # so a `maven_publish: false` rehearsal still exercises every check.
       # verifyDesktopArtifact and verifyAndroidArtifact otherwise only run as
       # dependencies of a publication task.
-      - name: Assemble and verify both artifacts
-        run: ./gradlew jar androidAar verifyDesktopArtifact verifyAndroidArtifact -Prelease=true -PprebuiltAndroidLibs=true
+      - name: Assemble and verify the two native-bearing artifacts
+        run: ./gradlew jvmJar assembleRelease verifyDesktopArtifact verifyAndroidArtifact -Prelease=true -PprebuiltAndroidLibs=true
 
       - name: Set pub mode env var
         # Note: This step is intended to allow publishing snapshot packages.
@@ -374,14 +378,15 @@ jobs:
             echo "RELEASE=closeAndReleaseSonatypeStagingRepository" >> $GITHUB_ENV
           fi
 
-      # One Gradle invocation, so both publications go into the same staging
+      # One Gradle invocation, so all three publications go into the same staging
       # repository and are released by the single closeAndRelease that follows
-      # them. Either both artifacts become public or neither does.
+      # them. Either every artifact becomes public or none does.
       - if: ${{ inputs.maven_publish == true }}
         name: Gradle Publish to Maven Central repository
         run: |
-          ./gradlew publishMavenPublicationToSonatypeRepository \
-                    publishAndroidPublicationToSonatypeRepository \
+          ./gradlew publishKotlinMultiplatformPublicationToSonatypeRepository \
+                    publishJvmPublicationToSonatypeRepository \
+                    publishAndroidReleasePublicationToSonatypeRepository \
                     ${{ env.RELEASE }} --info -PremotePublication=true -Prelease=true \
                     -PprebuiltAndroidLibs=true ${{ env.PUB_MODE }}
         env:

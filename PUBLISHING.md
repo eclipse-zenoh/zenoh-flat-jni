@@ -31,7 +31,7 @@ If Maven Central is unfamiliar, read
 - [Release relationship](#release-relationship)
 - [How the pipeline works](#how-the-pipeline-works)
   - [1. `tag` — branch, bump, tag](#1-tag--branch-bump-tag)
-  - [2. `publish` — both artifacts, one staging repository](#2-publish--both-artifacts-one-staging-repository)
+  - [2. `publish` — all three publications, one staging repository](#2-publish--all-three-publications-one-staging-repository)
   - [3. `publish-github`](#3-publish-github)
 - [How a publication reaches Maven Central](#how-a-publication-reaches-maven-central)
 - [Reproducibility](#reproducibility)
@@ -74,11 +74,13 @@ discarded. It is the release of that repository that has no undo.
 
 | File | What it is |
 | --- | --- |
-| `zenoh-flat-jni-1.9.0.jar` | the library itself |
+| `zenoh-flat-jni-1.9.0.jar` | the **root** artifact — metadata only, no classes |
+| `zenoh-flat-jni-jvm-1.9.0.jar` | the JVM library, with the desktop natives |
+| `zenoh-flat-jni-android-1.9.0.aar` | the Android library (`<packaging>aar</packaging>`), with `jni/<abi>/` |
 | `...-sources.jar` | the source code, so IDEs can show it |
 | `...-javadoc.jar` | API documentation, generated here by **Dokka** (Kotlin's doc tool) |
 | `...pom` | metadata: coordinates, licence, developers, SCM URL, and the library's own dependencies |
-| `...module` | Gradle's richer equivalent of the POM — *optional*, and only produced for the JVM publication |
+| `...module` | Gradle module metadata. Central does not require it; *this* design does, because it is what maps the root coordinate onto the JVM and Android variants. Maven ignores it |
 | `.md5`, `.sha1`, … | checksums for each of the above |
 | `.asc` | a **GPG signature** for each — Central rejects unsigned releases |
 
@@ -149,21 +151,20 @@ publication lands; `maven_publish` decides *whether* one happens at all.
 | GitHub release | not created | created |
 | reversible | yes — overwrite or ignore the snapshot | **no** |
 
-The **coordinate guards** are two checks in the `publish` job. Before anything is
+The **coordinate guards** are three checks in the `publish` job. Before anything is
 uploaded, each asks Maven Central whether the version being released already
-exists — once for `org.eclipse.zenoh:zenoh-flat-jni`, once for
-`org.eclipse.zenoh:zenoh-flat-jni-android`:
+exists — for `org.eclipse.zenoh:zenoh-flat-jni`, `…-jvm` and `…-android`:
 
 ```text
 https://repo1.maven.org/maven2/org/eclipse/zenoh/<artifact>/<version>/<artifact>-<version>.pom
 ```
 
-If either responds, the release stops. A published version can never be replaced
+If any of them responds, the release stops. A published version can never be replaced
 ([Coordinates, and why they are permanent](#coordinates-and-why-they-are-permanent)),
 so republishing cannot succeed — and discovering that part-way through an upload
-is a confusing way to find out. Both are checked before either is published,
-because an occupied *Android* coordinate found after the JVM artifact went public
-would have burned a version number.
+is a confusing way to find out. All three are checked before any is published, because an occupied *Android*
+coordinate found after the JVM artifact went public would have burned a version
+number.
 
 A rehearsal skips them because it does not publish under those coordinates at
 all: a `-SNAPSHOT` version lives in a different, mutable repository.
@@ -232,9 +233,9 @@ Supplying `zenoh-version` additionally re-points every `zenoh.*` dependency at
 against whatever the manifest already declares.
 
 The irreversible moment is the single `closeAndReleaseSonatypeStagingRepository`
-at the end of the `publish` job. Both publications are uploaded by one Gradle
+at the end of the `publish` job. All three publications are uploaded by one Gradle
 invocation, so they share one staging repository and are released by that one
-call: either both artifacts become public or neither does.
+call: either all three publications become public or none does.
 
 This is why the two publish workflows were merged into one. Run as separate
 workflows — in either order — whichever released first would already be public
@@ -251,11 +252,13 @@ coordinates already exist on Central, since republishing cannot succeed.
 
 ### After a release
 
-- Confirm **both** coordinates resolve — releasing them together is the whole
-  point of the single staging repository, so verifying one proves half of it:
+- Confirm **all three** coordinates resolve — releasing them together is the
+  whole point of the single staging repository, so verifying one proves a third
+  of it:
 
   ```text
   https://repo1.maven.org/maven2/org/eclipse/zenoh/zenoh-flat-jni/<version>/
+  https://repo1.maven.org/maven2/org/eclipse/zenoh/zenoh-flat-jni-jvm/<version>/
   https://repo1.maven.org/maven2/org/eclipse/zenoh/zenoh-flat-jni-android/<version>/
   ```
 
@@ -287,8 +290,19 @@ relying on as a record. `1.9.0-rc1` is already taken by the first rehearsal;
 ### Desktop JVM
 
 ```text
-org.eclipse.zenoh:zenoh-flat-jni:<version>
+org.eclipse.zenoh:zenoh-flat-jni:<version>          root — Gradle module metadata
+org.eclipse.zenoh:zenoh-flat-jni-jvm:<version>      the JVM artifact
+org.eclipse.zenoh:zenoh-flat-jni-android:<version>  the Android artifact
 ```
+
+This is a **Kotlin Multiplatform** library, so a *Gradle* consumer declares the
+root coordinate once and Gradle resolves the variant matching its target. **Maven
+consumers must name a platform module** (`-jvm` or `-android`) directly: Maven
+does not read Gradle module metadata, and the root artifact carries metadata
+only. That is what
+makes it structurally impossible to build an Android app against the desktop
+libraries — and it lets a consumer publish its own JVM and Android artifacts from
+a single Gradle invocation, which is what allows an atomic release downstream.
 
 A universal JVM JAR: the Kotlin/JVM classes plus one native library per
 supported desktop target. `NativeLibrary.kt` resolves them from this layout,
@@ -369,30 +383,32 @@ jni/x86/libzenoh_flat_jni.so
 jni/x86_64/libzenoh_flat_jni.so
 ```
 
-The AAR is assembled by a plain `Zip` task, not by the Android Gradle Plugin.
-This module has no Android resources, no manifest entries beyond `minSdk`, and
-no Android-only code, so its AAR is `classes.jar` plus `jni/<abi>/` — applying
-AGP would mean installing an Android SDK in CI to zip four `.so` files. The
-`androidAar` task synthesises the mandatory `AndroidManifest.xml` and empty
-`R.txt`, and `androidClassesJar` deliberately packs `output.classesDirs` rather
-than the desktop `jar`, so the AAR does not carry the desktop native ZIPs.
+The AAR is assembled by the Android Gradle Plugin.
+`cargo ndk -o` writes `<abi>/libzenoh_flat_jni.so`, which is exactly the layout
+AGP reads from `android.sourceSets["main"].jniLibs`, so nothing is repackaged and
+the manifest is generated rather than written by hand.
 
-Switch to `com.android.library` if this module ever grows real Android
-resources or a non-trivial manifest.
+Before this became a Kotlin Multiplatform project the AAR was built by a `Zip`
+task that synthesised its own `AndroidManifest.xml` and empty `R.txt` — a slice
+of AGP reimplemented to avoid needing an Android SDK. Variant-aware publishing
+requires AGP regardless, and the SDK is preinstalled on the runners already in
+use, so that trade-off no longer holds.
 
-Downstream Android publications must resolve this AAR, not the desktop JAR.
+A Gradle consumer reaches this through the root coordinate; a Maven consumer must
+name `zenoh-flat-jni-android` directly.
 
 ### Maven Central contents
 
-Both publications carry:
+All three publications carry:
 
 - The primary JAR or AAR.
-- A sources JAR (`sourcesJar`: Kotlin sources, the Rust `src/`, `build.rs`,
-  `Cargo.toml`).
+- A sources JAR, generated per publication by the Kotlin plugin. It carries the
+  Kotlin sources of that target — not the Rust `src/`, `build.rs` or
+  `Cargo.toml`, which the hand-rolled archive used to include.
 - A Dokka-generated Javadoc JAR (`javadocJar`).
 - A POM with name, description, URL, license, developers, and SCM information.
-  The Android POM is built from `artifact()` entries, so its single runtime
-  dependency on `kotlin-stdlib` is written explicitly.
+  The Android POM is generated by the Kotlin/AGP plugins and carries two
+  `compile` dependencies, `kotlin-stdlib-jdk8` and `kotlin-stdlib-common`.
 - A PGP signature per artifact and POM (signing is required only when
   `-PremotePublication=true`).
 - Checksums, generated during publication.
@@ -450,10 +466,10 @@ becomes `release/dry-run/<version>`, and the version comes from `git describe`
 if — and only if — no `version` input was supplied.
 That is the dry run.
 
-### 2. `publish` — both artifacts, one staging repository
+### 2. `publish` — all three publications, one staging repository
 
 [`publish.yml`](.github/workflows/publish.yml), called as a reusable workflow.
-Everything is built and checked before anything is uploaded, and both
+Everything is built and checked before anything is uploaded, and all three
 publications are released together:
 
 - **`desktop-natives`** cross-compiles the six declared targets with `--locked`
@@ -497,12 +513,13 @@ publications are released together:
   It runs on Linux, macOS and Windows.
 
 - **`publish`** checks that `version.txt` and `Cargo.toml` agree, then checks
-  **both** coordinates — `zenoh-flat-jni` and `zenoh-flat-jni-android` — against
-  Maven Central and refuses to proceed if either is taken. Doing both before
+  **all three** coordinates — `zenoh-flat-jni`, `-jvm` and `-android` — against
+  Maven Central and refuses to proceed if any is taken. Doing all of them before
   either is published is the point: an occupied Android coordinate discovered
   after the JVM release would have burned a version number.
 
-  It then assembles and verifies both artifacts, unconditionally, so a
+  It then assembles and verifies the two native-bearing artifacts — the JVM JAR
+  and the AAR; the root module carries no libraries — unconditionally, so a
   `maven_publish: false` rehearsal still exercises every check.
   `verifyDesktopArtifact` fails on a missing target ZIP, a ZIP whose contents
   are not exactly the one expected library, or a stray native at the JAR root
@@ -514,24 +531,29 @@ publications are released together:
 
 ### 3. `publish-github`
 
-`eclipse-zenoh/ci/publish-crates-github` creates the GitHub release, after both
-Maven publications have succeeded.
+`eclipse-zenoh/ci/publish-crates-github` creates the GitHub release, after all
+three Maven publications have succeeded.
 
 ## How a publication reaches Maven Central
 
-Publishing is one Gradle command, covering both publications:
+Publishing is one Gradle command, covering all three publications:
 
 ```bash
-./gradlew publishMavenPublicationToSonatypeRepository \
-          publishAndroidPublicationToSonatypeRepository \
+./gradlew publishKotlinMultiplatformPublicationToSonatypeRepository \
+          publishJvmPublicationToSonatypeRepository \
+          publishAndroidReleasePublicationToSonatypeRepository \
           closeAndReleaseSonatypeStagingRepository \
           -PremotePublication=true -Prelease=true -PprebuiltAndroidLibs=true
 ```
 
-`-PprebuiltAndroidLibs=true` matters here: without it `androidAar` would schedule
+`-PprebuiltAndroidLibs=true` matters here: without it the AAR build would schedule
 `buildAndroidLibs`, which on the publishing runner fails for want of an NDK — and
 on a machine that has one would rebuild the libraries instead of publishing the
 verified ones that were downloaded.
+
+All three publications go into that one invocation, so they share a staging
+repository: the root module, the JVM artifact and the AAR become public together
+or not at all.
 
 Three steps hide in there, run by
 `io.github.gradle-nexus.publish-plugin`:
@@ -549,9 +571,9 @@ Three steps hide in there, run by
    can never be changed.
 
 Every gate described above exists to run before step 3, and step 3 happens
-**once** per release: both publications are uploaded into the same staging
-repository by one Gradle invocation, so the single close-and-release either
-publishes both artifacts or neither.
+**once** per release: all three publications are uploaded into the same staging
+repository by one Gradle invocation, so the single close-and-release publishes
+the root module, the JVM artifact and the AAR together or none of them.
 
 Two mechanical details are worth knowing, because both previously made a release
 impossible in this repository:
@@ -662,7 +684,8 @@ stub aarch64-apple-darwin      libzenoh_flat_jni.dylib
 stub x86_64-pc-windows-msvc    zenoh_flat_jni.dll
 stub aarch64-pc-windows-msvc   zenoh_flat_jni.dll
 
-./gradlew publishMavenPublicationToDryRunRepository -Prelease=true
+./gradlew publishKotlinMultiplatformPublicationToDryRunRepository \
+          publishJvmPublicationToDryRunRepository -Prelease=true
 find build/dry-run-repository -type f -print
 
 # the wrapper, not a system `gradle`: the consumer needs the Gradle version this
@@ -682,15 +705,16 @@ Inspect the archives and signatures directly:
 
 ```bash
 unzip -l build/libs/zenoh-flat-jni-*.jar
-unzip -l build/distributions/zenoh-flat-jni-android-*.aar
+unzip -l build/outputs/aar/zenoh-flat-jni-release.aar
 gpg --verify path/to/artifact.asc path/to/artifact
 ```
 
 Two properties are easy to confuse:
 
 - **`-PremotePublication=true`** switches on GPG signing and makes the build
-  fail fast unless `jni-libs/` or `android-libs/` is populated, so a *remote*
-  publication cannot silently ship the publishing runner's own host library. It
+  fail fast unless `jni-libs/` **and** `android-libs/` are both populated — one
+  invocation publishes all three modules, so a *remote* publication with only one
+  platform's natives would ship an artifact missing its libraries. It
   is omitted from the recipe above only because a local dry run has no signing
   keys.
 - **`jni-libs/` existing** is what selects the multi-platform layout. Populate
