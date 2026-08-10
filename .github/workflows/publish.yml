@@ -362,7 +362,7 @@ jobs:
       # so a `maven_publish: false` rehearsal still exercises every check.
       # verifyDesktopArtifact and verifyAndroidArtifact otherwise only run as
       # dependencies of a publication task.
-      - name: Assemble and verify both artifacts
+      - name: Assemble and verify the two native-bearing artifacts
         run: ./gradlew jvmJar assembleRelease verifyDesktopArtifact verifyAndroidArtifact -Prelease=true -PprebuiltAndroidLibs=true
 
       - name: Set pub mode env var
