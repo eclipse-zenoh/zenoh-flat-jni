@@ -37,6 +37,7 @@ If Maven Central is unfamiliar, read
 - [Reproducibility](#reproducibility)
 - [Building and inspecting artifacts locally](#building-and-inspecting-artifacts-locally)
 - [Required secrets](#required-secrets)
+- [Snapshots from main](#snapshots-from-main)
 - [Downstream release requirements](#downstream-release-requirements)
 - [Known gaps](#known-gaps)
 - [Release checklist](#release-checklist)
@@ -739,11 +740,45 @@ Two properties are easy to confuse:
 | `ORG_GPG_PASSPHRASE` | signing |
 | `BOT_TOKEN_WORKFLOW` | creating and pushing the release branch and tag, and creating the GitHub release |
 
+## Snapshots from main
+
+CI publishes `<version.txt>-SNAPSHOT` from `main` — on every merge there, and on
+the weekday 06:00 nightly. This is the rule `zenoh-java` and `zenoh-kotlin` have
+always followed, applied here: publication is gated to `main`, and a branch or a
+pull request never publishes anything.
+
+It is the same `publish.yml` a rehearsal runs, with `snapshot: true`, so it goes
+to the mutable
+[snapshot repository](https://central.sonatype.com/repository/maven-snapshots/)
+rather than a staging repository, and is neither closed nor released. One
+coordinate set, rewritten in place — nothing accumulates, and the nightly keeps
+it alive on a quiet week, since Central removes a snapshot that stops being
+republished.
+
+Two things depend on it. It keeps the upload path exercised between releases —
+signing, credentials, and what Central accepts — which is the whole reason a
+snapshot publication exists. And it is what a consumer resolves before the first
+release: `zenoh-java` and `zenoh-kotlin` name it as
+`zenohFlatJniVersion=<version>-SNAPSHOT`, which is also what turns on the
+snapshot repository in their builds.
+
+Consuming it directly:
+
+```kotlin
+repositories {
+    maven("https://central.sonatype.com/repository/maven-snapshots/")
+}
+dependencies {
+    implementation("org.eclipse.zenoh:zenoh-flat-jni:1.9.0-SNAPSHOT")
+}
+```
+
 ## Downstream release requirements
 
 Before releasing `zenoh-java` or `zenoh-kotlin`:
 
 - The selected `zenoh-flat-jni` version must already resolve from Maven Central.
+  A snapshot is for rehearsals only — see [Snapshots from main](#snapshots-from-main).
 - The dependency version must live in one release-controlled property or version
   catalog, not be duplicated as a string.
 - Local composite substitution (`includeBuild("../zenoh-flat-jni")`) must be

@@ -5,6 +5,12 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  # The weekday nightly every JVM repository in the org runs, so the snapshot is
+  # refreshed on a quiet week too - Central deletes one that stops being
+  # republished.
+  schedule:
+    - cron: "0 6 * * 1-5"
+  workflow_dispatch:
 
 env:
   RUST_BACKTRACE: 1
@@ -180,3 +186,25 @@ jobs:
 
       - name: Build release
         run: cargo build --release
+
+  # Publish <version.txt>-SNAPSHOT from main, the same rule zenoh-java and
+  # zenoh-kotlin have always followed: publication is gated to main, and runs on
+  # every merge there plus the weekday nightly. Nothing is published from a
+  # branch or a pull request.
+  #
+  # This is how the upload path stays exercised between releases - signing,
+  # credentials, and what Central accepts - and it is what a consumer resolves
+  # before the first release exists. Snapshots are mutable, so rewriting one
+  # coordinate is exactly what they are for.
+  publish_snapshot_package:
+    name: Publish snapshot package
+    if: github.ref == 'refs/heads/main'
+    needs: [lint, test, gradle-test, build]
+    uses: ./.github/workflows/publish.yml
+    permissions:
+      contents: read
+      packages: write
+    with:
+      snapshot: true
+      branch: ${{ github.ref_name }}
+    secrets: inherit
