@@ -22,10 +22,10 @@ on:
 
 # Superseded runs are cancelled, including a snapshot publication in flight. That
 # is safe here because no build resolves the coordinate this publishes: each SDK
-# builds and publishes its own copy from the commit it pins (PUBLISHING.md,
-# "Downstream copies of the snapshot"). A cancelled upload therefore leaves an
-# artifact nobody consumes, which the next merge overwrites - the snapshot
-# repository is mutable and has no staging state to unwind.
+# builds and publishes its own copy from the commit it pins, rather than
+# resolving ours. A cancelled upload therefore leaves an artifact nobody
+# consumes, which the next merge overwrites - the snapshot repository is mutable
+# and has no staging state to unwind.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
