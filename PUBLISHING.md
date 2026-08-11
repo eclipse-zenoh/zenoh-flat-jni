@@ -751,18 +751,26 @@ It is the same `publish.yml` a rehearsal runs, with `snapshot: true`, so it goes
 to the mutable
 [snapshot repository](https://central.sonatype.com/repository/maven-snapshots/)
 rather than a staging repository, and is neither closed nor released. One
-coordinate set, rewritten in place — nothing accumulates, and the nightly keeps
-it alive on a quiet week, since Central removes a snapshot that stops being
-republished.
+coordinate set, rewritten in place — nothing accumulates, and republishing keeps
+it alive, since Central removes a snapshot that stops being republished.
 
-Two things depend on it. It keeps the upload path exercised between releases —
-signing, credentials, and what Central accepts — which is the whole reason a
-snapshot publication exists. And it is what a consumer resolves before the first
-release: `zenoh-java` and `zenoh-kotlin` name it as
-`zenohFlatJniVersion=<version>-SNAPSHOT`, which is also what turns on the
-snapshot repository in their builds.
+**Why it exists: it is this repository's own upload test.** Signing,
+credentials, and what Central accepts are otherwise exercised only when someone
+dispatches a release by hand — so a break in that path is discovered during a
+release, which is the worst moment to discover it. Publishing from `main` moves
+that discovery to the merge that caused it.
 
-Consuming it directly:
+**No SDK depends on it.** `zenoh-java` and `zenoh-kotlin` build and publish
+their own copy of this library from the commit each one pins — see
+[Downstream copies of the snapshot](#downstream-copies-of-the-snapshot). Their
+CI therefore does not wait on this repository's, and their snapshot depends on
+the commit it actually compiled against rather than on whatever `main` held. The
+unqualified `<version>-SNAPSHOT` published here is the tip of `main`, carrying
+the same `zenoh.flatJniCommit` stamp as every other publication, so anyone can
+ask which sources a mutable version came from.
+
+Consuming it directly — for a look at the tip of `main`, not as an SDK
+dependency:
 
 ```kotlin
 repositories {

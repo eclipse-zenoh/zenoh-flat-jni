@@ -1,16 +1,35 @@
 name: CI
 
 on:
+  # `release/*` because that is where a release is actually built from: the
+  # release workflow creates the branch through the shared
+  # eclipse-zenoh/ci/create-release-branch action, and without this CI never runs
+  # on it. The dry-run branches that same action produces are excluded - they are
+  # throwaway.
   push:
-    branches: [main]
+    branches: ["main", "release/*", "!release/dry-run/*"]
+  # Every branch, not just main: a backport pull request targets a release
+  # branch, and it needs CI as much as any other.
   pull_request:
-    branches: [main]
-  # The weekday nightly every JVM repository in the org runs, so the snapshot is
-  # refreshed on a quiet week too - Central deletes one that stops being
-  # republished.
+    branches: ["**"]
+  # The weekday nightly the JVM repositories in the org run. It is not here for
+  # the snapshot: zenoh, zenoh-ext and zenoh-flat are tracked by git *branch*, so
+  # a nightly build is the only thing that catches one of them moving under us
+  # between merges. The publication rides along on a trigger that has to exist
+  # anyway.
   schedule:
     - cron: "0 6 * * 1-5"
   workflow_dispatch:
+
+# Superseded runs are cancelled, including a snapshot publication in flight. That
+# is safe here because no build resolves the coordinate this publishes: each SDK
+# builds and publishes its own copy from the commit it pins (PUBLISHING.md,
+# "Downstream copies of the snapshot"). A cancelled upload therefore leaves an
+# artifact nobody consumes, which the next merge or the nightly overwrites - the
+# snapshot repository is mutable and has no staging state to unwind.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   RUST_BACKTRACE: 1
@@ -151,10 +170,12 @@ jobs:
   # every merge there plus the weekday nightly. Nothing is published from a
   # branch or a pull request.
   #
-  # This is how the upload path stays exercised between releases - signing,
-  # credentials, and what Central accepts - and it is what a consumer resolves
-  # before the first release exists. Snapshots are mutable, so rewriting one
-  # coordinate is exactly what they are for.
+  # This is this repository's own upload test: signing, credentials and what
+  # Central accepts are otherwise exercised only when someone dispatches a
+  # release by hand. No SDK depends on the result - they publish their own
+  # qualified copies - so what this buys is that the path runs on every merge
+  # instead of twice a year. Snapshots are mutable, so rewriting one coordinate
+  # is exactly what they are for.
   publish_snapshot_package:
     name: Publish snapshot package
     if: github.ref == 'refs/heads/main'
