@@ -76,7 +76,7 @@ jobs:
           - { target: x86_64-pc-windows-msvc,    os: windows-latest, lib: zenoh_flat_jni.dll,      build-cmd: cargo }
           - { target: aarch64-pc-windows-msvc,   os: windows-latest, lib: zenoh_flat_jni.dll,      build-cmd: cargo }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.branch }}
 
@@ -149,7 +149,7 @@ jobs:
           SUPPORTED_GLIBC: ${{ env.SUPPORTED_GLIBC }}
 
       - name: Upload packages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: desktop-${{ matrix.target }}
           path: ${{ env.JNI_LIB_PATHS }}
@@ -159,11 +159,11 @@ jobs:
     name: Build the Android ABIs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.branch }}
 
-      - uses: nttld/setup-ndk@v1
+      - uses: nttld/setup-ndk@ed92fe6cadad69be94a966a7ee3271275e62f779 # v1.6.0
         id: ndk
         with:
           ndk-version: ${{ env.ANDROID_NDK_VERSION }}
@@ -178,7 +178,7 @@ jobs:
       - name: Install cargo-ndk
         run: cargo install cargo-ndk --locked --version ${{ env.CARGO_NDK_VERSION }}
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           distribution: temurin
           java-version: 11
@@ -200,7 +200,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload packages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: android-natives
           path: ${{ env.ANDROID_LIB_PATHS }}
@@ -219,7 +219,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.branch }}
 
@@ -228,7 +228,7 @@ jobs:
         run: mkdir -p ${{ env.JNI_LIB_PATHS }}
 
       - name: Download result of previous builds
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: desktop-*
           merge-multiple: true
@@ -241,13 +241,13 @@ jobs:
         shell: bash
         run: find ${{ env.JNI_LIB_PATHS }} -type f | sort
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           distribution: temurin
           java-version: 11
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
         with:
           gradle-version: '8.5'
 
@@ -303,7 +303,7 @@ jobs:
       packages: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.branch }}
 
@@ -341,14 +341,14 @@ jobs:
         run: mkdir -p ${{ env.JNI_LIB_PATHS }} ${{ env.ANDROID_LIB_PATHS }}
 
       - name: Download the desktop natives
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: desktop-*
           merge-multiple: true
           path: ${{ env.JNI_LIB_PATHS }}
 
       - name: Download the Android natives
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: android-natives
           path: ${{ env.ANDROID_LIB_PATHS }}
@@ -357,13 +357,13 @@ jobs:
         shell: bash
         run: find ${{ env.JNI_LIB_PATHS }} ${{ env.ANDROID_LIB_PATHS }} -type f | sort
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           distribution: temurin
           java-version: 11
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
 
       # Both artifacts are assembled and verified before anything is uploaded,
       # so a `maven_publish: false` rehearsal still exercises every check.
@@ -406,7 +406,7 @@ jobs:
 
       - name: Upload gradle problems report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: problem-reports-${{ github.job }}.zip
           path: ${{ github.workspace }}/build/reports/problems/

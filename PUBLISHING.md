@@ -627,6 +627,7 @@ These inputs are pinned:
 | the Rust compiler | `rust-toolchain.toml` |
 | `cargo-ndk`, the NDK | pinned by exact version in `publish.yml`; `cargo install --locked` pins the dependencies of the *selected* release, not which release is selected, so each needs its own version pin |
 | `cross` | the *executable*, by exact version — see below for its image |
+| every third-party workflow action | a commit SHA in `uses:`, with the version in a trailing comment — a tag is mutable, a SHA is not |
 
 Every release build runs `--locked`, so a lockfile that does not match the
 manifest fails the build instead of silently resolving something else.
@@ -639,13 +640,12 @@ because of them:
 | the `cross` images (`ghcr.io/cross-rs/<target>:<version>`) | a mutable tag, not a digest, so the Linux sysroot can change under a fixed tool version. The glibc check bounds only the *glibc-floor effect* of such a change |
 | every runner image (`ubuntu-latest`, `macos-latest`, `windows-latest`) | host toolchains, SDKs and linkers move with GitHub's images — `ubuntu-latest` runs the Linux, Android, tag and publication jobs, so it reaches the Android and Kotlin artifacts too |
 | the JDK (`java-version: 11`) | a major version, not a patch release, so the compiler that builds the Kotlin classes can change |
-| the workflow actions (`@v4`, `@v1`) | major-version tags, so action behaviour can change |
-| `eclipse-zenoh/ci/create-release-branch@main`, `…/publish-crates-github@main` | a moving branch, not even a tag: the tagging and GitHub-release steps track whatever `main` holds at run time |
+| `eclipse-zenoh/ci/create-release-branch@main`, `…/publish-crates-github@main` | a moving branch, not even a tag: the tagging and GitHub-release steps track whatever `main` holds at run time. These are ours, and are left on a branch deliberately |
 
-Pinning all of these would mean carrying image digests and action SHAs and
-keeping them current. That maintenance has not been taken on; what the release
-does guarantee is the dependency graph (`Cargo.lock`), the compiler
-(`rust-toolchain.toml`) and the glibc bound.
+Pinning the rest would mean carrying image digests and keeping them current.
+That maintenance has not been taken on; what the release does guarantee is the
+dependency graph (`Cargo.lock`), the compiler (`rust-toolchain.toml`), the
+action code (a SHA per `uses:`) and the glibc bound.
 
 ## Building and inspecting artifacts locally
 
