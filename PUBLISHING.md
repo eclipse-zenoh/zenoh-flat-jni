@@ -813,7 +813,8 @@ release, which is the worst moment to discover it. Publishing from `main` moves
 that discovery to the merge that caused it.
 
 **No SDK depends on it.** `zenoh-java` and `zenoh-kotlin` build and publish
-their own copy of this library from the commit each one pins. Their
+their own copy of this library from the commit each one pins — see
+[Downstream copies of the snapshot](#downstream-copies-of-the-snapshot). Their
 CI therefore does not wait on this repository's, and their snapshot depends on
 the commit it actually compiled against rather than on whatever `main` held. The
 unqualified `<version>-SNAPSHOT` published here is the tip of `main`, carrying
