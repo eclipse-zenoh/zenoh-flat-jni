@@ -105,6 +105,8 @@ jobs:
         if: inputs.version-qualifier != ''
         env:
           VERSION_QUALIFIER: ${{ inputs.version-qualifier }}
+          SOURCE_REF: ${{ inputs.branch }}
+          EXPECTED_BASE_VERSION: ${{ inputs.expected-base-version }}
         run: |
           set -eo pipefail
           [[ $VERSION_QUALIFIER =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]] || {
@@ -122,8 +124,15 @@ jobs:
           # Without a ref the checkout below takes the default branch, so a
           # downstream copy would be built from a moving target — the opposite of
           # why it pins one.
-          [[ -n "${{ inputs.branch }}" ]] || {
+          [[ -n $SOURCE_REF ]] || {
             echo "::error::publishing a qualified copy needs an explicit branch"
+            exit 1
+          }
+          # Optional in general, mandatory here: omitted, the version comparison
+          # below would simply not happen, which is the drift it exists to catch.
+          [[ -n $EXPECTED_BASE_VERSION ]] || {
+            echo "::error::publishing a qualified copy needs expected-base-version," \
+                 "the version.txt the caller expects the pinned source to have"
             exit 1
           }
 
@@ -160,6 +169,7 @@ jobs:
         if: inputs.version-qualifier != ''
         env:
           EXPECTED_BASE_VERSION: ${{ inputs.expected-base-version }}
+          VERSION_QUALIFIER: ${{ inputs.version-qualifier }}
         run: |
           set -eo pipefail
           grep -q versionQualifier build.gradle.kts || {
@@ -168,10 +178,10 @@ jobs:
             exit 1
           }
           version=$(tr -d '[:space:]' < version.txt)
-          if [[ -n $EXPECTED_BASE_VERSION && $version != "$EXPECTED_BASE_VERSION" ]]; then
+          if [[ $version != "$EXPECTED_BASE_VERSION" ]]; then
             echo "::error::${{ steps.resolve.outputs.sha }} is version $version, but the caller" \
                  "expects $EXPECTED_BASE_VERSION — it would publish and then fail to resolve" \
-                 "$EXPECTED_BASE_VERSION-${{ inputs.version-qualifier }}-SNAPSHOT"
+                 "$EXPECTED_BASE_VERSION-$VERSION_QUALIFIER-SNAPSHOT"
             exit 1
           fi
 
