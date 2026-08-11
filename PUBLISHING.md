@@ -38,6 +38,7 @@ If Maven Central is unfamiliar, read
 - [Building and inspecting artifacts locally](#building-and-inspecting-artifacts-locally)
 - [Required secrets](#required-secrets)
 - [Snapshots from main](#snapshots-from-main)
+  - [Why there is no nightly](#why-there-is-no-nightly)
 - [Downstream release requirements](#downstream-release-requirements)
 - [Known gaps](#known-gaps)
 - [Release checklist](#release-checklist)
@@ -742,17 +743,19 @@ Two properties are easy to confuse:
 
 ## Snapshots from main
 
-CI publishes `<version.txt>-SNAPSHOT` from `main` — on every merge there, and on
-the weekday 06:00 nightly. This is the rule `zenoh-java` and `zenoh-kotlin` have
-always followed, applied here: publication is gated to `main`, and a branch or a
-pull request never publishes anything.
+CI publishes `<version.txt>-SNAPSHOT` from `main`, on every merge there. This is
+the rule `zenoh-java` and `zenoh-kotlin` have always followed, applied here:
+publication is gated to `main`, and a branch or a pull request never publishes
+anything. There is no scheduled publication — see
+[Why there is no nightly](#why-there-is-no-nightly).
 
 It is the same `publish.yml` a rehearsal runs, with `snapshot: true`, so it goes
 to the mutable
 [snapshot repository](https://central.sonatype.com/repository/maven-snapshots/)
 rather than a staging repository, and is neither closed nor released. One
-coordinate set, rewritten in place — nothing accumulates, and republishing keeps
-it alive, since Central removes a snapshot that stops being republished.
+coordinate set, rewritten in place — nothing accumulates. Central removes a
+snapshot that stops being republished, so a long enough quiet period lets it
+lapse until the next merge; nothing depends on it being there.
 
 **Why it exists: it is this repository's own upload test.** Signing,
 credentials, and what Central accepts are otherwise exercised only when someone
@@ -768,6 +771,31 @@ the commit it actually compiled against rather than on whatever `main` held. The
 unqualified `<version>-SNAPSHOT` published here is the tip of `main`, carrying
 the same `zenoh.flatJniCommit` stamp as every other publication, so anyone can
 ask which sources a mutable version came from.
+
+### Why there is no nightly
+
+The other JVM repositories in the org publish their snapshot on a weekday 06:00
+schedule as well as on merge. This one does not, and the difference is worth
+recording because the obvious argument for a nightly does not hold here.
+
+That argument would be dependency drift: `zenoh`, `zenoh-ext` and `zenoh-flat`
+are `branch = "main"` dependencies, so a timed rebuild sounds like the way to
+catch one of them moving. It is not. `Cargo.lock` pins each to a commit —
+
+```text
+source = "git+https://github.com/eclipse-zenoh/zenoh.git?branch=main#773126fd…"
+```
+
+— and Cargo re-resolves a git dependency only on `cargo update` or a missing
+lock entry. A timed build therefore rebuilds exactly what the last merge built.
+Upstream drift reaches this repository as a lockfile-sync pull request, which
+runs CI like any other.
+
+What a nightly would still catch is an expired Central token or GPG key, and
+only during a week with no merges at all — every merge already exercises them.
+That is a thin canary against five ten-target publications a week, so the
+trigger is left out. `workflow_dispatch` covers running the path on demand, and
+if the canary is ever wanted, a weekly schedule buys it at a fifth of the cost.
 
 Consuming it directly — for a look at the tip of `main`, not as an SDK
 dependency:

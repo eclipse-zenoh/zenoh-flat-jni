@@ -12,21 +12,20 @@ on:
   # branch, and it needs CI as much as any other.
   pull_request:
     branches: ["**"]
-  # The weekday nightly the JVM repositories in the org run. It is not here for
-  # the snapshot: zenoh, zenoh-ext and zenoh-flat are tracked by git *branch*, so
-  # a nightly build is the only thing that catches one of them moving under us
-  # between merges. The publication rides along on a trigger that has to exist
-  # anyway.
-  schedule:
-    - cron: "0 6 * * 1-5"
+  # No schedule. zenoh, zenoh-ext and zenoh-flat are `branch = "main"` deps, but
+  # Cargo.lock pins each to a commit, so a timed build rebuilds exactly what the
+  # last merge did - upstream drift arrives as a lockfile-sync pull request, not
+  # as a nightly failure. That leaves a nightly worth only the chance of catching
+  # an expired Central token or GPG key during a week with no merges at all, and
+  # it would pay for that with five ten-target publications a week.
   workflow_dispatch:
 
 # Superseded runs are cancelled, including a snapshot publication in flight. That
 # is safe here because no build resolves the coordinate this publishes: each SDK
 # builds and publishes its own copy from the commit it pins (PUBLISHING.md,
 # "Downstream copies of the snapshot"). A cancelled upload therefore leaves an
-# artifact nobody consumes, which the next merge or the nightly overwrites - the
-# snapshot repository is mutable and has no staging state to unwind.
+# artifact nobody consumes, which the next merge overwrites - the snapshot
+# repository is mutable and has no staging state to unwind.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -166,9 +165,8 @@ jobs:
         run: echo '${{ toJson(needs) }}' | jq -e 'all(.result == "success")'
 
   # Publish <version.txt>-SNAPSHOT from main, the same rule zenoh-java and
-  # zenoh-kotlin have always followed: publication is gated to main, and runs on
-  # every merge there plus the weekday nightly. Nothing is published from a
-  # branch or a pull request.
+  # zenoh-kotlin have always followed: publication is gated to main and runs on
+  # every merge there. Nothing is published from a branch or a pull request.
   #
   # This is this repository's own upload test: signing, credentials and what
   # Central accepts are otherwise exercised only when someone dispatches a
