@@ -37,6 +37,8 @@ If Maven Central is unfamiliar, read
 - [Reproducibility](#reproducibility)
 - [Building and inspecting artifacts locally](#building-and-inspecting-artifacts-locally)
 - [Required secrets](#required-secrets)
+- [Snapshots from main](#snapshots-from-main)
+  - [Why there is no nightly](#why-there-is-no-nightly)
 - [Downstream release requirements](#downstream-release-requirements)
 - [Known gaps](#known-gaps)
 - [Release checklist](#release-checklist)
@@ -626,6 +628,7 @@ These inputs are pinned:
 | the Rust compiler | `rust-toolchain.toml` |
 | `cargo-ndk`, the NDK | pinned by exact version in `publish.yml`; `cargo install --locked` pins the dependencies of the *selected* release, not which release is selected, so each needs its own version pin |
 | `cross` | the *executable*, by exact version — see below for its image |
+| every third-party workflow action | a commit SHA in `uses:`, with the version in a trailing comment — a tag is mutable, a SHA is not |
 
 Every release build runs `--locked`, so a lockfile that does not match the
 manifest fails the build instead of silently resolving something else.
@@ -638,13 +641,12 @@ because of them:
 | the `cross` images (`ghcr.io/cross-rs/<target>:<version>`) | a mutable tag, not a digest, so the Linux sysroot can change under a fixed tool version. The glibc check bounds only the *glibc-floor effect* of such a change |
 | every runner image (`ubuntu-latest`, `macos-latest`, `windows-latest`) | host toolchains, SDKs and linkers move with GitHub's images — `ubuntu-latest` runs the Linux, Android, tag and publication jobs, so it reaches the Android and Kotlin artifacts too |
 | the JDK (`java-version: 11`) | a major version, not a patch release, so the compiler that builds the Kotlin classes can change |
-| the workflow actions (`@v4`, `@v1`) | major-version tags, so action behaviour can change |
-| `eclipse-zenoh/ci/create-release-branch@main`, `…/publish-crates-github@main` | a moving branch, not even a tag: the tagging and GitHub-release steps track whatever `main` holds at run time |
+| `eclipse-zenoh/ci/create-release-branch@main`, `…/publish-crates-github@main` | a moving branch, not even a tag: the tagging and GitHub-release steps track whatever `main` holds at run time. These are ours, and are left on a branch deliberately |
 
-Pinning all of these would mean carrying image digests and action SHAs and
-keeping them current. That maintenance has not been taken on; what the release
-does guarantee is the dependency graph (`Cargo.lock`), the compiler
-(`rust-toolchain.toml`) and the glibc bound.
+Pinning the rest would mean carrying image digests and keeping them current.
+That maintenance has not been taken on; what the release does guarantee is the
+dependency graph (`Cargo.lock`), the compiler (`rust-toolchain.toml`), the
+action code (a SHA per `uses:`) and the glibc bound.
 
 ## Building and inspecting artifacts locally
 
@@ -739,11 +741,85 @@ Two properties are easy to confuse:
 | `ORG_GPG_PASSPHRASE` | signing |
 | `BOT_TOKEN_WORKFLOW` | creating and pushing the release branch and tag, and creating the GitHub release |
 
+## Snapshots from main
+
+CI publishes `<version.txt>-SNAPSHOT` from `main`, on every merge there. This is
+the rule `zenoh-java` and `zenoh-kotlin` have always followed, applied here:
+publication is gated to `main`, and a branch or a pull request never publishes
+anything. There is no scheduled publication — see
+[Why there is no nightly](#why-there-is-no-nightly).
+
+It is the same `publish.yml` a rehearsal runs, with `snapshot: true`, so it goes
+to the mutable
+[snapshot repository](https://central.sonatype.com/repository/maven-snapshots/)
+rather than a staging repository, and is neither closed nor released. One
+coordinate set, rewritten in place — nothing accumulates. Central removes a
+snapshot that stops being republished, so a long enough quiet period lets it
+lapse until the next merge; nothing depends on it being there.
+
+**Why it exists: it is this repository's own upload test.** Signing,
+credentials, and what Central accepts are otherwise exercised only when someone
+dispatches a release by hand — so a break in that path is discovered during a
+release, which is the worst moment to discover it. Publishing from `main` moves
+that discovery to the merge that caused it.
+
+**No SDK depends on it.** `zenoh-java` and `zenoh-kotlin` build and publish
+their own copy of this library from the commit each one pins. Their
+CI therefore does not wait on this repository's, and their snapshot depends on
+the commit it actually compiled against rather than on whatever `main` held. The
+unqualified `<version>-SNAPSHOT` published here is the tip of `main`, carrying
+the same `zenoh.flatJniCommit` stamp as every other publication, so anyone can
+ask which sources a mutable version came from.
+
+### Why there is no nightly
+
+`zenoh-kotlin` publishes its snapshot on a weekday 06:00 schedule as well as on
+merge. This one does not, and the difference is worth recording because the
+obvious argument for a nightly does not hold here.
+
+That argument would be dependency drift: `zenoh`, `zenoh-ext` and `zenoh-flat`
+are `branch = "main"` dependencies, so a timed rebuild sounds like the way to
+catch one of them moving. It is not. `Cargo.lock` pins each to a commit —
+
+```text
+source = "git+https://github.com/eclipse-zenoh/zenoh.git?branch=main#773126fd…"
+```
+
+— and Cargo re-resolves a git dependency only on `cargo update` or a missing
+lock entry. A timed build therefore rebuilds exactly what the last merge built.
+Upstream drift reaches this repository as a lockfile-sync pull request, which
+runs CI like any other.
+
+What a nightly would still catch is an expired Central token or GPG key, and
+only during a week with no merges at all — every merge already exercises them.
+That is a thin canary against five ten-target publications a week, so the
+trigger is left out. `workflow_dispatch` covers running the path on demand, and
+if the canary is ever wanted, a weekly schedule buys it at a fifth of the cost.
+
+The argument is not special to this repository, and `zenoh-java` has since
+dropped its nightly on the same grounds
+([zenoh-java#526](https://github.com/eclipse-zenoh/zenoh-java/pull/526)): its
+`Cargo.lock` pins the `zenoh-flat-jni` commit, so a timed build there also
+rebuilds what the last merge built. `zenoh-kotlin` is the remaining candidate.
+
+Consuming it directly — for a look at the tip of `main`, not as an SDK
+dependency:
+
+```kotlin
+repositories {
+    maven("https://central.sonatype.com/repository/maven-snapshots/")
+}
+dependencies {
+    implementation("org.eclipse.zenoh:zenoh-flat-jni:1.9.0-SNAPSHOT")
+}
+```
+
 ## Downstream release requirements
 
 Before releasing `zenoh-java` or `zenoh-kotlin`:
 
 - The selected `zenoh-flat-jni` version must already resolve from Maven Central.
+  A snapshot is for rehearsals only — see [Snapshots from main](#snapshots-from-main).
 - The dependency version must live in one release-controlled property or version
   catalog, not be duplicated as a string.
 - Local composite substitution (`includeBuild("../zenoh-flat-jni")`) must be

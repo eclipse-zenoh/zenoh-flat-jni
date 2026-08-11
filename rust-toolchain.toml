@@ -1,2 +1,5 @@
 [toolchain]
 channel = "1.97.1"
+# CI installs the toolchain with `rustup show`, which reads this file - so the
+# lint job's components have to be named here, not in the workflow.
+components = ["rustfmt", "clippy"]
