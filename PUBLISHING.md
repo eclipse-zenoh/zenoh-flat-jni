@@ -467,8 +467,13 @@ commit that SDK pins, and `version-qualifier:` set to its name.
 That commit's own `build.gradle.kts` is what honours the qualifier and writes
 the stamp, so a pin from before both existed cannot publish a qualified copy —
 it would publish an unqualified, unstamped one and leave the caller resolving a
-coordinate nobody uploaded. The workflow refuses such a pin up front rather than
-half an hour later. The names are
+coordinate nobody uploaded. Its `version.txt` is the other half: it decides the
+coordinate, while the caller names a fixed version of its own, so a pin that has
+moved past a version bump here would publish `1.10.0-java-SNAPSHOT` to an SDK
+still resolving `1.9.0-java-SNAPSHOT`. `expected-base-version` is how the caller
+says what it expects. Both are checked, along with the qualifier's syntax and
+that it came with `snapshot: true`, before any of the half-hour build runs. The
+names are
 fixed, so each copy is overwritten rather than accumulated, and the three
 publishers never overwrite each other — which matters because they can
 legitimately pin different commits at the same moment. A qualifier is rejected

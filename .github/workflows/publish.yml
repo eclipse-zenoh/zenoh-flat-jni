@@ -44,8 +44,17 @@ on:
         type: string
         required: false
       version-qualifier:
-        # Read by build.gradle.kts. Snapshot-only, and checked there.
+        # Read by build.gradle.kts. Snapshot-only, and checked there as well as
+        # in `resolve-source`, which rejects it before anything is built.
         description: "Inserted before -SNAPSHOT, so downstream copies do not overwrite ours"
+        type: string
+        required: false
+      expected-base-version:
+        # The coordinate is derived from the checked-out version.txt, while a
+        # caller names a fixed version of its own. Passing what it expects is how
+        # a pin that moved past a version bump here fails before publishing
+        # something the caller cannot resolve.
+        description: The version.txt the caller expects the pinned source to have
         type: string
         required: false
       maven_publish:
@@ -88,9 +97,11 @@ jobs:
     outputs:
       sha: ${{ steps.resolve.outputs.sha }}
     steps:
-      # Through the environment, not string interpolation: this input comes from
-      # a caller and would otherwise be pasted into executable script text.
-      - name: Check the qualifier is a qualifier
+      # Everything a caller asked for that can be judged before half an hour of
+      # cross-compilation. The qualifier goes through the environment rather than
+      # string interpolation: it is caller input, and would otherwise be pasted
+      # into executable script text.
+      - name: Check what was asked for
         if: inputs.version-qualifier != ''
         env:
           VERSION_QUALIFIER: ${{ inputs.version-qualifier }}
@@ -101,47 +112,54 @@ jobs:
                  "hyphens; got '$VERSION_QUALIFIER'"
             exit 1
           }
+          # build.gradle.kts refuses this too, but only once the consumer test
+          # configures — six desktop targets and the Android build later.
+          [[ "${{ inputs.snapshot }}" == "true" ]] || {
+            echo "::error::a qualified version is only ever a snapshot;" \
+                 "releases are published from this repository unqualified"
+            exit 1
+          }
+          # Without a ref the checkout below takes the default branch, so a
+          # downstream copy would be built from a moving target — the opposite of
+          # why it pins one.
+          [[ -n "${{ inputs.branch }}" ]] || {
+            echo "::error::publishing a qualified copy needs an explicit branch"
+            exit 1
+          }
+
+      # The same action every job below uses, so a branch, tag or commit resolves
+      # the way it will resolve there — `git ls-remote <name>` would match by ref
+      # pattern and could pick refs/heads/… over the refs/tags/… that was meant.
+      # What comes out is a commit, and that is what the rest of the run checks
+      # out.
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.source-repository || github.repository }}
+          ref: ${{ inputs.branch }}
 
       - name: Resolve it to a commit
         id: resolve
-        env:
-          SOURCE_REPOSITORY: ${{ inputs.source-repository || github.repository }}
-          SOURCE_REF: ${{ inputs.branch }}
         run: |
           set -eo pipefail
-          if [[ -z $SOURCE_REF ]]; then
-            # What an unqualified checkout would have used: the caller's own
-            # commit. Only meaningful when the caller owns the sources.
-            [[ $SOURCE_REPOSITORY == "$GITHUB_REPOSITORY" ]] || {
-              echo "::error::source-repository=$SOURCE_REPOSITORY needs an explicit branch"
-              exit 1
-            }
-            sha=$GITHUB_SHA
-          elif [[ $SOURCE_REF =~ ^[0-9a-f]{40}$ ]]; then
-            sha=$SOURCE_REF
-          else
-            sha=$(git ls-remote "https://github.com/$SOURCE_REPOSITORY" "$SOURCE_REF" | head -1 | cut -f1)
-            [[ -n $sha ]] || {
-              echo "::error::$SOURCE_REPOSITORY has no ref '$SOURCE_REF'"
-              exit 1
-            }
-          fi
+          sha=$(git rev-parse HEAD)
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
-          echo "Building $SOURCE_REPOSITORY at $sha" >> "$GITHUB_STEP_SUMMARY"
+          echo "Building ${{ inputs.source-repository || github.repository }} at $sha" \
+            >> "$GITHUB_STEP_SUMMARY"
 
-      # A downstream caller pins a commit of *this* repository, and that commit's
-      # build.gradle.kts is what has to honour the qualifier and write the commit
-      # stamp. Pinned before those existed, everything below would succeed while
-      # publishing an unqualified, unstamped artifact — and the caller would fail
-      # later, resolving a coordinate that was never uploaded. Fail here instead.
-      - uses: actions/checkout@v4
+      # A downstream caller pins a commit of *this* repository, and it is that
+      # commit's build.gradle.kts that has to honour the qualifier and write the
+      # commit stamp. Pinned before those existed, everything below would succeed
+      # while publishing an unqualified, unstamped artifact — and the caller would
+      # fail later, resolving a coordinate that was never uploaded.
+      #
+      # The version is the other half: the coordinate comes from this source's
+      # version.txt, while the caller names a fixed version of its own. Let those
+      # diverge — the pin moves past a version bump here — and the run publishes
+      # 1.10.0-java-SNAPSHOT while the SDK still resolves 1.9.0-java-SNAPSHOT.
+      - name: Check the source can publish what was asked for
         if: inputs.version-qualifier != ''
-        with:
-          repository: ${{ inputs.source-repository || github.repository }}
-          ref: ${{ steps.resolve.outputs.sha }}
-
-      - name: Check the source can publish a qualified copy
-        if: inputs.version-qualifier != ''
+        env:
+          EXPECTED_BASE_VERSION: ${{ inputs.expected-base-version }}
         run: |
           set -eo pipefail
           grep -q versionQualifier build.gradle.kts || {
@@ -149,6 +167,13 @@ jobs:
                  "pin a commit that has it (eclipse-zenoh/zenoh-flat-jni#37 or later)"
             exit 1
           }
+          version=$(tr -d '[:space:]' < version.txt)
+          if [[ -n $EXPECTED_BASE_VERSION && $version != "$EXPECTED_BASE_VERSION" ]]; then
+            echo "::error::${{ steps.resolve.outputs.sha }} is version $version, but the caller" \
+                 "expects $EXPECTED_BASE_VERSION — it would publish and then fail to resolve" \
+                 "$EXPECTED_BASE_VERSION-${{ inputs.version-qualifier }}-SNAPSHOT"
+            exit 1
+          fi
 
   desktop-natives:
     name: Build for ${{ matrix.target }}
