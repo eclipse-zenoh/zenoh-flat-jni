@@ -446,6 +446,44 @@ Maven Central releases are immutable. A downstream release must therefore never
 depend on an unpublished `zenoh-flat-jni` version or assume that an already
 published JNI artifact can be replaced later.
 
+### Downstream copies of the snapshot
+
+Releases are the only artifacts a downstream *release* may use. A downstream
+*snapshot* is a different matter: it must be publishable even if this
+repository's CI has not run, and its dependency has to be the commit it actually
+compiled against, so each SDK builds and publishes **its own copy** of this
+library under a qualified version:
+
+```text
+org.eclipse.zenoh:zenoh-flat-jni:1.9.0-SNAPSHOT         published here
+org.eclipse.zenoh:zenoh-flat-jni:1.9.0-java-SNAPSHOT    published by zenoh-java
+org.eclipse.zenoh:zenoh-flat-jni:1.9.0-kotlin-SNAPSHOT  published by zenoh-kotlin
+```
+
+The mechanism is `.github/workflows/publish.yml` called as a reusable workflow,
+with `source-repository: eclipse-zenoh/zenoh-flat-jni`, `branch:` set to the
+commit that SDK pins, and `version-qualifier:` set to its name. The names are
+fixed, so each copy is overwritten rather than accumulated, and the three
+publishers never overwrite each other — which matters because they can
+legitimately pin different commits at the same moment. A qualifier is rejected
+for a non-snapshot publication: releases come from here only.
+
+Every POM this repository publishes — qualified or not — carries the commit it
+was built from:
+
+```xml
+<properties>
+  <zenoh.flatJniCommit>e75529ce…</zenoh.flatJniCommit>
+</properties>
+```
+
+It is in the POM rather than the jar manifest so that reading it costs two small
+requests instead of a 39 MB download. A downstream publisher compares it against
+the commit it pins to decide whether its copy is current, and any consumer can
+use it to ask which sources a mutable version came from. It is absent when the
+build has no git checkout, which reads as "unknown" and makes a comparing
+consumer rebuild rather than reuse.
+
 ## How the pipeline works
 
 Releases are driven by

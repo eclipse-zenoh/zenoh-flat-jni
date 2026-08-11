@@ -30,7 +30,31 @@ group = "org.eclipse.zenoh"
 // version.txt is the single source of truth; the release workflow checks that
 // the tag and Cargo.toml agree with it.
 val baseVersion = file("version.txt").readText().trim()
-version = if (project.hasProperty("SNAPSHOT")) "$baseVersion-SNAPSHOT" else baseVersion
+
+// A downstream SDK publishes its own copy of this library, built from the commit
+// it pins, so that its snapshot has a dependency that exists and matches what it
+// compiled against. The qualifier keeps those copies from overwriting each other
+// and from overwriting ours: `-PversionQualifier=java` gives 1.9.0-java-SNAPSHOT.
+// Only ever a snapshot — a release comes from here, under the plain version.
+val versionQualifier = project.findProperty("versionQualifier")?.toString().orEmpty()
+val isSnapshot = project.hasProperty("SNAPSHOT")
+require(versionQualifier.isEmpty() || isSnapshot) {
+    "versionQualifier=$versionQualifier is only meaningful for a snapshot; a release must be unqualified"
+}
+version = buildString {
+    append(baseVersion)
+    if (versionQualifier.isNotEmpty()) append("-").append(versionQualifier)
+    if (isSnapshot) append("-SNAPSHOT")
+}
+
+// The commit this artifact was built from, stamped into every POM below. A
+// mutable coordinate otherwise says nothing about which sources it holds, and a
+// downstream publisher needs exactly that to decide whether its copy is current.
+// Absent outside a git checkout, which reads as "unknown" — the safe direction:
+// a consumer comparing stamps rebuilds rather than reusing the wrong build.
+val flatJniCommit: String = runCatching {
+    providers.exec { commandLine("git", "rev-parse", "HEAD") }.standardOutput.asText.get().trim()
+}.getOrDefault("")
 
 repositories {
     google()   // AGP's own artifacts (lint, build tools)
@@ -437,7 +461,12 @@ publishing {
     // desktop libraries.
     publications.withType<MavenPublication>().configureEach {
         artifact(javadocJar)
-        pom { describe(artifactId) }
+        pom {
+            describe(artifactId)
+            // In the POM rather than the jar manifest so reading it costs two
+            // small requests instead of a 39 MB download.
+            if (flatJniCommit.isNotEmpty()) properties.put("zenoh.flatJniCommit", flatJniCommit)
+        }
     }
 }
 

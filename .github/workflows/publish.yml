@@ -28,7 +28,20 @@ on:
         required: true
         default: false
       branch:
-        description: Target branch
+        description: Branch, tag or commit to build from
+        type: string
+        required: false
+      source-repository:
+        # A called workflow runs with the *caller's* context, so an unqualified
+        # checkout would fetch the caller's repository. Downstream SDKs call this
+        # workflow to publish their own copy of this library (see PUBLISHING.md),
+        # and pass their own name for it here.
+        description: Repository holding the sources to build (defaults to the caller's own)
+        type: string
+        required: false
+      version-qualifier:
+        # Read by build.gradle.kts. Snapshot-only, and checked there.
+        description: "Inserted before -SNAPSHOT, so downstream copies do not overwrite ours"
         type: string
         required: false
       maven_publish:
@@ -39,6 +52,9 @@ on:
 env:
   RUST_BACKTRACE: 1
   CARGO_TERM_COLOR: always
+  # Appended to every Gradle invocation that names a coordinate, so the dry-run
+  # consumer test and the upload cannot disagree about which version they mean.
+  QUALIFIER_ARG: ${{ inputs.version-qualifier && format('-PversionQualifier={0}', inputs.version-qualifier) || '' }}
   # Where the cross-built libraries are collected before Gradle packages them.
   # Kept in step with `jniLibsDir` / `androidLibsDir` in build.gradle.kts.
   JNI_LIB_PATHS: jni-libs
@@ -78,6 +94,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          repository: ${{ inputs.source-repository || github.repository }}
           ref: ${{ inputs.branch }}
 
       # No toolchain is named here on purpose: rust-toolchain.toml pins it, and
@@ -161,6 +178,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          repository: ${{ inputs.source-repository || github.repository }}
           ref: ${{ inputs.branch }}
 
       - uses: nttld/setup-ndk@ed92fe6cadad69be94a966a7ee3271275e62f779 # v1.6.0
@@ -221,6 +239,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          repository: ${{ inputs.source-repository || github.repository }}
           ref: ${{ inputs.branch }}
 
       - name: Create resources destination
@@ -287,6 +306,9 @@ jobs:
           set -euo pipefail
           repo="$GITHUB_WORKSPACE/build/dry-run-repository"
           version=$(tr -d '[:space:]' < "$GITHUB_WORKSPACE/version.txt")
+          if [[ -n "${{ inputs.version-qualifier }}" ]]; then
+            version="$version-${{ inputs.version-qualifier }}"
+          fi
           if [[ "${{ inputs.snapshot }}" == "true" ]]; then
             version="$version-SNAPSHOT"
           fi
@@ -305,6 +327,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          repository: ${{ inputs.source-repository || github.repository }}
           ref: ${{ inputs.branch }}
 
       - name: Check that every version declaration agrees
@@ -395,7 +418,7 @@ jobs:
                     publishJvmPublicationToSonatypeRepository \
                     publishAndroidReleasePublicationToSonatypeRepository \
                     ${{ env.RELEASE }} --info -PremotePublication=true -Prelease=true \
-                    -PprebuiltAndroidLibs=true ${{ env.PUB_MODE }}
+                    -PprebuiltAndroidLibs=true ${{ env.PUB_MODE }} ${{ env.QUALIFIER_ARG }}
         env:
           CENTRAL_SONATYPE_TOKEN_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
           CENTRAL_SONATYPE_TOKEN_PASSWORD: ${{ secrets.CENTRAL_SONATYPE_TOKEN_PASSWORD }}
