@@ -462,7 +462,13 @@ org.eclipse.zenoh:zenoh-flat-jni:1.9.0-kotlin-SNAPSHOT  published by zenoh-kotli
 
 The mechanism is `.github/workflows/publish.yml` called as a reusable workflow,
 with `source-repository: eclipse-zenoh/zenoh-flat-jni`, `branch:` set to the
-commit that SDK pins, and `version-qualifier:` set to its name. The names are
+commit that SDK pins, and `version-qualifier:` set to its name.
+
+That commit's own `build.gradle.kts` is what honours the qualifier and writes
+the stamp, so a pin from before both existed cannot publish a qualified copy —
+it would publish an unqualified, unstamped one and leave the caller resolving a
+coordinate nobody uploaded. The workflow refuses such a pin up front rather than
+half an hour later. The names are
 fixed, so each copy is overwritten rather than accumulated, and the three
 publishers never overwrite each other — which matters because they can
 legitimately pin different commits at the same moment. A qualifier is rejected

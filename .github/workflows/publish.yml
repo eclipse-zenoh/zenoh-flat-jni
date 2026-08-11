@@ -28,6 +28,10 @@ on:
         required: true
         default: false
       branch:
+        # Resolved to an immutable commit once, by `resolve-source` below, and it
+        # is that commit every job checks out. A branch name here would otherwise
+        # be resolved independently by each of them, and this workflow runs for
+        # about half an hour.
         description: Branch, tag or commit to build from
         type: string
         required: false
@@ -52,9 +56,6 @@ on:
 env:
   RUST_BACKTRACE: 1
   CARGO_TERM_COLOR: always
-  # Appended to every Gradle invocation that names a coordinate, so the dry-run
-  # consumer test and the upload cannot disagree about which version they mean.
-  QUALIFIER_ARG: ${{ inputs.version-qualifier && format('-PversionQualifier={0}', inputs.version-qualifier) || '' }}
   # Where the cross-built libraries are collected before Gradle packages them.
   # Kept in step with `jniLibsDir` / `androidLibsDir` in build.gradle.kts.
   JNI_LIB_PATHS: jni-libs
@@ -74,8 +75,84 @@ env:
   ANDROID_NDK_VERSION: r26
 
 jobs:
+  # What every job below checks out, decided once.
+  #
+  # `branch` accepts a branch name, and this workflow takes about half an hour:
+  # resolved per job, `main` moving mid-run would package native libraries built
+  # from one commit into an artifact whose POM is stamped with another. A
+  # downstream stamp check would then read that as current and reuse a
+  # JNI-incompatible build. So it is resolved to a commit once, here.
+  resolve-source:
+    name: Resolve the source revision
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
+    steps:
+      # Through the environment, not string interpolation: this input comes from
+      # a caller and would otherwise be pasted into executable script text.
+      - name: Check the qualifier is a qualifier
+        if: inputs.version-qualifier != ''
+        env:
+          VERSION_QUALIFIER: ${{ inputs.version-qualifier }}
+        run: |
+          set -eo pipefail
+          [[ $VERSION_QUALIFIER =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]] || {
+            echo "::error::version-qualifier must be lowercase alphanumeric words separated by" \
+                 "hyphens; got '$VERSION_QUALIFIER'"
+            exit 1
+          }
+
+      - name: Resolve it to a commit
+        id: resolve
+        env:
+          SOURCE_REPOSITORY: ${{ inputs.source-repository || github.repository }}
+          SOURCE_REF: ${{ inputs.branch }}
+        run: |
+          set -eo pipefail
+          if [[ -z $SOURCE_REF ]]; then
+            # What an unqualified checkout would have used: the caller's own
+            # commit. Only meaningful when the caller owns the sources.
+            [[ $SOURCE_REPOSITORY == "$GITHUB_REPOSITORY" ]] || {
+              echo "::error::source-repository=$SOURCE_REPOSITORY needs an explicit branch"
+              exit 1
+            }
+            sha=$GITHUB_SHA
+          elif [[ $SOURCE_REF =~ ^[0-9a-f]{40}$ ]]; then
+            sha=$SOURCE_REF
+          else
+            sha=$(git ls-remote "https://github.com/$SOURCE_REPOSITORY" "$SOURCE_REF" | head -1 | cut -f1)
+            [[ -n $sha ]] || {
+              echo "::error::$SOURCE_REPOSITORY has no ref '$SOURCE_REF'"
+              exit 1
+            }
+          fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Building $SOURCE_REPOSITORY at $sha" >> "$GITHUB_STEP_SUMMARY"
+
+      # A downstream caller pins a commit of *this* repository, and that commit's
+      # build.gradle.kts is what has to honour the qualifier and write the commit
+      # stamp. Pinned before those existed, everything below would succeed while
+      # publishing an unqualified, unstamped artifact — and the caller would fail
+      # later, resolving a coordinate that was never uploaded. Fail here instead.
+      - uses: actions/checkout@v4
+        if: inputs.version-qualifier != ''
+        with:
+          repository: ${{ inputs.source-repository || github.repository }}
+          ref: ${{ steps.resolve.outputs.sha }}
+
+      - name: Check the source can publish a qualified copy
+        if: inputs.version-qualifier != ''
+        run: |
+          set -eo pipefail
+          grep -q versionQualifier build.gradle.kts || {
+            echo "::error::${{ steps.resolve.outputs.sha }} predates versionQualifier support;" \
+                 "pin a commit that has it (eclipse-zenoh/zenoh-flat-jni#37 or later)"
+            exit 1
+          }
+
   desktop-natives:
     name: Build for ${{ matrix.target }}
+    needs: resolve-source
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -95,7 +172,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ inputs.source-repository || github.repository }}
-          ref: ${{ inputs.branch }}
+          ref: ${{ needs.resolve-source.outputs.sha }}
 
       # No toolchain is named here on purpose: rust-toolchain.toml pins it, and
       # the release must use the same compiler CI and the lockfile sync use.
@@ -174,12 +251,13 @@ jobs:
 
   android-natives:
     name: Build the Android ABIs
+    needs: resolve-source
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ inputs.source-repository || github.repository }}
-          ref: ${{ inputs.branch }}
+          ref: ${{ needs.resolve-source.outputs.sha }}
 
       - uses: nttld/setup-ndk@ed92fe6cadad69be94a966a7ee3271275e62f779 # v1.6.0
         id: ndk
@@ -230,7 +308,7 @@ jobs:
   # back to Central and pass against an older release.
   consumer-test:
     name: Consume the candidate on ${{ matrix.os }}
-    needs: desktop-natives
+    needs: [resolve-source, desktop-natives]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -240,7 +318,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ inputs.source-repository || github.repository }}
-          ref: ${{ inputs.branch }}
+          ref: ${{ needs.resolve-source.outputs.sha }}
 
       - name: Create resources destination
         shell: bash
@@ -292,22 +370,33 @@ jobs:
         # default is PowerShell and `\` is not a line continuation — the
         # invocation below would be split and the properties silently dropped.
         shell: bash
+        # The qualifier arrives through the environment and is expanded as an
+        # array element, so a caller cannot inject shell syntax or split it into
+        # extra arguments. Same in every step below that uses it.
+        env:
+          VERSION_QUALIFIER: ${{ inputs.version-qualifier }}
         run: |
+          set -eo pipefail
+          qualifier=()
+          [[ -z $VERSION_QUALIFIER ]] || qualifier=("-PversionQualifier=$VERSION_QUALIFIER")
           ./gradlew publishKotlinMultiplatformPublicationToDryRunRepository \
                     publishJvmPublicationToDryRunRepository \
-                    -Prelease=true -PprebuiltAndroidLibs=true ${{ env.PUB_MODE }} --no-daemon
+                    -Prelease=true -PprebuiltAndroidLibs=true ${{ env.PUB_MODE }} \
+                    "${qualifier[@]}" --no-daemon
 
       # Resolved through the file repository, with `--refresh-dependencies` so a
       # cached artifact of the same coordinates cannot stand in for it.
       - name: Smoke-test the candidate as an external consumer
         working-directory: ci/consumer-smoke-test
         shell: bash
+        env:
+          VERSION_QUALIFIER: ${{ inputs.version-qualifier }}
         run: |
-          set -euo pipefail
+          set -eo pipefail
           repo="$GITHUB_WORKSPACE/build/dry-run-repository"
           version=$(tr -d '[:space:]' < "$GITHUB_WORKSPACE/version.txt")
-          if [[ -n "${{ inputs.version-qualifier }}" ]]; then
-            version="$version-${{ inputs.version-qualifier }}"
+          if [[ -n $VERSION_QUALIFIER ]]; then
+            version="$version-$VERSION_QUALIFIER"
           fi
           if [[ "${{ inputs.snapshot }}" == "true" ]]; then
             version="$version-SNAPSHOT"
@@ -319,7 +408,7 @@ jobs:
 
   publish:
     name: Publish to Maven Central
-    needs: [desktop-natives, android-natives, consumer-test]
+    needs: [resolve-source, desktop-natives, android-natives, consumer-test]
     permissions:
       contents: read
       packages: write
@@ -328,7 +417,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ inputs.source-repository || github.repository }}
-          ref: ${{ inputs.branch }}
+          ref: ${{ needs.resolve-source.outputs.sha }}
 
       - name: Check that every version declaration agrees
         shell: bash
@@ -414,12 +503,16 @@ jobs:
       - if: ${{ inputs.maven_publish == true }}
         name: Gradle Publish to Maven Central repository
         run: |
+          set -eo pipefail
+          qualifier=()
+          [[ -z $VERSION_QUALIFIER ]] || qualifier=("-PversionQualifier=$VERSION_QUALIFIER")
           ./gradlew publishKotlinMultiplatformPublicationToSonatypeRepository \
                     publishJvmPublicationToSonatypeRepository \
                     publishAndroidReleasePublicationToSonatypeRepository \
                     ${{ env.RELEASE }} --info -PremotePublication=true -Prelease=true \
-                    -PprebuiltAndroidLibs=true ${{ env.PUB_MODE }} ${{ env.QUALIFIER_ARG }}
+                    -PprebuiltAndroidLibs=true ${{ env.PUB_MODE }} "${qualifier[@]}"
         env:
+          VERSION_QUALIFIER: ${{ inputs.version-qualifier }}
           CENTRAL_SONATYPE_TOKEN_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
           CENTRAL_SONATYPE_TOKEN_PASSWORD: ${{ secrets.CENTRAL_SONATYPE_TOKEN_PASSWORD }}
           ORG_GPG_KEY_ID: ${{ secrets.ORG_GPG_KEY_ID }}
