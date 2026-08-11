@@ -823,9 +823,9 @@ ask which sources a mutable version came from.
 
 ### Why there is no nightly
 
-The other JVM repositories in the org publish their snapshot on a weekday 06:00
-schedule as well as on merge. This one does not, and the difference is worth
-recording because the obvious argument for a nightly does not hold here.
+`zenoh-kotlin` publishes its snapshot on a weekday 06:00 schedule as well as on
+merge. This one does not, and the difference is worth recording because the
+obvious argument for a nightly does not hold here.
 
 That argument would be dependency drift: `zenoh`, `zenoh-ext` and `zenoh-flat`
 are `branch = "main"` dependencies, so a timed rebuild sounds like the way to
@@ -845,6 +845,12 @@ only during a week with no merges at all — every merge already exercises them.
 That is a thin canary against five ten-target publications a week, so the
 trigger is left out. `workflow_dispatch` covers running the path on demand, and
 if the canary is ever wanted, a weekly schedule buys it at a fifth of the cost.
+
+The argument is not special to this repository, and `zenoh-java` has since
+dropped its nightly on the same grounds
+([zenoh-java#526](https://github.com/eclipse-zenoh/zenoh-java/pull/526)): its
+`Cargo.lock` pins the `zenoh-flat-jni` commit, so a timed build there also
+rebuilds what the last merge built. `zenoh-kotlin` is the remaining candidate.
 
 Consuming it directly — for a look at the tip of `main`, not as an SDK
 dependency:
