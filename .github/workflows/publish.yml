@@ -28,7 +28,33 @@ on:
         required: true
         default: false
       branch:
-        description: Target branch
+        # Resolved to an immutable commit once, by `resolve-source` below, and it
+        # is that commit every job checks out. A branch name here would otherwise
+        # be resolved independently by each of them, and this workflow runs for
+        # about half an hour.
+        description: Branch, tag or commit to build from
+        type: string
+        required: false
+      source-repository:
+        # A called workflow runs with the *caller's* context, so an unqualified
+        # checkout would fetch the caller's repository. Downstream SDKs call this
+        # workflow to publish their own copy of this library (see PUBLISHING.md),
+        # and pass their own name for it here.
+        description: Repository holding the sources to build (defaults to the caller's own)
+        type: string
+        required: false
+      version-qualifier:
+        # Read by build.gradle.kts. Snapshot-only, and checked there as well as
+        # in `resolve-source`, which rejects it before anything is built.
+        description: "Inserted before -SNAPSHOT, so downstream copies do not overwrite ours"
+        type: string
+        required: false
+      expected-base-version:
+        # The coordinate is derived from the checked-out version.txt, while a
+        # caller names a fixed version of its own. Passing what it expects is how
+        # a pin that moved past a version bump here fails before publishing
+        # something the caller cannot resolve.
+        description: The version.txt the caller expects the pinned source to have
         type: string
         required: false
       maven_publish:
@@ -58,8 +84,110 @@ env:
   ANDROID_NDK_VERSION: r26
 
 jobs:
+  # What every job below checks out, decided once.
+  #
+  # `branch` accepts a branch name, and this workflow takes about half an hour:
+  # resolved per job, `main` moving mid-run would package native libraries built
+  # from one commit into an artifact whose POM is stamped with another. A
+  # downstream stamp check would then read that as current and reuse a
+  # JNI-incompatible build. So it is resolved to a commit once, here.
+  resolve-source:
+    name: Resolve the source revision
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
+    steps:
+      # Everything a caller asked for that can be judged before half an hour of
+      # cross-compilation. The qualifier goes through the environment rather than
+      # string interpolation: it is caller input, and would otherwise be pasted
+      # into executable script text.
+      - name: Check what was asked for
+        if: inputs.version-qualifier != ''
+        env:
+          VERSION_QUALIFIER: ${{ inputs.version-qualifier }}
+          SOURCE_REF: ${{ inputs.branch }}
+          EXPECTED_BASE_VERSION: ${{ inputs.expected-base-version }}
+        run: |
+          set -eo pipefail
+          [[ $VERSION_QUALIFIER =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]] || {
+            echo "::error::version-qualifier must be lowercase alphanumeric words separated by" \
+                 "hyphens; got '$VERSION_QUALIFIER'"
+            exit 1
+          }
+          # build.gradle.kts refuses this too, but only once the consumer test
+          # configures — six desktop targets and the Android build later.
+          [[ "${{ inputs.snapshot }}" == "true" ]] || {
+            echo "::error::a qualified version is only ever a snapshot;" \
+                 "releases are published from this repository unqualified"
+            exit 1
+          }
+          # Without a ref the checkout below takes the default branch, so a
+          # downstream copy would be built from a moving target — the opposite of
+          # why it pins one.
+          [[ -n $SOURCE_REF ]] || {
+            echo "::error::publishing a qualified copy needs an explicit branch"
+            exit 1
+          }
+          # Optional in general, mandatory here: omitted, the version comparison
+          # below would simply not happen, which is the drift it exists to catch.
+          [[ -n $EXPECTED_BASE_VERSION ]] || {
+            echo "::error::publishing a qualified copy needs expected-base-version," \
+                 "the version.txt the caller expects the pinned source to have"
+            exit 1
+          }
+
+      # The same action every job below uses, so a branch, tag or commit resolves
+      # the way it will resolve there — `git ls-remote <name>` would match by ref
+      # pattern and could pick refs/heads/… over the refs/tags/… that was meant.
+      # What comes out is a commit, and that is what the rest of the run checks
+      # out.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ inputs.source-repository || github.repository }}
+          ref: ${{ inputs.branch }}
+
+      - name: Resolve it to a commit
+        id: resolve
+        run: |
+          set -eo pipefail
+          sha=$(git rev-parse HEAD)
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Building ${{ inputs.source-repository || github.repository }} at $sha" \
+            >> "$GITHUB_STEP_SUMMARY"
+
+      # A downstream caller pins a commit of *this* repository, and it is that
+      # commit's build.gradle.kts that has to honour the qualifier and write the
+      # commit stamp. Pinned before those existed, everything below would succeed
+      # while publishing an unqualified, unstamped artifact — and the caller would
+      # fail later, resolving a coordinate that was never uploaded.
+      #
+      # The version is the other half: the coordinate comes from this source's
+      # version.txt, while the caller names a fixed version of its own. Let those
+      # diverge — the pin moves past a version bump here — and the run publishes
+      # 1.10.0-java-SNAPSHOT while the SDK still resolves 1.9.0-java-SNAPSHOT.
+      - name: Check the source can publish what was asked for
+        if: inputs.version-qualifier != ''
+        env:
+          EXPECTED_BASE_VERSION: ${{ inputs.expected-base-version }}
+          VERSION_QUALIFIER: ${{ inputs.version-qualifier }}
+        run: |
+          set -eo pipefail
+          grep -q versionQualifier build.gradle.kts || {
+            echo "::error::${{ steps.resolve.outputs.sha }} predates versionQualifier support;" \
+                 "pin a commit that has it (eclipse-zenoh/zenoh-flat-jni#37 or later)"
+            exit 1
+          }
+          version=$(tr -d '[:space:]' < version.txt)
+          if [[ $version != "$EXPECTED_BASE_VERSION" ]]; then
+            echo "::error::${{ steps.resolve.outputs.sha }} is version $version, but the caller" \
+                 "expects $EXPECTED_BASE_VERSION — it would publish and then fail to resolve" \
+                 "$EXPECTED_BASE_VERSION-$VERSION_QUALIFIER-SNAPSHOT"
+            exit 1
+          fi
+
   desktop-natives:
     name: Build for ${{ matrix.target }}
+    needs: resolve-source
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -78,7 +206,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.branch }}
+          repository: ${{ inputs.source-repository || github.repository }}
+          ref: ${{ needs.resolve-source.outputs.sha }}
 
       # No toolchain is named here on purpose: rust-toolchain.toml pins it, and
       # the release must use the same compiler CI and the lockfile sync use.
@@ -157,11 +286,13 @@ jobs:
 
   android-natives:
     name: Build the Android ABIs
+    needs: resolve-source
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.branch }}
+          repository: ${{ inputs.source-repository || github.repository }}
+          ref: ${{ needs.resolve-source.outputs.sha }}
 
       - uses: nttld/setup-ndk@ed92fe6cadad69be94a966a7ee3271275e62f779 # v1.6.0
         id: ndk
@@ -212,7 +343,7 @@ jobs:
   # back to Central and pass against an older release.
   consumer-test:
     name: Consume the candidate on ${{ matrix.os }}
-    needs: desktop-natives
+    needs: [resolve-source, desktop-natives]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -221,7 +352,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.branch }}
+          repository: ${{ inputs.source-repository || github.repository }}
+          ref: ${{ needs.resolve-source.outputs.sha }}
 
       - name: Create resources destination
         shell: bash
@@ -273,20 +405,34 @@ jobs:
         # default is PowerShell and `\` is not a line continuation — the
         # invocation below would be split and the properties silently dropped.
         shell: bash
+        # The qualifier arrives through the environment and is expanded as an
+        # array element, so a caller cannot inject shell syntax or split it into
+        # extra arguments. Same in every step below that uses it.
+        env:
+          VERSION_QUALIFIER: ${{ inputs.version-qualifier }}
         run: |
+          set -eo pipefail
+          qualifier=()
+          [[ -z $VERSION_QUALIFIER ]] || qualifier=("-PversionQualifier=$VERSION_QUALIFIER")
           ./gradlew publishKotlinMultiplatformPublicationToDryRunRepository \
                     publishJvmPublicationToDryRunRepository \
-                    -Prelease=true -PprebuiltAndroidLibs=true ${{ env.PUB_MODE }} --no-daemon
+                    -Prelease=true -PprebuiltAndroidLibs=true ${{ env.PUB_MODE }} \
+                    "${qualifier[@]}" --no-daemon
 
       # Resolved through the file repository, with `--refresh-dependencies` so a
       # cached artifact of the same coordinates cannot stand in for it.
       - name: Smoke-test the candidate as an external consumer
         working-directory: ci/consumer-smoke-test
         shell: bash
+        env:
+          VERSION_QUALIFIER: ${{ inputs.version-qualifier }}
         run: |
-          set -euo pipefail
+          set -eo pipefail
           repo="$GITHUB_WORKSPACE/build/dry-run-repository"
           version=$(tr -d '[:space:]' < "$GITHUB_WORKSPACE/version.txt")
+          if [[ -n $VERSION_QUALIFIER ]]; then
+            version="$version-$VERSION_QUALIFIER"
+          fi
           if [[ "${{ inputs.snapshot }}" == "true" ]]; then
             version="$version-SNAPSHOT"
           fi
@@ -297,7 +443,7 @@ jobs:
 
   publish:
     name: Publish to Maven Central
-    needs: [desktop-natives, android-natives, consumer-test]
+    needs: [resolve-source, desktop-natives, android-natives, consumer-test]
     permissions:
       contents: read
       packages: write
@@ -305,7 +451,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.branch }}
+          repository: ${{ inputs.source-repository || github.repository }}
+          ref: ${{ needs.resolve-source.outputs.sha }}
 
       - name: Check that every version declaration agrees
         shell: bash
@@ -391,12 +538,16 @@ jobs:
       - if: ${{ inputs.maven_publish == true }}
         name: Gradle Publish to Maven Central repository
         run: |
+          set -eo pipefail
+          qualifier=()
+          [[ -z $VERSION_QUALIFIER ]] || qualifier=("-PversionQualifier=$VERSION_QUALIFIER")
           ./gradlew publishKotlinMultiplatformPublicationToSonatypeRepository \
                     publishJvmPublicationToSonatypeRepository \
                     publishAndroidReleasePublicationToSonatypeRepository \
                     ${{ env.RELEASE }} --info -PremotePublication=true -Prelease=true \
-                    -PprebuiltAndroidLibs=true ${{ env.PUB_MODE }}
+                    -PprebuiltAndroidLibs=true ${{ env.PUB_MODE }} "${qualifier[@]}"
         env:
+          VERSION_QUALIFIER: ${{ inputs.version-qualifier }}
           CENTRAL_SONATYPE_TOKEN_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
           CENTRAL_SONATYPE_TOKEN_PASSWORD: ${{ secrets.CENTRAL_SONATYPE_TOKEN_PASSWORD }}
           ORG_GPG_KEY_ID: ${{ secrets.ORG_GPG_KEY_ID }}
