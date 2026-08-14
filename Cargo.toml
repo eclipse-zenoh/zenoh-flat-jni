@@ -19,7 +19,7 @@ zenoh-ext = ["dep:zenoh-ext"]
 # (`Reliability`, `CongestionControl::BlockFirst`, …) in lockstep with the
 # zenoh enum variants, so without it the flat↔native conversions go
 # non-exhaustive once Cargo unifies `zenoh` with `unstable`.
-zenoh-flat = { version = "1.9.0", git = "https://github.com/eclipse-zenoh/zenoh-flat.git", branch = "main", features = ["unstable"] }
+zenoh-flat = { version = "1.10.0", git = "https://github.com/eclipse-zenoh/zenoh-flat.git", branch = "release/1.10.0", features = ["unstable"] }
 # Runtime home of the JNI binding helpers and the default `JniBindingError`
 # (`::prebindgen_jni_runtime::JniBindingError`) that the generated bindings
 # reference. This is the ~350-line leaf crate — a shipped binding library does
@@ -27,8 +27,8 @@ zenoh-flat = { version = "1.9.0", git = "https://github.com/eclipse-zenoh/zenoh-
 prebindgen-jni-runtime = "0.5"
 # Direct zenoh/zenoh-ext deps for the self-contained ZBytes serialization JNI.
 # Same git rev as zenoh-flat so Cargo unifies the crate instances.
-zenoh = { version = "1.9.0", git = "https://github.com/eclipse-zenoh/zenoh.git", branch = "main", features = ["unstable", "internal", "default"], default-features = false }
-zenoh-ext = { version = "1.9.0", git = "https://github.com/eclipse-zenoh/zenoh.git", branch = "main", features = ["internal"], default-features = false, optional = true }
+zenoh = { version = "1.10.0", git = "https://github.com/eclipse-zenoh/zenoh.git", branch = "release/1.10.0", features = ["unstable", "internal", "default"], default-features = false }
+zenoh-ext = { version = "1.10.0", git = "https://github.com/eclipse-zenoh/zenoh.git", branch = "release/1.10.0", features = ["internal"], default-features = false, optional = true }
 jni = "0.21.1"
 konst = "0.3.17"
 tracing = { version = "0.1", features = ["log"] }
@@ -44,7 +44,7 @@ crate-type = ["staticlib", "cdylib"]
 [build-dependencies]
 # Same feature set as the runtime dep so the captured `FEATURES` / cfg-gated
 # `#[prebindgen]` items match what the runtime crate actually compiles.
-zenoh-flat = { version = "1.9.0", git = "https://github.com/eclipse-zenoh/zenoh-flat.git", branch = "main", features = ["unstable"] }
+zenoh-flat = { version = "1.10.0", git = "https://github.com/eclipse-zenoh/zenoh-flat.git", branch = "release/1.10.0", features = ["unstable"] }
 # The generator, post-#371 split: the JNI/Kotlin adapter plus the decl macros
 # (`convert!`, `fun!`, `expand_*!`, …) it shares with the language-agnostic
 # pipeline.
