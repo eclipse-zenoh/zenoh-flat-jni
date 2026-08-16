@@ -24,7 +24,7 @@ import kotlin.test.assertEquals
  * Self-verification of the pure-Kotlin [zidString] formatter (the Zenoh id
  * string form, no JNI) against the native `ZenohId.toStr`, over edge byte
  * patterns and a seeded-random corpus. Both operate on the same generated
- * [ZenohId] value class.
+ * [ZenohId] data class.
  */
 class ZenohIdCorrespondenceTest {
 
