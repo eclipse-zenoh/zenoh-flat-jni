@@ -359,7 +359,7 @@ fn main() {
                 .class(
                     ptr_class!(Hello)
                         .method(fun!(hello_get_whatami)) // WhatAmI enum -> Int
-                        .method(fun!(hello_get_zid)) // ZenohId value class -> ByteArray
+                        .method(fun!(hello_get_zid)) // ZenohId data class -> ByteArray
                         .method(fun!(hello_get_locators)), // Vec<String> -> List<String>
                 )
                 // Semantic resources (Scout, and Session/Publisher/… below)
@@ -551,7 +551,7 @@ fn main() {
                 .class(sealed_class!(RecoveryMode))
                 .class(data_class!(RecoveryConfig))
                 // `EntityGlobalId` is declared before `Miss`, which nests it as a
-                // field; its `zid` is the `ZenohId` value class declared above.
+                // field; its `zid` is the `ZenohId` data class declared above.
                 .class(data_class!(EntityGlobalId))
                 .class(data_class!(Miss))
                 // Advanced publisher: put/delete + matching status/listeners
@@ -740,7 +740,7 @@ fn main() {
                     // `session.get(...)` takes a whole `Selector` value (key expr
                     // + parameters), so there is no key-expr param to split on.
                     .method(fun!(session_get))
-                    // `Vec<ZenohId>`: ZenohId is a value class, so these return
+                    // `Vec<ZenohId>`: ZenohId is a data class, so these return
                     // `List<ZenohId>` via the normal Vec converter. Named to drop
                     // the `get` prefix (`peersZid` / `routersZid`).
                     .method(fun!(session_get_peers_zid))
