@@ -430,7 +430,7 @@ build or package their own copies of the JNI library.
 The release order is:
 
 ```text
-prebindgen from crates.io, zenoh-flat and Zenoh pinned by Cargo.lock
+  prebindgen, zenoh-flat and Zenoh pinned by Cargo.lock
                          |
                          v
              publish zenoh-flat-jni

@@ -104,15 +104,15 @@ sed -i 's|// includeBuild|includeBuild|' settings.gradle.kts
 
 ### Where the dependencies come from
 
-Nothing needs to sit next to this repository. The generator is a published
-crate, and the zenoh side is declared the way every zenoh binding declares it:
+Nothing needs to sit next to this repository. Every dependency is a Git
+dependency on `branch = "main"`, with the commit fixed by `Cargo.lock`:
 
 ```toml
 # [dependencies] and [build-dependencies]
 zenoh-flat = { version = "1.9.0", git = "https://github.com/eclipse-zenoh/zenoh-flat.git", branch = "main", features = ["unstable"] }
-prebindgen-jni = "0.5"          # build-dependency, from crates.io
-prebindgen-registry = "0.5"     # build-dependency, from crates.io
-prebindgen-jni-runtime = "0.5"  # runtime, from crates.io
+prebindgen-jni = { version = "0.5", git = "https://github.com/milyin/prebindgen.git", branch = "main" }          # build-dependency
+prebindgen-registry = { version = "0.5", git = "https://github.com/milyin/prebindgen.git", branch = "main" }     # build-dependency
+prebindgen-jni-runtime = { version = "0.5", git = "https://github.com/milyin/prebindgen.git", branch = "main" }  # runtime
 ```
 
 ### Building against a local checkout
@@ -127,18 +127,21 @@ checked out:
 [patch."https://github.com/eclipse-zenoh/zenoh-flat.git"]
 zenoh-flat = { path = "zenoh-flat" }
 
-[patch.crates-io]
+[patch."https://github.com/milyin/prebindgen.git"]
 prebindgen-jni = { path = "prebindgen/prebindgen-jni" }
 prebindgen-registry = { path = "prebindgen/prebindgen-registry" }
 prebindgen-jni-runtime = { path = "prebindgen/prebindgen-jni-runtime" }
 ```
 
+A `[patch]` is keyed by the source a dependency is declared with, so the key
+follows whatever `Cargo.toml` says — `[patch.crates-io]` for a version
+requirement, the repository URL for a Git dependency.
+
 ### Published Versions (CI/Release)
 
-Nothing has to sit next to this repository any more. `prebindgen-*` comes from
-crates.io as a version constraint, and `zenoh`, `zenoh-ext` and `zenoh-flat` are
-Git dependencies on `branch = "main"` — the shape every zenoh binding uses. A
-bare clone therefore builds.
+Nothing has to sit next to this repository. `prebindgen-*`, `zenoh`,
+`zenoh-ext` and `zenoh-flat` are all Git dependencies on `branch = "main"`, so a
+bare clone builds.
 
 Which commit of each of those a build actually resolves is fixed by the
 committed `Cargo.lock`, which the shared lockfile-sync bot keeps aligned with
@@ -210,9 +213,10 @@ When you push commits or create pull requests, GitHub Actions will automatically
 
 ### "Cannot find zenoh-flat" or "Cannot find prebindgen"
 
-Make sure the path dependencies are correct in `Cargo.toml`. They should point to:
-- `../zenoh-flat` (or adjust to your actual path)
-- `../prebindgen/prebindgen`
+Nothing is a path dependency here, so this means Cargo could not reach the
+sources `Cargo.toml` names, or a `[patch]` of yours points at a directory that
+is not there. Check the network, and check any `.cargo/config.toml` above this
+checkout.
 
 ### Gradle says "Cannot resolve org.eclipse.zenoh:zenoh-flat-jni"
 
@@ -261,5 +265,5 @@ which makes it impossible to prove which repository supplied an artifact.
 
 - [Zenoh](https://zenoh.io/)
 - [prebindgen](https://github.com/milyin/prebindgen)
-- [zenoh-flat](https://github.com/milyin/prebindgen/tree/main/zenoh-flat)
+- [zenoh-flat](https://github.com/eclipse-zenoh/zenoh-flat)
 - [zenoh-java](https://github.com/eclipse-zenoh/zenoh-java)
