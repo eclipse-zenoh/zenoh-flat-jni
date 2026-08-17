@@ -100,28 +100,19 @@ cargo build --release
 ./gradlew build
 ```
 
-#### Local Development with Workspace
+#### Building against a local checkout of a dependency
 
-To use local versions of `zenoh-flat` and `prebindgen`:
+A clone builds on its own — every dependency is fetched. To build against your
+own checkout of one instead, override its source from outside this repository
+rather than editing the manifest, e.g. in a `.cargo/config.toml` one directory
+above:
 
-```bash
-# Ensure you have the PREBINDGEN workspace checked out locally
-mkdir -p ~/zenoh-workspace
-cd ~/zenoh-workspace
-
-git clone https://github.com/milyin/prebindgen.git
-git clone https://github.com/eclipse-zenoh/zenoh-flat-jni.git
-
-cd zenoh-flat-jni
-
-# To build against a local checkout instead of the published/Git sources,
-# point Cargo at it without editing this repository's manifest — e.g. in a
-# workspace-level .cargo/config.toml:
-# [patch."https://github.com/eclipse-zenoh/zenoh-flat.git"]
-# zenoh-flat = { path = "../zenoh-flat" }
-
-cargo build --release
+```toml
+[patch."https://github.com/eclipse-zenoh/zenoh-flat.git"]
+zenoh-flat = { path = "zenoh-flat" }
 ```
+
+See [DEVELOPMENT.md](DEVELOPMENT.md) for why the manifest is left alone.
 
 ### Testing
 
