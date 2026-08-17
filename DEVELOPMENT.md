@@ -104,16 +104,21 @@ sed -i 's|// includeBuild|includeBuild|' settings.gradle.kts
 
 ### Where the dependencies come from
 
-Nothing needs to sit next to this repository. The generator is a published
-crate, and the zenoh side is declared the way every zenoh binding declares it:
+Nothing needs to sit next to this repository. Every dependency is declared the
+way every zenoh binding declares one — a Git dependency on `branch = "main"`,
+with the commit fixed by `Cargo.lock`:
 
 ```toml
 # [dependencies] and [build-dependencies]
 zenoh-flat = { version = "1.9.0", git = "https://github.com/eclipse-zenoh/zenoh-flat.git", branch = "main", features = ["unstable"] }
-prebindgen-jni = "0.5"          # build-dependency, from crates.io
-prebindgen-registry = "0.5"     # build-dependency, from crates.io
-prebindgen-jni-runtime = "0.5"  # runtime, from crates.io
+prebindgen-jni = { version = "0.5", git = "https://github.com/milyin/prebindgen.git", branch = "main" }          # build-dependency
+prebindgen-registry = { version = "0.5", git = "https://github.com/milyin/prebindgen.git", branch = "main" }     # build-dependency
+prebindgen-jni-runtime = { version = "0.5", git = "https://github.com/milyin/prebindgen.git", branch = "main" }  # runtime
 ```
+
+The `prebindgen-*` trio is on Git rather than on crates.io only until the next
+prebindgen release: the committed generated code needs generator fixes that are
+merged on `main` but not in 0.5.0. Then they go back to a plain `"0.5"`.
 
 ### Building against a local checkout
 
@@ -127,18 +132,20 @@ checked out:
 [patch."https://github.com/eclipse-zenoh/zenoh-flat.git"]
 zenoh-flat = { path = "zenoh-flat" }
 
-[patch.crates-io]
+[patch."https://github.com/milyin/prebindgen.git"]
 prebindgen-jni = { path = "prebindgen/prebindgen-jni" }
 prebindgen-registry = { path = "prebindgen/prebindgen-registry" }
 prebindgen-jni-runtime = { path = "prebindgen/prebindgen-jni-runtime" }
 ```
 
+A `[patch]` is keyed by the source it replaces, so these move back under
+`[patch.crates-io]` when the `prebindgen-*` dependencies do.
+
 ### Published Versions (CI/Release)
 
-Nothing has to sit next to this repository any more. `prebindgen-*` comes from
-crates.io as a version constraint, and `zenoh`, `zenoh-ext` and `zenoh-flat` are
-Git dependencies on `branch = "main"` — the shape every zenoh binding uses. A
-bare clone therefore builds.
+Nothing has to sit next to this repository any more. `prebindgen-*`, `zenoh`,
+`zenoh-ext` and `zenoh-flat` are all Git dependencies on `branch = "main"` — the
+shape every zenoh binding uses. A bare clone therefore builds.
 
 Which commit of each of those a build actually resolves is fixed by the
 committed `Cargo.lock`, which the shared lockfile-sync bot keeps aligned with

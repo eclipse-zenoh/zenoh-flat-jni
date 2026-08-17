@@ -24,7 +24,13 @@ zenoh-flat = { version = "1.9.0", git = "https://github.com/eclipse-zenoh/zenoh-
 # (`::prebindgen_jni_runtime::JniBindingError`) that the generated bindings
 # reference. This is the ~350-line leaf crate — a shipped binding library does
 # not depend on the generator.
-prebindgen-jni-runtime = "0.5"
+#
+# TEMPORARY: on `branch = "main"` rather than the crates.io 0.5.0, because the
+# generated code this repository now commits needs generator fixes that are
+# merged but unreleased (milyin/prebindgen#404, #418, #419). Which commit that
+# is, is fixed by Cargo.lock. Go back to a plain `"0.5"` on the next
+# prebindgen release.
+prebindgen-jni-runtime = { version = "0.5", git = "https://github.com/milyin/prebindgen.git", branch = "main" }
 # Direct zenoh/zenoh-ext deps for the self-contained ZBytes serialization JNI.
 # Same git rev as zenoh-flat so Cargo unifies the crate instances.
 zenoh = { version = "1.9.0", git = "https://github.com/eclipse-zenoh/zenoh.git", branch = "main", features = ["unstable", "internal", "default"], default-features = false }
@@ -48,8 +54,9 @@ zenoh-flat = { version = "1.9.0", git = "https://github.com/eclipse-zenoh/zenoh-
 # The generator, post-#371 split: the JNI/Kotlin adapter plus the decl macros
 # (`convert!`, `fun!`, `expand_*!`, …) it shares with the language-agnostic
 # pipeline.
-prebindgen-jni = "0.5"
-prebindgen-registry = "0.5"
+# Same TEMPORARY git source as prebindgen-jni-runtime above.
+prebindgen-jni = { version = "0.5", git = "https://github.com/milyin/prebindgen.git", branch = "main" }
+prebindgen-registry = { version = "0.5", git = "https://github.com/milyin/prebindgen.git", branch = "main" }
 syn = "2"
 
 # panic = "abort" is required on the JNI boundary — a Rust panic crossing
