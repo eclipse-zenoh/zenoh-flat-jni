@@ -1862,7 +1862,6 @@ dependencies = [
 [[package]]
 name = "prebindgen"
 version = "0.5.0"
-source = "git+https://github.com/milyin/prebindgen.git?branch=main#e04654679e7aa0e7c7d4b9bb4a1268f9943926ec"
 dependencies = [
  "if_rust_version",
  "itertools",
@@ -1881,7 +1880,6 @@ dependencies = [
 [[package]]
 name = "prebindgen-flat"
 version = "0.5.0"
-source = "git+https://github.com/milyin/prebindgen.git?branch=main#e04654679e7aa0e7c7d4b9bb4a1268f9943926ec"
 dependencies = [
  "prebindgen",
  "proc-macro2",
@@ -1892,7 +1890,6 @@ dependencies = [
 [[package]]
 name = "prebindgen-jni"
 version = "0.5.0"
-source = "git+https://github.com/milyin/prebindgen.git?branch=main#e04654679e7aa0e7c7d4b9bb4a1268f9943926ec"
 dependencies = [
  "jni",
  "kotlin-codegen",
@@ -1907,7 +1904,6 @@ dependencies = [
 [[package]]
 name = "prebindgen-jni-runtime"
 version = "0.5.0"
-source = "git+https://github.com/milyin/prebindgen.git?branch=main#e04654679e7aa0e7c7d4b9bb4a1268f9943926ec"
 dependencies = [
  "jni",
 ]
@@ -1915,7 +1911,6 @@ dependencies = [
 [[package]]
 name = "prebindgen-proc-macro"
 version = "0.5.0"
-source = "git+https://github.com/milyin/prebindgen.git?branch=main#e04654679e7aa0e7c7d4b9bb4a1268f9943926ec"
 dependencies = [
  "prebindgen",
  "proc-macro2",
@@ -1928,7 +1923,6 @@ dependencies = [
 [[package]]
 name = "prebindgen-registry"
 version = "0.5.0"
-source = "git+https://github.com/milyin/prebindgen.git?branch=main#e04654679e7aa0e7c7d4b9bb4a1268f9943926ec"
 dependencies = [
  "itertools",
  "prebindgen",

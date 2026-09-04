@@ -225,6 +225,15 @@ fn main() {
         // zenoh-flat's captured `#[prebindgen]` items — the single source of
         // this binding.
         .source(zenoh_flat::PREBINDGEN_OUT_DIR)
+        // The decompositions prebindgen's row differential does not compare
+        // yet, each a part binding milyin/prebindgen#701's step 3 still owes.
+        // A build fails if the set changes either way, so one leaving the
+        // comparison is noticed rather than silently reducing its reach.
+        .expect_parity_skips([
+            "the callback argument `Query`: a part whose type states no `parts` row yet",
+            "the callback argument `Reply`: a part reached through an `Option`",
+            "the callback argument `Sample`: a row that states no parts",
+        ])
         .set_package_prefix("io.zenoh.jni") // base package of the generated JNI bindings
         // Every generated native call routes through `JNINative`; trigger our own
         // loader from its static initializer so the native library is loaded
