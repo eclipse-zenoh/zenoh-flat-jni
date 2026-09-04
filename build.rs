@@ -225,11 +225,60 @@ fn main() {
         // zenoh-flat's captured `#[prebindgen]` items — the single source of
         // this binding.
         .source(zenoh_flat::PREBINDGEN_OUT_DIR)
-        // The decompositions prebindgen's row differential does not compare
-        // yet, each a part binding milyin/prebindgen#701's step 3 still owes.
-        // A build fails if the set changes either way, so one leaving the
-        // comparison is noticed rather than silently reducing its reach.
+        // What prebindgen's row differential does NOT compare, one entry per
+        // decomposition, each a part binding milyin/prebindgen#701's step 3
+        // still owes. The build fails if the set changes either way, so a
+        // decomposition leaving the comparison is seen and one being lowered
+        // is recorded.
         .expect_parity_skips([
+            "`advanced_publisher_declare_background_matching_listener`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`advanced_publisher_declare_matching_listener`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`advanced_publisher_delete`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`advanced_publisher_matching_status`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`advanced_publisher_put`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`advanced_subscriber_declare_background_detect_publishers_subscriber`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`advanced_subscriber_declare_background_sample_miss_listener`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`advanced_subscriber_declare_detect_publishers_subscriber`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`advanced_subscriber_declare_sample_miss_listener`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`config_get_json`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`config_insert_json5`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`config_new_from_file`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`config_new_from_json5`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`config_new_from_yaml`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`hello_get_locators`'s return: a whole-element fold, which takes nothing apart",
+            "`keyexpr_new_autocanonize`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`keyexpr_new_concat`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`keyexpr_new_join`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`keyexpr_new_try_from`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`liveliness_declare_subscriber`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`liveliness_declare_token`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`liveliness_get`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`open`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`parameters_values`'s return: a whole-element fold, which takes nothing apart",
+            "`publisher_delete`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`publisher_put`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`querier_get`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`query_reply_delete`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`query_reply_error`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`query_reply_sample`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`query_reply_success`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`sample_get_attachment`'s return: `ZBytes`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`sample_get_payload`'s return: `ZBytes`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`sample_new_delete`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`sample_new_put`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`scout`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`session_declare_advanced_publisher`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`session_declare_advanced_subscriber`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`session_declare_keyexpr`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`session_declare_publisher`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`session_declare_querier`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`session_declare_queryable`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`session_declare_subscriber`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`session_delete`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`session_get`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`session_put`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`session_undeclare_keyexpr`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
+            "`zenoh_id_to_string`'s error: `Error`'s row uses no row that takes the value apart, which the leaf view does not read yet",
             "the callback argument `Query`: a part whose type states no `parts` row yet",
             "the callback argument `Reply`: a part reached through an `Option`",
             "the callback argument `Sample`: a row that states no parts",
