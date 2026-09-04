@@ -1315,9 +1315,8 @@ checksum = "00af7901ba50898c9e545c24d5c580c96a982298134e8037d8978b6594782c07"
 
 [[package]]
 name = "kotlin-codegen"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5bba9922acc37e9f38dce99ed966c2777c09a458566b75932bdcf2a1717b46b1"
+version = "0.3.0"
+source = "git+https://github.com/milyin/kotlin-codegen.git?branch=ctor-vis-and-file-annotations#a3d6b26d8a201214e105829177bb6756990c3f78"
 
 [[package]]
 name = "lazy_static"
@@ -1863,8 +1862,7 @@ dependencies = [
 [[package]]
 name = "prebindgen"
 version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df70aa887ea86326a03ccd4ddffcad0858c5c1ade86a9b25047f0b6b27222ce2"
+source = "git+https://github.com/milyin/prebindgen.git?branch=main#e04654679e7aa0e7c7d4b9bb4a1268f9943926ec"
 dependencies = [
  "if_rust_version",
  "itertools",
@@ -1883,8 +1881,7 @@ dependencies = [
 [[package]]
 name = "prebindgen-flat"
 version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b61ae0f7eea879df64ed40837b4111b09084533648c71a7b5f528ec67063cb05"
+source = "git+https://github.com/milyin/prebindgen.git?branch=main#e04654679e7aa0e7c7d4b9bb4a1268f9943926ec"
 dependencies = [
  "prebindgen",
  "proc-macro2",
@@ -1895,8 +1892,7 @@ dependencies = [
 [[package]]
 name = "prebindgen-jni"
 version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa15d7c2b59f15249fa5fd0f97beeff2785587e6046e749c1bbcc15cc00340a9"
+source = "git+https://github.com/milyin/prebindgen.git?branch=main#e04654679e7aa0e7c7d4b9bb4a1268f9943926ec"
 dependencies = [
  "jni",
  "kotlin-codegen",
@@ -1911,8 +1907,7 @@ dependencies = [
 [[package]]
 name = "prebindgen-jni-runtime"
 version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "63e1c12ad857da45a8c6977a4b5b3395b4f53c8082239dcde925f3b964144531"
+source = "git+https://github.com/milyin/prebindgen.git?branch=main#e04654679e7aa0e7c7d4b9bb4a1268f9943926ec"
 dependencies = [
  "jni",
 ]
@@ -1920,13 +1915,11 @@ dependencies = [
 [[package]]
 name = "prebindgen-proc-macro"
 version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e4ec12eecd2811fd1395a20bdd40e3740026be0603bf2812172445fc524c98e7"
+source = "git+https://github.com/milyin/prebindgen.git?branch=main#e04654679e7aa0e7c7d4b9bb4a1268f9943926ec"
 dependencies = [
  "prebindgen",
  "proc-macro2",
  "quote",
- "rand 0.9.5",
  "serde",
  "serde_json",
  "syn 2.0.119",
@@ -1935,8 +1928,7 @@ dependencies = [
 [[package]]
 name = "prebindgen-registry"
 version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56a3be56008ab6c8631ea5d6b0df8f7a9142134d39befe6e695679a7d618a12a"
+source = "git+https://github.com/milyin/prebindgen.git?branch=main#e04654679e7aa0e7c7d4b9bb4a1268f9943926ec"
 dependencies = [
  "itertools",
  "prebindgen",
