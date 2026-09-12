@@ -225,6 +225,66 @@ fn main() {
         // zenoh-flat's captured `#[prebindgen]` items — the single source of
         // this binding.
         .source(zenoh_flat::PREBINDGEN_OUT_DIR)
+        // The two halves of what prebindgen's row differential does with this
+        // binding's decompositions: the ones it does not compare, each named with a
+        // stable reason code, and how many it does. Every decomposition is in exactly
+        // one, so a build fails if either moves — one leaving the comparison, or one
+        // leaving the population. Each entry is a part binding milyin/prebindgen#701
+        // step 3 owes.
+        .expect_parity_skips([
+            "`advanced_publisher_declare_background_matching_listener`'s error: no-parts-row",
+            "`advanced_publisher_declare_matching_listener`'s error: no-parts-row",
+            "`advanced_publisher_delete`'s error: no-parts-row",
+            "`advanced_publisher_matching_status`'s error: no-parts-row",
+            "`advanced_publisher_put`'s error: no-parts-row",
+            "`advanced_subscriber_declare_background_detect_publishers_subscriber`'s error: no-parts-row",
+            "`advanced_subscriber_declare_background_sample_miss_listener`'s error: no-parts-row",
+            "`advanced_subscriber_declare_detect_publishers_subscriber`'s error: no-parts-row",
+            "`advanced_subscriber_declare_sample_miss_listener`'s error: no-parts-row",
+            "`config_get_json`'s error: no-parts-row",
+            "`config_insert_json5`'s error: no-parts-row",
+            "`config_new_from_file`'s error: no-parts-row",
+            "`config_new_from_json5`'s error: no-parts-row",
+            "`config_new_from_yaml`'s error: no-parts-row",
+            "`hello_get_locators`'s return: whole-element-fold",
+            "`keyexpr_new_autocanonize`'s error: no-parts-row",
+            "`keyexpr_new_concat`'s error: no-parts-row",
+            "`keyexpr_new_join`'s error: no-parts-row",
+            "`keyexpr_new_try_from`'s error: no-parts-row",
+            "`liveliness_declare_subscriber`'s error: no-parts-row",
+            "`liveliness_declare_token`'s error: no-parts-row",
+            "`liveliness_get`'s error: no-parts-row",
+            "`open`'s error: no-parts-row",
+            "`parameters_values`'s return: whole-element-fold",
+            "`publisher_delete`'s error: no-parts-row",
+            "`publisher_put`'s error: no-parts-row",
+            "`querier_get`'s error: no-parts-row",
+            "`query_reply_delete`'s error: no-parts-row",
+            "`query_reply_error`'s error: no-parts-row",
+            "`query_reply_sample`'s error: no-parts-row",
+            "`query_reply_success`'s error: no-parts-row",
+            "`sample_get_attachment`'s return: no-parts-row",
+            "`sample_get_payload`'s return: no-parts-row",
+            "`sample_new_delete`'s error: no-parts-row",
+            "`sample_new_put`'s error: no-parts-row",
+            "`scout`'s error: no-parts-row",
+            "`session_declare_advanced_publisher`'s error: no-parts-row",
+            "`session_declare_advanced_subscriber`'s error: no-parts-row",
+            "`session_declare_keyexpr`'s error: no-parts-row",
+            "`session_declare_publisher`'s error: no-parts-row",
+            "`session_declare_querier`'s error: no-parts-row",
+            "`session_declare_queryable`'s error: no-parts-row",
+            "`session_declare_subscriber`'s error: no-parts-row",
+            "`session_delete`'s error: no-parts-row",
+            "`session_get`'s error: no-parts-row",
+            "`session_put`'s error: no-parts-row",
+            "`session_undeclare_keyexpr`'s error: no-parts-row",
+            "`zenoh_id_to_string`'s error: no-parts-row",
+            "the callback argument `Query`: part-without-parts-row",
+            "the callback argument `Reply`: optional-part",
+            "the callback argument `Sample`: row-states-no-parts",
+        ])
+        .expect_parity_compared(11)
         .set_package_prefix("io.zenoh.jni") // base package of the generated JNI bindings
         // Every generated native call routes through `JNINative`; trigger our own
         // loader from its static initializer so the native library is loaded
