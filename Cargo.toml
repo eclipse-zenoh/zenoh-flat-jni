@@ -52,6 +52,27 @@ prebindgen-jni = "0.5"
 prebindgen-registry = "0.5"
 syn = "2"
 
+# The generator, from git rather than from crates.io.
+#
+# The committed `src/generated_bindings.rs`, `kotlin/generated` and
+# `kotlin/REPORT.md` are whatever the generator writes, and CI fails when they
+# drift — so pinning the published 0.5.0 crates pins this repository to a
+# generator that is no longer the one being developed against. Cargo.lock
+# records the exact commit, the same arrangement zenoh-flat and zenoh use.
+#
+# A `[patch]` rather than six dependency edits, because `prebindgen` itself is
+# not a dependency here: zenoh-flat reaches it, and it writes the capture
+# directory that `prebindgen-jni` then reads. The two have to be the same
+# version — a capture written by 0.5.0 is a format a later prebindgen refuses —
+# and only a patch reaches a transitive dependency of another repository.
+[patch.crates-io]
+prebindgen = { git = "https://github.com/milyin/prebindgen.git", branch = "main" }
+prebindgen-flat = { git = "https://github.com/milyin/prebindgen.git", branch = "main" }
+prebindgen-jni = { git = "https://github.com/milyin/prebindgen.git", branch = "main" }
+prebindgen-jni-runtime = { git = "https://github.com/milyin/prebindgen.git", branch = "main" }
+prebindgen-proc-macro = { git = "https://github.com/milyin/prebindgen.git", branch = "main" }
+prebindgen-registry = { git = "https://github.com/milyin/prebindgen.git", branch = "main" }
+
 # panic = "abort" is required on the JNI boundary — a Rust panic crossing
 # into the JVM under unwind is UB.
 [profile.release]
