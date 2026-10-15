@@ -26,6 +26,9 @@ import kotlin.test.assertEquals
  */
 class EncodingCorrespondenceTest {
 
+    // A fallible native call returns null on the error path, having already
+    // handed the failure to its handler. This one throws, so every `!!` below
+    // is unreachable rather than an assumption about the binding.
     private val boom = JniErrorHandler<Nothing> { je ->
         throw AssertionError("unexpected native encoding error: $je")
     }
@@ -39,9 +42,9 @@ class EncodingCorrespondenceTest {
      * exercised here is text.
      */
     private fun nativeRender(id: Int, schema: String?): String {
-        val h = Encoding.newFromId(id, schema?.encodeToByteArray(), boom)
+        val h = Encoding.newFromId(id, schema?.encodeToByteArray(), boom)!!
         try {
-            return h.toStr(boom)
+            return h.toStr(boom)!!
         } finally {
             h.close()
         }
@@ -49,9 +52,9 @@ class EncodingCorrespondenceTest {
 
     /** Native parse: a string into `(id, schema, canonical string)`. */
     private fun nativeParse(s: String): Triple<Int, String?, String> {
-        val h = Encoding.newFromString(s, boom)
+        val h = Encoding.newFromString(s, boom)!!
         try {
-            return Triple(h.getId(boom), h.getSchema(boom)?.decodeToString(), h.toStr(boom))
+            return Triple(h.getId(boom), h.getSchema(boom)?.decodeToString(), h.toStr(boom)!!)
         } finally {
             h.close()
         }
@@ -102,7 +105,7 @@ class EncodingCorrespondenceTest {
             val pure = EncodingCodec.render(pid, pschema)
             // The `e` param crosses on the selector's value arm as its
             // decomposed (id, schema) pair.
-            val w = Encoding.newWithSchema(0, id, schema?.encodeToByteArray(), null, "new-schema", boom)
+            val w = Encoding.newWithSchema(0, id, schema?.encodeToByteArray(), null, "new-schema", boom)!!
             val nativeStr = try {
                 w.toStr(boom)
             } finally {

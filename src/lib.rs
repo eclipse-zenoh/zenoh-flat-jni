@@ -7,7 +7,9 @@
     clippy::extra_unused_lifetimes,
     clippy::let_unit_value,
     clippy::missing_safety_doc,
+    clippy::needless_borrow,
     clippy::needless_borrows_for_generic_args,
+    clippy::type_complexity,
     clippy::unnecessary_map_on_constructor,
     clippy::unused_unit,
     clippy::useless_conversion
