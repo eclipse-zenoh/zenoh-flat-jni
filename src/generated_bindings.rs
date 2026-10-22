@@ -3841,9 +3841,16 @@ pub(crate) unsafe fn CacheConfig_to_JObject_db89a97c<'a>(
             env,
             v.replies_config.is_express.clone(),
         )?;
+        let __cls = ::prebindgen_jni_runtime::find_class(
+                env,
+                "io/zenoh/jni/pubsub/CacheConfig",
+            )
+            .map_err(|e| <__JniErr as ::core::convert::From<
+                String,
+            >>::from(format!("encode struct via fromParts: {}", e)))?;
         let __obj = env
             .call_static_method(
-                "io/zenoh/jni/pubsub/CacheConfig",
+                &__cls,
                 "fromParts",
                 "(JIIZ)Lio/zenoh/jni/pubsub/CacheConfig;",
                 &[
@@ -4023,9 +4030,16 @@ pub(crate) unsafe fn EntityGlobalId_to_JObject_42df3b10<'a>(
             )?
             .into();
         let ___eid: jni::sys::jlong = u32_to_jlong_9594a230(env, v.eid.clone())?;
+        let __cls = ::prebindgen_jni_runtime::find_class(
+                env,
+                "io/zenoh/jni/pubsub/EntityGlobalId",
+            )
+            .map_err(|e| <__JniErr as ::core::convert::From<
+                String,
+            >>::from(format!("encode struct via fromParts: {}", e)))?;
         let __obj = env
             .call_static_method(
-                "io/zenoh/jni/pubsub/EntityGlobalId",
+                &__cls,
                 "fromParts",
                 "([BJ)Lio/zenoh/jni/pubsub/EntityGlobalId;",
                 &[
@@ -4089,9 +4103,16 @@ pub(crate) unsafe fn HistoryConfig_to_JObject_9af92cec<'a>(
             env,
             v.max_age.clone(),
         )?;
+        let __cls = ::prebindgen_jni_runtime::find_class(
+                env,
+                "io/zenoh/jni/pubsub/HistoryConfig",
+            )
+            .map_err(|e| <__JniErr as ::core::convert::From<
+                String,
+            >>::from(format!("encode struct via fromParts: {}", e)))?;
         let __obj = env
             .call_static_method(
-                "io/zenoh/jni/pubsub/HistoryConfig",
+                &__cls,
                 "fromParts",
                 "(ZLjava/lang/Long;Ljava/lang/Double;)Lio/zenoh/jni/pubsub/HistoryConfig;",
                 &[
@@ -7263,9 +7284,16 @@ pub(crate) unsafe fn MissDetectionConfig_to_JObject_5213dfb7<'a>(
             env,
             v.sporadic.clone(),
         )?;
+        let __cls = ::prebindgen_jni_runtime::find_class(
+                env,
+                "io/zenoh/jni/pubsub/MissDetectionConfig",
+            )
+            .map_err(|e| <__JniErr as ::core::convert::From<
+                String,
+            >>::from(format!("encode struct via fromParts: {}", e)))?;
         let __obj = env
             .call_static_method(
-                "io/zenoh/jni/pubsub/MissDetectionConfig",
+                &__cls,
                 "fromParts",
                 "(JZ)Lio/zenoh/jni/pubsub/MissDetectionConfig;",
                 &[
@@ -7308,9 +7336,13 @@ pub(crate) unsafe fn Miss_to_JObject_e2758329<'a>(
             v.source.eid.clone(),
         )?;
         let ___nb: jni::sys::jlong = u32_to_jlong_9594a230(env, v.nb.clone())?;
+        let __cls = ::prebindgen_jni_runtime::find_class(env, "io/zenoh/jni/pubsub/Miss")
+            .map_err(|e| <__JniErr as ::core::convert::From<
+                String,
+            >>::from(format!("encode struct via fromParts: {}", e)))?;
         let __obj = env
             .call_static_method(
-                "io/zenoh/jni/pubsub/Miss",
+                &__cls,
                 "fromParts",
                 "([BJJ)Lio/zenoh/jni/pubsub/Miss;",
                 &[
@@ -7865,9 +7897,16 @@ pub(crate) unsafe fn RecoveryConfig_to_JObject_99b77b36<'a>(
             env,
             v.retention_period.clone(),
         )?;
+        let __cls = ::prebindgen_jni_runtime::find_class(
+                env,
+                "io/zenoh/jni/pubsub/RecoveryConfig",
+            )
+            .map_err(|e| <__JniErr as ::core::convert::From<
+                String,
+            >>::from(format!("encode struct via fromParts: {}", e)))?;
         let __obj = env
             .call_static_method(
-                "io/zenoh/jni/pubsub/RecoveryConfig",
+                &__cls,
                 "fromParts",
                 "(ZIJJ)Lio/zenoh/jni/pubsub/RecoveryConfig;",
                 &[
@@ -7933,9 +7972,16 @@ pub(crate) unsafe fn RepliesConfig_to_JObject_eb8e9079<'a>(
             env,
             v.is_express.clone(),
         )?;
+        let __cls = ::prebindgen_jni_runtime::find_class(
+                env,
+                "io/zenoh/jni/pubsub/RepliesConfig",
+            )
+            .map_err(|e| <__JniErr as ::core::convert::From<
+                String,
+            >>::from(format!("encode struct via fromParts: {}", e)))?;
         let __obj = env
             .call_static_method(
-                "io/zenoh/jni/pubsub/RepliesConfig",
+                &__cls,
                 "fromParts",
                 "(IIZ)Lio/zenoh/jni/pubsub/RepliesConfig;",
                 &[
@@ -8472,9 +8518,16 @@ pub(crate) unsafe fn Selector_to_JObject_60d319dc<'a>(
                 v.parameters.clone(),
             )?
             .into();
+        let __cls = ::prebindgen_jni_runtime::find_class(
+                env,
+                "io/zenoh/jni/query/Selector",
+            )
+            .map_err(|e| <__JniErr as ::core::convert::From<
+                String,
+            >>::from(format!("encode struct via fromParts: {}", e)))?;
         let __obj = env
             .call_static_method(
-                "io/zenoh/jni/query/Selector",
+                &__cls,
                 "fromParts",
                 "(JLjava/lang/String;)Lio/zenoh/jni/query/Selector;",
                 &[
@@ -8555,9 +8608,16 @@ pub(crate) unsafe fn SourceInfo_to_JObject_355bb3a8<'a>(
             v.source.eid.clone(),
         )?;
         let ___sn: jni::sys::jlong = u32_to_jlong_9594a230(env, v.sn.clone())?;
+        let __cls = ::prebindgen_jni_runtime::find_class(
+                env,
+                "io/zenoh/jni/sample/SourceInfo",
+            )
+            .map_err(|e| <__JniErr as ::core::convert::From<
+                String,
+            >>::from(format!("encode struct via fromParts: {}", e)))?;
         let __obj = env
             .call_static_method(
-                "io/zenoh/jni/sample/SourceInfo",
+                &__cls,
                 "fromParts",
                 "([BJJ)Lio/zenoh/jni/sample/SourceInfo;",
                 &[
@@ -8648,9 +8708,16 @@ pub(crate) unsafe fn TimestampInstrumentation_to_JObject_4986e51d<'a>(
             env,
             v.receive.clone(),
         )?;
+        let __cls = ::prebindgen_jni_runtime::find_class(
+                env,
+                "io/zenoh/jni/time/TimestampInstrumentation",
+            )
+            .map_err(|e| <__JniErr as ::core::convert::From<
+                String,
+            >>::from(format!("encode struct via fromParts: {}", e)))?;
         let __obj = env
             .call_static_method(
-                "io/zenoh/jni/time/TimestampInstrumentation",
+                &__cls,
                 "fromParts",
                 "(ZZZ)Lio/zenoh/jni/time/TimestampInstrumentation;",
                 &[
@@ -8720,9 +8787,16 @@ pub(crate) unsafe fn TimestampStackRecord_to_JObject_9b3e6002<'a>(
                 ___timestamp_g1 = jni::objects::JObject::null();
             }
         }
+        let __cls = ::prebindgen_jni_runtime::find_class(
+                env,
+                "io/zenoh/jni/time/TimestampStackRecord",
+            )
+            .map_err(|e| <__JniErr as ::core::convert::From<
+                String,
+            >>::from(format!("encode struct via fromParts: {}", e)))?;
         let __obj = env
             .call_static_method(
-                "io/zenoh/jni/time/TimestampStackRecord",
+                &__cls,
                 "fromParts",
                 "(IIJ[B[B)Lio/zenoh/jni/time/TimestampStackRecord;",
                 &[
@@ -8802,9 +8876,16 @@ pub(crate) unsafe fn Timestamp_to_JObject_2cba8ec4<'a>(
                 v.id.clone(),
             )?
             .into();
+        let __cls = ::prebindgen_jni_runtime::find_class(
+                env,
+                "io/zenoh/jni/time/Timestamp",
+            )
+            .map_err(|e| <__JniErr as ::core::convert::From<
+                String,
+            >>::from(format!("encode struct via fromParts: {}", e)))?;
         let __obj = env
             .call_static_method(
-                "io/zenoh/jni/time/Timestamp",
+                &__cls,
                 "fromParts",
                 "(J[B)Lio/zenoh/jni/time/Timestamp;",
                 &[
@@ -9045,9 +9126,16 @@ pub(crate) unsafe fn ZenohId_to_JObject_d483690b<'a>(
                 v.bytes.clone(),
             )?
             .into();
+        let __cls = ::prebindgen_jni_runtime::find_class(
+                env,
+                "io/zenoh/jni/config/ZenohId",
+            )
+            .map_err(|e| <__JniErr as ::core::convert::From<
+                String,
+            >>::from(format!("encode struct via fromParts: {}", e)))?;
         let __obj = env
             .call_static_method(
-                "io/zenoh/jni/config/ZenohId",
+                &__cls,
                 "fromParts",
                 "([B)Lio/zenoh/jni/config/ZenohId;",
                 &[jni::objects::JValue::Object(&___bytes)],
